@@ -10,7 +10,8 @@
         "guzzlehttp/guzzle": "^6.3",
         "s1lentium/iptools": "^1.1",
         "tymon/jwt-auth": "^0.5.12",
-        "nesbot/carbon": "^1.22"
+        "nesbot/carbon": "^1.22",
+        "laravelcollective/remote": "^5.2.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
