@@ -11,7 +11,9 @@
         "s1lentium/iptools": "^1.1",
         "tymon/jwt-auth": "^0.5.12",
         "nesbot/carbon": "^1.22",
-        "laravelcollective/remote": "^5.2.0"
+        "laravelcollective/remote": "^5.2.0",
+        "jenssegers/mongodb": "v3.0.0",
+        "zizaco/entrust": "5.2.x-dev"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

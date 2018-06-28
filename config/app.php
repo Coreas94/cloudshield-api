@@ -149,6 +149,8 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         'Tymon\JWTAuth\Providers\JWTAuthServiceProvider',
         Collective\Remote\RemoteServiceProvider::class,
+        Jenssegers\Mongodb\MongodbServiceProvider::class,
+        Zizaco\Entrust\EntrustServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -205,6 +207,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'JWTAuth' => 'Tymon\JWTAuth\Facades\JWTAuth',
         'SSH' => Collective\Remote\RemoteFacade::class,
+        'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
 
     ],
 
