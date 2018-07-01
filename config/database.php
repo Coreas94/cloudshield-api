@@ -66,7 +66,7 @@ return [
          'engine' => null,
       ],
 
-      'ipban' => [
+      /*'ipban' => [
          'driver' => 'mysql',
          'host' => env('DB_IPBAN_HOST', 'localhost'),
          'port' => env('DB_IPBAN_PORT', '3306'),
@@ -78,7 +78,7 @@ return [
          'prefix' => '',
          'strict' => false,
          'engine' => null,
-      ],
+      ],*/
 
       'syslog' => [
          'driver' => 'mysql',

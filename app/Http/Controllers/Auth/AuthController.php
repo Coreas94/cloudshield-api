@@ -79,4 +79,31 @@ class AuthController extends Controller
             'password' => bcrypt($data['password']),
         ]);
     }
+    public function api_login(Request $request){
+
+  		$validator = Validator::make($request->all(), ['email' => 'required', 'password' => 'required']);
+  		$input = $request->all();
+
+  		if(!$token = JWTAuth::attempt($input)) {
+  			// return response()->json(['result' => 'wrong email or password.']);
+  			return response()->json([
+  				'error' => [
+  					'message' => 'Login failed',
+  					'status_code' => 20
+  				]
+  			]);
+  		}
+
+  		$user = JWTAuth::toUser($token);
+  		$role_user = $user->roles->first()->name;
+
+  		return response()->json([
+  			'success' => [
+  				'api_token' => $token,
+  				'role_user' => $role_user,
+  				'message' => 'Login successful',
+  				'status_code' => 200
+  			]
+  		]);
+	}
 }

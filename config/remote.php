@@ -37,6 +37,19 @@ return [
             'agent'     => '',
             'timeout'   => 10,
         ],
+        'test' => [
+            'host'      => '172.16.20.254',
+            'username'  => 'jcoreas',
+            'password'  => 'Mardo1994393122',
+            'timeout'   => 10,
+        ],
+
+        'checkpoint' => [
+            'host'      => '172.16.3.9',
+            'username'  => 'control4',
+            'password'  => 'FA7bkN3tcciXXhb',
+            'timeout'   => 10,
+        ],
     ],
 
     /*
