@@ -118,6 +118,7 @@ class Control {
     }
     public function addObject($name){
         Control::$cmd = "-a adddyo -o {$name}";
+        return $this;
     }
     public function eSSH($callback){
         foreach (Control::$hosts as $host){
