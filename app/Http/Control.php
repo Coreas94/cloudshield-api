@@ -12,7 +12,6 @@ class Control {
     protected static $request = "POST";
     protected static $maxRedir = 10;
     protected static $timeOut = 30;
-    //protected static $postmanToken = "67baa239-ddc9-c7a4-fece-5a05f2396e38";
     protected static $sid = "";
     protected static $is = "login";
 
@@ -71,47 +70,53 @@ class Control {
             'transfer' => Control::$returnTransfer
         );
     }
-    public function eCurl(){
+    public function eCurl(...$callback){
         $get = $this->get();
-
         $curl = curl_init();
         curl_setopt_array($curl, array(
-    			CURLOPT_URL => "https://{$get['ip']}/web_api/{$get['is']}",
-    			CURLOPT_RETURNTRANSFER => $get['transfer'],
-    			CURLOPT_ENCODING => "",
-    			CURLOPT_MAXREDIRS => $get['redir'],
-    			CURLOPT_TIMEOUT => $get['timeout'],
-    			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    			CURLOPT_SSL_VERIFYPEER => $get['ssl']['vp'],
-    			CURLOPT_SSL_VERIFYHOST => $get['ssl']['vh'],
-    			CURLOPT_CUSTOMREQUEST => $get['request'],
-    			CURLOPT_POSTFIELDS => $get['fields'],
-    			CURLOPT_HTTPHEADER => array(
-      				"cache-control: no-cache",
-      				"content-type: application/json",
-              "X-chkp-sid: {$get['sid']}"
-    			),
+      			CURLOPT_URL => "https://{$get['ip']}/web_api/{$get['is']}",
+      			CURLOPT_RETURNTRANSFER => $get['transfer'],
+      			CURLOPT_ENCODING => "",
+      			CURLOPT_MAXREDIRS => $get['redir'],
+      			CURLOPT_TIMEOUT => $get['timeout'],
+      			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      			CURLOPT_SSL_VERIFYPEER => $get['ssl']['vp'],
+      			CURLOPT_SSL_VERIFYHOST => $get['ssl']['vh'],
+      			CURLOPT_CUSTOMREQUEST => $get['request'],
+      			CURLOPT_POSTFIELDS => $get['fields'],
+      			CURLOPT_HTTPHEADER => array(
+        				"cache-control: no-cache",
+        				"content-type: application/json",
+                "postman-token: 67baa239-ddc9-c7a4-fece-5a05f2396e38",
+                "X-chkp-sid: {$get['sid']}"
+      			)
     		));
-
         $response = curl_exec($curl);
         $err = curl_error($curl);
         curl_close($curl);
-
-        if($err) return $err;
-        else $response;
+        if($err){
+            if(isset($callback[1]))
+              $callback[1]($err);
+            else return $err;
+        }else{
+            if(isset($callback[0]))
+              $callback[0]($response);
+            else return $response;
+        }
     }
 
     protected static $cmd = "";
     protected static $hosts = [];
+    protected static $server = "checkpoint";
 
     public static function ssh($handl){
         if(is_array($handl)){
             $body = isset($handl[0]) ? $handl[0] : "127.0.0.*";
             if(isset($handl[1])){
-                if(is_array($handl[1])){
+                if(is_array($handl[1]))
                     foreach($handl[1] as $val)
                       array_push(Control::$hosts, str_replace("*", $val, $body));
-                } else array_push(Control::$hosts, $body);
+                else array_push(Control::$hosts, $body);
             } else array_push(Control::$hosts, $body);
         } else return false;
         return (new Control)->run();
@@ -120,11 +125,15 @@ class Control {
         Control::$cmd = "-a adddyo -o {$name}";
         return $this;
     }
+    public function server($server){
+        Control::$server = $server;
+        return $this;
+    }
     public function eSSH($callback){
         foreach (Control::$hosts as $host){
             $instaceCommand = Control::$cmd;
             $cmd = "tscpgw_api -g \"{$host}\" {$instaceCommand}";
-            \SSH::into('checkpoint')->run($cmd, function($response){
+            \SSH::into(Control::$server)->run($cmd, function($response){
                 $callback($response, $cmd);
 						});
             sleep(2);
