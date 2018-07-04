@@ -15,7 +15,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
-    Route::group(['middleware' => 'jwt-auth'], function(){
-        Route::post('/test', 'CheckpointController@test');
+    /*Route::group(['middleware' => ['jwt-auth']], function(){
+        //Here
     });
+    Route::post('auth/api_login', 'Auth\AuthController@api_login');*/
+    //Replace
+    Route::post('/test', 'CheckpointController@test');
 });
