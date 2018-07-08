@@ -551,4 +551,270 @@ class CheckpointController extends Controller
     			'status_code' => 200
     		]);
   	}
+    public function disableRule(Request $request){
+    		if(Session::has('sid_session'))
+    			$sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
+
+    		if($sid){
+      			$uid_rule = $request['uid'];
+      			$status = $request['enabled'];
+
+      			if($status == true) $value_enable = 'false';
+      			else $value_enable = 'true';
+
+            Control::curl("172.16.3.114")
+            ->is("set-access-rule")
+            ->config([
+                'uid' => $uid_rule,
+                'layer' => 'Network',
+                'enabled' => $value_enable
+            ])
+            ->sid($sid)
+            ->eCurl(function($response){
+                $this->typeResponseCurl = 1;
+            }, function($error){
+                $this->typeResponseCurl = 0;
+            });
+      			if($this->typeResponseCurl) return response()->json([
+        					'error' => [
+        						'message' => $err,
+        						'status_code' => 20
+        					]
+      				]);
+      			else{
+        				$publish = $this->publishChanges($sid);
+        				if($publish == "success") return response()->json([
+        						'success' => [
+        							'message' => "Regla deshabilitada",
+        							'status_code' => 200
+        						]
+        					]);
+        				else return response()->json([
+        						'error' => [
+        							'message' => "No se deshabilitó la regla",
+        							'status_code' => 20
+        						]
+        					]);
+      			}
+    		}else return response()->json([
+    				'error' => [
+    					'message' => "No existe sesión con el checkpoint",
+    					'status_code' => 20
+    				]
+    			]);
+    }
+    public function removeRule(Request $request){
+    		if(Session::has('sid_session'))
+    			$sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
+
+    		if($sid){
+
+    			$uid_rule = $request['uid'];
+          Control::curl("172.16.3.114")
+          ->is("delete-access-rule")
+          ->config([
+              'uid' => $uid_rule,
+              'layer' => 'Network'
+          ])
+          ->sid($sid)
+          ->eCurl(function($response){
+              $this->typeResponseCurl = 1;
+          }, function($error){
+              $this->typeResponseCurl = 0;
+          });
+
+    			if(!$this->typeResponseCurl) return response()->json([
+      					'error' => [
+      						'message' => $err,
+      						'status_code' => 20
+      					]
+    				]);
+    			else{
+    				$publish = $this->publishChanges($sid);
+    				if($publish == "success"){
+      					$install = $this->installPolicy();
+      					return response()->json([
+        						'success' => [
+          							'message' => "Regla eliminada",
+          							'status_code' => 200
+        						]
+      					]);
+    				}else return response()->json([
+    						'error' => [
+      							'message' => "No se eliminó la regla",
+      							'status_code' => 20
+    						]
+    					]);
+    			}
+    		}else return response()->json([
+    				'error' => [
+      					'message' => "No existe sesión con el checkpoint",
+      					'status_code' => 20
+    				]
+    			]);
+  	}
+    public function getAllIpsForDelete(Request $request){
+    		$object_id = $request['object_id'];
+    		$ips = DB::table('fw_address_objects')
+    			->join('fw_objects', 'fw_address_objects.object_id', '=', 'fw_objects.id')
+    			->where('fw_address_objects.id', $object_id)
+    			//->select('ip_initial', 'ip_last')
+    			->get();
+
+    		$ip_initial = $ips[0]->ip_initial;
+    		$ip_last = $ips[0]->ip_last;
+
+    		$ip_list = [];
+    		$i = 0;
+    		$networks = Range::parse($ip_initial.'-'.$ip_last);
+
+    		foreach($networks as $network){
+      			$ip_list[$i]['id'] = $i;
+      			$ip_list[$i]['text'] = (string)$network;
+      			$i++;
+    		}
+    		return response()->json([
+    			'success' => [
+    				'data' => $ip_list,
+    				'status_code' => 200
+    			]
+    		]);
+  	}
+    public function getAllIpsByObject(Request $request){
+      try{
+          $user = JWTAuth::toUser($request['token']);
+          //$company_id = $user['company_id'];
+          $object_id = $request['object_id'];
+          //$role_user = $user->roles->first()->name;
+
+          $ips = DB::table('fw_address_objects AS addr')
+              ->join('fw_objects AS obj', 'addr.object_id', '=', 'obj.id')
+              ->where('obj.id', '=', $object_id)
+              ->select('addr.id AS address_id', 'addr.ip_initial', 'addr.ip_last', 'obj.name', 'obj.id AS object_id')
+              ->get();
+          $ips = json_decode(json_encode($ips), true);
+          $ip_list = [];
+          $ip_array = [];
+
+          foreach ($ips as $key => $value) {
+            if($value['ip_initial'] == '1.1.1.1'){
+              unset($ips[$key]);
+            }else{
+              $networks = Range::parse($value['ip_initial'].'-'.$value['ip_last']);
+              foreach($networks as $network){
+                  $ip_array['address'] = (string)$network;
+                  $ip_array['address_id'] = $value['address_id'];
+                  $ip_array['object_name'] = $value['name'];
+                  $ip_array['object_id'] = $value['object_id'];
+                  $ip_array['ip_initial'] = $value['ip_initial'];
+                  $ip_array['ip_last'] = $value['ip_last'];
+                  array_push($ip_list, $ip_array);
+              }
+            }
+          }
+          return response()->json([
+            'success' => [
+              'data' => $ip_list,
+              'status_code' => 200
+            ]
+          ]);
+      }catch (Exception $e) {
+          //Log::info($e->getMessage());
+          return response()->json([
+            'error' => [
+              'data' => $e->getMessage(),
+              'status_code' => 20
+            ]
+          ]);
+      }
+    }
+    public function getObjectsRules(Request $request){
+    		$user = JWTAuth::toUser($request['token']);
+    		$company_id = $user['company_id'];
+    		$role_user = $user->roles->first()->name;
+
+    		if($role_user == "superadmin"){
+    			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
+    				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
+    				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
+    				->where('fw_objects.server_id', 1)
+    				->where('fw_objects.type_object_id', 4)
+    				->select('fw_objects.*', 'fw_objects.name AS text', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+    				->get();
+    		}else{
+    			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
+    				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
+    				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
+    				->where('company_id', $company_id)
+    				->where('fw_objects.server_id', 1)
+    				->where('fw_objects.type_object_id', 4)
+    				->select('fw_objects.*', 'fw_objects.name AS text', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+    				->get();
+    		}
+
+    		return response()->json([
+    			'data' => $obj,
+    		]);
+  	}
+    public function getChanges(Request $request){
+    		$date_init = \Carbon\Carbon::now()->subDays(6);
+    		$date_last = \Carbon\Carbon::now();
+
+    		$date_init = $date_init->toDateString();
+    		$date_last = $date_last->toDateString();
+
+    		if(Session::has('sid_session')){
+    			$sid = Session::get('sid_session');
+    		}else	$sid = $this->getLastSession();
+
+        Control::curl("172.16.3.114")
+        ->is('show-changes')
+        ->config([
+            'from-date' => $date_init,
+            'to-date' => $date_last
+        ])
+        ->sid($sid)
+        ->eCurl(function($response){
+            $this->output = $response;
+            $this->typeResponseCurl = 1;
+        });
+
+    		$resp = json_decode($this->output, true);
+
+    		if(isset($resp['task-id'])){
+    			$task = $resp['task-id'];
+
+    			$result_task = $this->showTask($task);
+    			$array_tasks = [];
+    			$i = 0;
+
+    			foreach ($result_task['tasks'] as $key => $value) {
+    				foreach ($value['task-details'] as $key2 => $value2) {
+    					foreach($value2['changes'] as $row){
+    						$array_tasks[$i] = array_filter($row['operations']);
+    						$i++;
+    					}
+    				}
+    			}
+
+    			$i = 0;
+    			$info_changes = [];
+    			foreach ($array_tasks as $key => $value) {
+    				foreach ($value as $key2 => $value2) {
+    					$info_changes[$i]['type_change'] = $key2;
+    					$info_changes[$i]['data'] = $value2;
+    					$i++;
+    				}
+    			}
+
+    			$result_changes = $this->evaluateChanges($info_changes);
+    			return $array_tasks;
+    		}else{
+    			//Log::info($resp['message']);
+    			return "error";
+    		}
+  	}
+    
 }
