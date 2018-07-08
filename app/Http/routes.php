@@ -21,4 +21,7 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
     Route::post('auth/api_login', 'Auth\AuthController@api_login');*/
     //Replace
     Route::post('/test', 'CheckpointController@test');
+    Route::group(['prefix' => 'checkpoint'], function(){
+        
+    });
 });

@@ -14,6 +14,10 @@ class Control {
     protected static $timeOut = 30;
     protected static $sid = "";
     protected static $is = "login";
+    protected static $cmd = "";
+    protected static $hosts = [];
+    protected static $server = "checkpoint";
+    protected static $sshResponse = "";
 
     public static function curl($ipAddress){
         Control::$ip = $ipAddress;
@@ -39,8 +43,8 @@ class Control {
         if(isset($max[0]))
             Control::$maxRedir = !empty($max[0]) ? $max[0] : Control::$maxRedir;
         if(isset($max[1]))
-            Control::$timeOut = !empty($max[0]) ? $max[0] : Control::$timeOut;
-        return $this;;
+            Control::$timeOut = !empty($max[1]) ? $max[1] : Control::$timeOut;
+        return $this;
     }
     public function sid($sid){
         Control::$sid = $sid;
@@ -104,12 +108,6 @@ class Control {
             else return $response;
         }
     }
-
-    protected static $cmd = "";
-    protected static $hosts = [];
-    protected static $server = "checkpoint";
-    protected static $sshResponse = "";
-
     public static function ssh($handl){
         if(is_array($handl)){
             $body = isset($handl[0]) ? $handl[0] : "127.0.0.*";
@@ -124,6 +122,13 @@ class Control {
     }
     public function raw($cmd){
         Control::$cmd = $cmd;
+        return $this;
+    }
+    public function apply($servers){
+        if(is_array($servers)){
+            foreach($servers as $server)
+              array_push(Control::$hosts, $server);
+        }
         return $this;
     }
     public function addObject($name){
