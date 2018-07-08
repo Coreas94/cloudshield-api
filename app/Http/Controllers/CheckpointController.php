@@ -14,16 +14,15 @@ class CheckpointController extends Controller
 {
     public function test(Request $req){
 
-        /*Control::ssh(['172.6.3.*', ['112','113']])->addObject("controlExample")->eSSH(function($resp, $cmd){
-            Log::info("COMMAND: {$cmd}, RESPONSE: {$resp}");
-        });*/
-        /*return Control::curl("172.16.3.114")
+        /*return Control::ssh(['172.16.3.*', ['112', '113']])->raw("-a display")->eSSH(function($response){
+            Log::info($response);
+        }, false);*/
+        return Control::curl("172.16.3.114")
           ->config(array(
               "user" => "test",
               "password" => "test",
               "continue-last-session" => true
-          ))
-          ->eCurl();*/
+          ))->eCurl();
         //return 'ok';
     }
 }

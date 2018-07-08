@@ -108,6 +108,7 @@ class Control {
     protected static $cmd = "";
     protected static $hosts = [];
     protected static $server = "checkpoint";
+    protected static $sshResponse = "";
 
     public static function ssh($handl){
         if(is_array($handl)){
@@ -121,22 +122,49 @@ class Control {
         } else return false;
         return (new Control)->run();
     }
+    public function raw($cmd){
+        Control::$cmd = $cmd;
+        return $this;
+    }
     public function addObject($name){
         Control::$cmd = "-a adddyo -o {$name}";
         return $this;
+    }
+    public function deleteObjetc($name){
+        Control::$cmd = "-a deldyo -o {$name}";
+        return $this;
+    }
+    public function addIPRange($object, $ipI, $ipL){
+        Control::$cmd = "-a addrip -o {$object} -r {$ipI} {$ipL}";
+        return $this;
+    }
+    public function deleteIPRange($object, $ipI, $ipL){
+        Control::$cmd = "-a delrip -o {$object} -r {$ipI} {$ipL}";
     }
     public function server($server){
         Control::$server = $server;
         return $this;
     }
-    public function eSSH($callback){
+    public function eSSH($callback, $errorControl){
         foreach (Control::$hosts as $host){
             $instaceCommand = Control::$cmd;
             $cmd = "tscpgw_api -g \"{$host}\" {$instaceCommand}";
-            \SSH::into(Control::$server)->run($cmd, function($response){
-                $callback($response, $cmd);
-						});
-            sleep(2);
+            try{
+                if($errorControl){
+                    do{
+                        \SSH::into(Control::$server)->run($cmd, function($response){
+                            $response = $response.PHP_EOL;
+                            Control::$sshResponse = $response;
+                        });
+                    }while(
+                        stripos(Control::$sshResponse, "try again") !== false ||
+                        stripos(Control::$sshResponse, "failed") !== false
+                    );
+                    $callback(Control::$sshResponse);
+                } else \SSH::into(Control::$server)->run($cmd, $callback);
+            }catch(\Exception $ex){
+                $callback($ex->getMessage());
+            }
         }
     }
 }
