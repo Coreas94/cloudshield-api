@@ -140,6 +140,7 @@ class Control {
     }
     public function deleteIPRange($object, $ipI, $ipL){
         Control::$cmd = "-a delrip -o {$object} -r {$ipI} {$ipL}";
+        return $this;
     }
     public function server($server){
         Control::$server = $server;

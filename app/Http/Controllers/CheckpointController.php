@@ -36,11 +36,6 @@ class CheckpointController extends Controller
     private $output = "";
     private $typeResponseCurl = 1;
     public function test(){
-        /*return Control::curl("172.16.3.114")
-        ->config(array(
-            "user" => "test",
-            "password" => "test"
-        ))->eCurl();*/
         return 'ok';
 
     }
@@ -816,5 +811,4 @@ class CheckpointController extends Controller
     			return "error";
     		}
   	}
-    
 }
