@@ -1723,7 +1723,7 @@ class CheckpointController extends Controller
               $this->typeResponseCurl = 0;
           });
 
-    			if(!$this->typeResponseCur){
+    			if(!$this->typeResponseCurl){
     				return response()->json([
     					'error' => [
     						'message' => $err,
@@ -1751,7 +1751,6 @@ class CheckpointController extends Controller
     						$i++;
     					}
     				}
-
     				return response()->json([
     					'data' => $data,
     					'status_code' => 200
@@ -1760,6 +1759,435 @@ class CheckpointController extends Controller
 
     		}else{
     			return "error";
+    		}
+    }
+    public function moveRule(Request $request){
+  		if(Session::has('sid_session'))
+  			$sid = Session::get('sid_session');
+  		else $sid = $this->getLastSession();
+
+  		if($sid){
+
+  			$uid_rule = $request['uid'];
+  			$name_rule = $request['name'];
+  			$position = $request['position'];
+  			$rule_change = $request['name_change'];
+
+        Control::curl("172.16.3.114")
+          ->is("set-access-rule")
+          ->config([
+              'name' => $rule_change,
+              'layer' => 'Network',
+              'new-position' => [
+                  $position => $name_rule
+              ]
+          ])
+          ->sid($sid)
+          ->eCurl(function($response){
+              $this->output = $response;
+              $this->typeResponseCurl = 1;
+          }, function($error){
+              $this->output = $error;
+              $this->typeResponseCurl = 0;
+          });
+
+  			if(!$this->typeResponseCurl){
+  				return response()->json([
+  					'error' => [
+  						'message' => $err,
+  						'status_code' => 20
+  					]
+  				]);
+  			}else{
+
+  				$result = json_decode($this->output, true);
+
+  				if(isset($result['code'])){
+  					Log::info($result['code']);
+  					if($result['code'] == "err_rulebase_invalid_operation"){
+  						return response()->json([
+  							'error' => [
+  								'message' => $result['message'],
+  								'status_code' => 20
+  							]
+  						]);
+  					}
+  				}else{
+
+  					$publish = $this->publishChanges($sid);
+
+  					if($publish == "success"){
+  						return response()->json([
+  							'success' => [
+  								'message' => "Regla Movida",
+  								'status_code' => 200
+  							]
+  						]);
+  					}else{
+  						return response()->json([
+  							'error' => [
+  								'message' => "No se movió la regla",
+  								'status_code' => 20
+  							]
+  						]);
+  					}
+
+  				}
+  			}
+  		}else{
+  			return response()->json([
+  				'error' => [
+  					'message' => "No existe sesión con el checkpoint",
+  					'status_code' => 20
+  				]
+  			]);
+  		}
+  	}
+    public function editIpsObject(Request $request){
+
+    		$addr_id = $request['object_info']['id'];
+    		$object_id = $request['object_info']['object_id'];
+    		$object_name = $request['object_info']['objeto'];
+    		$new_range = $request['new_ip_initial'].' '.$request['new_ip_last'];
+    		$old_range = $request['object_info']['ip_initial'].' '.$request['object_info']['ip_last'];
+    		$ip1 = $request['new_ip_initial'];
+    		$ip2 = $request['new_ip_last'];
+
+    		$ip_object = AddressObject::find($addr_id);
+    		$ip_object->ip_initial = $ip1;
+    		$ip_object->ip_last = $ip2;
+    		$ip_object->save();
+
+    		if($ip_object){
+
+    			Log::info($old_range);
+    			Log::info($new_range);
+
+          Control::ssh(['172.16.3.*',['112','113']])
+          ->raw("-a delrip {$object_name} -r {$old_range}")
+          ->eSSH(function($response){}, true);
+    			sleep(3);
+
+    			$bd_ips_obj = DB::connection('checkpoint')->update("UPDATE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
+
+    			if($bd_ips_obj){
+    				//Ejecuto los comandos para crear los 2 rangos nuevos
+            Control::ssh(['172.16.3.*',['112','113']])
+            ->raw("-a addrip -o {$object_name} -r {$new_range}")
+            ->eSSH(function($response){}, false);
+    				sleep(3);
+
+    				return response()->json([
+    					'success' => [
+    						'message' => "Datos actualizados correctamente",
+    						'status_code' => 200
+    					]
+    				]);
+
+    			}else{
+    				Log::info("error");
+    				//Ejecuto los comandos para crear los 2 rangos nuevos
+            Control::ssh(['172.16.3.*',['112','113']])
+            ->raw("-a addrip -o {$object_name} -r {$new_range}")
+            ->eSSH(function($response){}, false);
+    				sleep(3);
+    			}
+    	  }
+  	}
+    public function removeObjectComplete($object){
+
+    		$emailCtrl = new EmailController;
+
+    		if(Session::has('sid_session'))
+    			$sid = Session::get('sid_session');
+    		else	$sid = $this->getLastSession();
+
+    		if($sid){
+
+    			foreach($object as $value){
+    				$object_name = $value['name'];
+    				$object_id = $value['id'];
+
+            Control::curl("172.16.3.114")
+            ->is("delete-dynamic-object")
+            ->config([
+                'name' => $object_name,
+                'layer' => 'Network'
+            ])
+            ->sid($sid)
+            ->eCurl(function($response){
+                $this->typeResponseCurl = 1;
+            }, function($error){
+                $this->typeResponseCurl = 0;
+            });
+
+    				if(!$this->typeResponseCurl){
+    					$type = "error";
+    					$update_rule = FwObject::where('id', $object_id)
+    						->update(['status_error' => 1]);
+
+    					$emailCtrl->sendEmailObject($object_name, $type);
+    				}else{
+    					$publish = $this->publishChanges($sid);
+
+    					if($publish == "success"){
+                Control::ssh(['172.16.3.*',['112','113']])
+                ->deleteObjetc($object_name)
+                ->eSSH(function($response){}, true);
+    						sleep(3);
+
+    						$delete = FwObject::where('id', '=', $object_id)->delete();
+
+    						if($delete){
+    							$delete_adds = AddressObject::where('object_id', '=', $object_id)->delete();
+    							if($delete_adds){
+
+    							}else{
+    								$type = "error_ips";
+    								$update_rule = AddressObject::where('id', $id_section)
+    									->update(['status_error' => 1]);
+    								$emailCtrl->sendEmailSection($name_section, $type);
+    							}
+    						}else{
+    							$type = "error";
+    							$update_rule = FwObject::where('id', $object_id)
+    								->update(['status_error' => 1]);
+
+    							$emailCtrl->sendEmailObject($object_name, $type);
+    						}
+    					}else{
+    						$type = "error";
+    						$update_rule = FwObject::where('id', $object_id)
+    							->update(['status_error' => 1]);
+
+    						$emailCtrl->sendEmailObject($object_name, $type);
+    					}
+    				}
+    			}
+    		}else{
+    			$type = "connection";
+    			$update_rule = FwObject::where('id', $id_rule)
+    				->update(['status_error' => 1]);
+
+    			$emailCtrl->sendEmailObject($object_name, $type);
+    		}
+    }
+    public function removeSectionComplete($section){
+    		$emailCtrl = new EmailController;
+
+    		if(Session::has('sid_session'))
+    			$sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
+
+    		if($sid){
+
+    			foreach($section as $value){
+
+    				$id_section = $value['id'];
+    				$name_section = $value['name'];
+
+            Control::curl("172.16.3.114")
+            ->is("delete-access-section")
+            ->config([
+                'name' => $name_section,
+                'layer' => 'Network'
+            ])
+            ->sid($sid)
+            ->eCurl(function(){
+                $this->typeResponseCurl = 1;
+            }, function(){
+                $this->typeResponseCurl = 0;
+            });
+
+    				if(!$this->typeResponseCurl){
+    					$type = "error";
+    					$update_rule = FwSectionAccess::where('id', $id_section)
+    						->update(['status_error' => 1]);
+
+    					$emailCtrl->sendEmailSection($name_section, $type);
+
+    				}else{
+    					$publish = $this->publishChanges($sid);
+
+    					if($publish == "success"){
+    						$deleted_rule = FwSectionAccess::where('id', $id_section)->delete();
+
+    					}else{
+    						$type = "error";
+    						$update_rule = FwSectionAccess::where('id', $id_section)
+    							->update(['status_error' => 1]);
+
+    						$emailCtrl->sendEmailSection($name_section, $type);
+    					}
+    				}
+    			}
+
+    		}else{
+    			$type = "connection";
+    			$update_rule = FwAccessRule::where('id', $id_rule)
+    				->update(['status_error' => 1]);
+
+    			$emailCtrl->sendEmailSection($name_section, $type);
+    		}
+  	}
+    public function removeRuleComplete($rules){
+    		$emailCtrl = new EmailController;
+
+    		if(Session::has('sid_session'))
+    			$sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
+
+    		if($sid){
+
+    			foreach($rules as $value){
+
+    				$uid_rule = $value['uid'];
+    				$id_rule = $value['id'];
+    				$name_rule = $value['name'];
+
+            Control::curl("172.16.3.114")
+            ->is("delete-access-rule")
+            ->config([
+                'uid' => $uid_rule,
+                'layer' => 'Network'
+            ])
+            ->sid($sid)
+            ->eCurl(function(){
+                $this->typeResponseCurl = 1;
+            }, function(){
+                $this->typeResponseCurl = 0;
+            });
+
+    				if(!$this->typeResponseCurl){
+    					$type = "error";
+    					$update_rule = FwAccessRule::where('id', $id_rule)
+    						->update(['status_error' => 1]);
+
+    					$emailCtrl->sendEmailRules($name_rule, $type);
+
+    				}else{
+    					$publish = $this->publishChanges($sid);
+
+    					if($publish == "success"){
+    						$deleted_rule = FwAccessRule::where('id', $id_rule)->delete();
+
+    					}else{
+    						$type = "error";
+    						$update_rule = FwAccessRule::where('id', $id_rule)
+    							->update(['status_error' => 1]);
+
+    						$emailCtrl->sendEmailRules($name_rule, $type);
+    					}
+    				}
+    			}
+    		}else{
+    			$type = "connection";
+    			$update_rule = FwAccessRule::where('id', $id_rule)
+    				->update(['status_error' => 1]);
+
+    			$emailCtrl->sendEmailRules($name_rule, $type);
+    		}
+    }
+    public function getRulesByCompany(Request $request){
+
+    		if(Session::has('sid_session')){
+    			Log::info("existe la session");
+    			$sid = Session::get('sid_session');
+    		}else{
+    			Log::info("no existe");
+    			$sid = $this->getLastSession();
+    		}
+
+    		if($sid){
+          Control::curl("172.16.3.114")
+          ->is("show-access-rulebase")
+          ->config([
+              'offset' => 0,
+              'limit' => 100,
+              'name' => 'Network',
+              'details-level' => 'full',
+              'use-object-dictionary' => false
+          ])
+          ->sid($sid)
+          ->eCurl(function($response){
+              $this->output = $response;
+              $this->typeResponseCurl = 1;
+          }, function($error){
+              $this->output = $error;
+              $this->typeResponseCurl = 0;
+          });
+
+    			if(!$this->typeResponseCurl){
+    				return response()->json([
+    					'error' => [
+    						'message' => $err,
+    						'status_code' => 20
+    					]
+    				]);
+    			}else{
+    				$result = json_decode($this->output, true);
+    				$data = [];
+    				$data2 = [];
+    				$i = 0;
+    				$i2 = 0;
+
+    				$user = JWTAuth::toUser($request['token']);
+    				$company_id = $user['company_id'];
+    				$role_user = $user->roles->first()->name;
+
+    				$tag = $request['tag'];
+
+    				foreach($result['rulebase'] as $key => $value){
+
+    					$name_sep = explode("-", $value['name']);
+    					$company_tag = isset($name_sep[1]) ? $name_sep[1] : 'none';
+
+    					$data[$i]['section'] = array($value['name']);
+
+    					foreach($value['rulebase'] as $key2 => $row){
+    						$data[$i]['id'] = $i;
+    						$data[$i]['tag'] = $company_tag;
+    						$data[$i]['name'] = $row['name'];
+    						$data[$i]['text'] = $row['name'];
+    						$data[$i]['uid'] = $row['uid'];
+    						//$data[$i]['type'] = $row['type'];
+    						$data[$i]['comments'] = $row['comments'];
+    						//$data[$i]['enabled'] = $row['enabled'];
+
+    						$i++;
+    					}
+    				}
+
+    				foreach ($data as $key => $value) {
+    					if($value['tag'] == $tag && $value['comments'] == "editable"){
+    						array_push($data2, $value);
+    					}
+
+    					$i2++;
+    				}
+
+    				$data = $data2;
+
+    				/*return response()->json([
+    					'success' => [
+    						'data' => $data,
+    						'status_code' => 200
+    					]
+    				]);*/
+
+    				return response()->json([
+    					'data' => $data,
+    					//'data2' => $data2,
+    					'status_code' => 200
+    				]);
+    			}
+    		}else{
+    			return response()->json([
+    				'error' => [
+    					'message' => 'error al obtener las políticas',
+    					'status_code' => 20
+    				]
+    			]);
     		}
     }
 }
