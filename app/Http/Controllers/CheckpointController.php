@@ -304,11 +304,13 @@ class CheckpointController extends Controller
     			if(!$this->typeResponseCurl){
       				return response()->json([
       					'error' => [
-      						'message' => $err,
+      						'message' => $this->output,
       						'status_code' => 20
       					]
       				]);
     			}else{
+              Log::info($this->output);
+              return;
       				$result = json_decode($this->output, true);
       				$arr = [];
       				$i = 0;
@@ -851,7 +853,7 @@ class CheckpointController extends Controller
     			if(!$this->typeResponseCurl){
     				return response()->json([
     					'error' => [
-    						'message' => $err,
+    						'message' => $this->output,
     						'status_code' => 20
     					]
     				]);
