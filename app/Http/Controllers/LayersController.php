@@ -28,7 +28,7 @@ use IPTools\IP;
 use App\Http\Requests;
 use App\Http\Controllers\CheckpointController;
 
-class LayerController extends Controller
+class LayersController extends Controller
 {
 
 	private $output;
