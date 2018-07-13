@@ -218,7 +218,7 @@ class CheckpointController extends Controller
     		$user = JWTAuth::toUser($request['token']);
     		$company_id = $user['company_id'];
     		$role_user = $user->roles->first()->name;
-  	}
+  	} //?
     public function getIpsByObject(Request $request){
     		$object_id = $request['object_id'];
     		$ips = DB::table('fw_address_objects')
@@ -2090,6 +2090,118 @@ class CheckpointController extends Controller
     			$emailCtrl->sendEmailRules($name_rule, $type);
     		}
     }
+    public function getRules(Request $request){
+
+    		if(Session::has('sid_session'))
+    			$sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
+
+    		if($sid){
+          Control::curl("172.16.3.114")
+          ->is("show-access-rulebase")
+          ->config([
+              'name' => 'Network',
+              'limit' => 100,
+              'offset' => 0,
+              'details-level' => 'full',
+              'use-object-dictionary' => false
+          ])
+          ->sid($sid)
+          ->eCurl(function($response){
+              $this->output = $response;
+              $this->typeResponseCurl = 1;
+          }, function($error){
+              $this->output = $error;
+              $this->typeResponseCurl = 0;
+          });
+
+    			if(!$this->typeResponseCurl){
+    				return response()->json([
+    					'error' => [
+    						'message' => $this->output,
+    						'status_code' => 20
+    					]
+    				]);
+    			}else{
+    				$result = json_decode($this->output, true);
+    				$data = [];
+    				$data2 = [];
+    				$i = 0;
+    				$i2 = 0;
+
+    				$user = JWTAuth::toUser($request['token']);
+    				$company_id = $user['company_id'];
+    				$role_user = $user->roles->first()->name;
+
+    				$company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+    				$company_data2 = json_decode(json_encode($company_data), true);
+    				$tag = $company_data2[0]['tag'];
+
+    				foreach($result['rulebase'] as $key => $value){
+
+    					$name_sep = explode("-", $value['name']);
+    					$company_tag = isset($name_sep[1]) ? $name_sep[1] : 'none';
+
+    					$data[$i]['section'] = array($value['name']);
+
+    					foreach($value['rulebase'] as $key2 => $row){
+    						$data[$i]['tag'] = $company_tag;
+
+    						$data[$i]['name'] = $row['name'];
+    						$data[$i]['uid'] = $row['uid'];
+    						$data[$i]['type'] = $row['type'];
+    						$data[$i]['comments'] = $row['comments'];
+    						$data[$i]['enabled'] = $row['enabled'];
+    						$data[$i]['rule_number'] = array($row['rule-number']);
+
+    						foreach ($row['source'] as $value2) {
+    							$data[$i]['source'][] = $value2['name'];
+    						}
+
+    						foreach ($row['destination'] as $value2) {
+    							$data[$i]['destination'][] = $value2['name'];
+    						}
+
+    						foreach ($row['service'] as $value2) {
+    							$data[$i]['service'][] = $value2['name'];
+    						}
+
+    						foreach ($row['vpn'] as $value2) {
+    							$data[$i]['vpn'] = $value2['name'];
+    						}
+
+    						$data[$i]['action'] = $row['action']['name'];
+
+    						$i++;
+    					}
+    				}
+
+    				if($role_user != "superadmin"){
+    					foreach ($data as $key => $value) {
+    						if($value['tag'] == $tag){
+    							array_push($data2, $value);
+    						}
+    						$i2++;
+    					}
+
+    					$data = $data2;
+    				}
+
+    				return response()->json([
+    					'data' => $data,
+    					//'data2' => $data2,
+    					'status_code' => 200
+    				]);
+    			}
+    		}else{
+    			return response()->json([
+    				'error' => [
+    					'message' => 'error al obtener las políticas',
+    					'status_code' => 20
+    				]
+    			]);
+    		}
+    }
     public function getRulesByCompany(Request $request){
 
     		if(Session::has('sid_session')){
@@ -2190,6 +2302,301 @@ class CheckpointController extends Controller
     					'status_code' => 20
     				]
     			]);
+    		}
+    }
+    public function evaluateChanges($info_changes){
+    		$server_ch = 1;
+    		$company_default = Company::findOrFail(1);
+    		$evaluate;
+
+    		foreach ($info_changes as $key => $value){
+    			foreach ($value['data'] as $key2 => $row){
+
+    				switch ($value['type_change']) {
+    					case 'added-objects':
+
+    						if($row['type'] == "dynamic-object"){
+    							$new_object_name = $row['name'];
+    							$object = DB::table('fw_objects')->where('name', '=', $new_object_name)->count();
+    							Log::info($object);
+
+    							if($object == 0){
+    								Log::info("vuelve a entrar al object 0");
+
+    								if(Session::has('sid_session')){
+    									$sid = Session::get('sid_session');
+    								}else{
+    									$sid = $this->getLastSession();
+    								}
+
+    								if($sid){
+
+    									$object_type = 4; //Es object dynamic
+
+    									$object_new = New FwObject;
+    									$object_new->name = $new_object_name;
+    									$object_new->uid = $row['uid'];
+    									$object_new->type_object_id = $object_type;
+    									$object_new->server_id = $server_ch;
+    									$object_new->company_id = $company_default->id;
+    									$object_new->tag = $company_default->tag;
+    									$object_new->editable = 1;
+
+    									$object_new->save();
+
+    									if($object_new->id){
+    										Log::info("Se creó el objeto checkpoint");
+
+    										$bd_obj_check = DB::connection('checkpoint')->table('object_list')->insertGetId(['name' => $new_object_name, 'description' => "Object creado desde checkpoint"]);
+
+    										if($bd_obj_check){
+    											Log::info("Se guardó en la bd checkpoint");
+    										}else{
+    											Log::info("No se guardó en bd checkpoint");
+    										}
+
+                        Control::ssh(['172.16.3.*',['112','113']])
+                        ->addObject($new_object_name)
+                        ->eSSH(function($response){}, true);
+    										sleep(3);
+
+    										$publish = $this->publishChanges($sid);
+
+    										if($publish == 'success'){
+
+    											$ip_initial = '1.1.1.1';
+    											$ip_last = '1.1.1.1';
+
+    											//Ingreso el rango de ip
+    											$object_id = $object_new->id;
+    											$type_address_id = 7;//Pertenece a rango de ip para checkpoint
+
+                          Control::ssh(['172.16.3.*',['112','113']])
+                          ->addIPRange($new_object_name, $ip_initial, $ip_last)
+                          ->eSSH(function($response){}, true);
+    											sleep(3);
+
+    											Log::info("ip agregada ch");
+    											$addr_obj = new AddressObject;
+    											$addr_obj->ip_initial = $ip_initial;
+    											$addr_obj->ip_last = $ip_last;
+    											$addr_obj->object_id = $object_id;
+    											$addr_obj->type_address_id = $type_address_id;
+    											$addr_obj->save();
+
+    											if($addr_obj){
+    												$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
+
+    												if($bd_ips_check){
+    													Log::info("Objeto agregado correctamente");
+    												}else{
+    													Log::info("Se creó el objeto pero no las ips");
+    												}
+    											}else{
+    												Log::info("Se creó el objeto pero no las ips");
+    											}
+    										}else{
+    											Log::info("El objeto no pudo ser creado");
+    										}
+    									}else{
+    										Log::info("El objeto no pudo ser creado");
+    									}
+    								}else{
+    									Log::info("No se pudo agregar el objeto");
+    								}
+    							}else{
+    								Log::info("No se agregó objeto porque ya existe");
+    							}
+    						}elseif($row['type'] == "access-rule"){
+    							$rule_name = $row['name'];
+
+    							$rules = DB::table('fw_access_rules_ch')->where('name', '=', $rule_name)->count();
+
+    							if($rules == 0){
+    								$rule = new FwAccessRule;
+    								$rule->name = $rule_name;
+    								$rule->uid = $row['uid'];
+    								$rule->company_id = $company_default->id;
+    								$rule->tag = $company_default->tag;
+    								//$rule->section_id = $section_id;
+    								$rule->section_id = 1;
+    								$rule->editable = 1;
+    								$rule->save();
+    							}else{
+    								Log::info("Ya existe la regla");
+    							}
+
+    						}elseif ($row['type'] == "access-section") {
+    							$name_section = $row['name'];
+
+    							$sections = DB::table('fw_access_sections_ch')->where('name', '=', $name_section)->count();
+
+    							if($sections == 0){
+    								$section = new FwSectionAccess;
+    								$section->name = $name_section;
+    								$section->company_id = $company_default->id;
+    								$section->tag = $company_default->tag;
+    								$section->save();
+    							}else{
+    								Log::info("Ya existe la sección");
+    							}
+    						}
+
+    					break;
+
+    					case 'modified-objects':
+    						foreach ($row as $key2 => $val) {
+    							$new_name = $row['new-object']['name'];
+
+    							if($val['type'] == "dynamic-object"){
+
+    								if($key2 == "old-object"){
+    									$old_name = $val['name'];
+
+    									$object = DB::table('fw_objects')->where('name', '=', $old_name)->get();
+    									$object = json_decode(json_encode($object), true);
+
+    									if(count($object) > 0){
+    										foreach ($object as $obj){
+    											$id_object = $obj['id'];
+    										}
+
+    										$upd_obj = DB::table('fw_objects')->where('id', '=', $id_object)->update(['name' => $new_name]);
+
+    										if($upd_obj){
+    											Log::info("se actualizó objeto");
+    										}else{
+    											Log::info("NO se actualizó objeto");
+    										}
+    									}
+    								}
+    							}elseif($val['type'] == "access-section"){
+
+    								if($key2 == "old-object"){
+    									$old_name = $val['name'];
+
+    									$section = DB::table('fw_access_sections_ch')->where('name', '=', $old_name)->get();
+    									$section = json_decode(json_encode($section), true);
+
+    									if(count($section) > 0){
+    										foreach ($section as $sect){
+    											$section_id = $sect['id'];
+    										}
+
+    										$upd_sec = DB::table('fw_access_sections_ch')->where('id', '=', $section_id)->update(['name' => $new_name]);
+
+    										if($upd_sec){
+    											Log::info("Se actualizó sección");
+    										}else{
+    											Log::info("NO se actualizó sección");
+    										}
+    									}
+    								}
+
+    							}elseif($val['type'] == "access-rule"){
+
+    								if($key2 == "old-object"){
+
+    									$old_name = $val['name'];
+
+    									$rule = DB::table('fw_access_rules_ch')->where('name', '=', $old_name)->get();
+    									$rule = json_decode(json_encode($rule), true);
+
+    									if(count($rule) > 0){
+    										foreach ($rule as $rul){
+    											$rule_id = $rul['id'];
+    										}
+
+    										$upd_rule = DB::table('fw_access_rules_ch')->where('id', '=', $rule_id)->update(['name' => $new_name]);
+
+    										if($upd_rule){
+    											Log::info("Se actualizó regla");
+    										}else{
+    											Log::info("NO se actualizó regla");
+    										}
+    									}
+    								}
+    							}
+    						}
+
+    					break;
+
+    					case 'deleted-objects':
+
+    						if($row['type'] == "dynamic-object"){
+
+    							$old_name = $row['name'];
+
+    							$object = DB::table('fw_objects')->where('name', '=', $old_name)->get();
+    							$count_obj = count($object);
+
+    							if($count_obj > 0){
+    								$object = json_decode(json_encode($object), true);
+    								foreach ($object as $obj){
+    									$id_object = $obj['id'];
+    								}
+
+    								$del_obj = DB::table('fw_objects')->where('id', '=', $id_object)->delete();
+
+    								if($del_obj){
+    									Log::info("se actualizó objeto");
+    								}else{
+    									Log::info("NO se actualizó objeto");
+    								}
+    							}
+
+    						}elseif($row['type'] == "access-section"){
+
+    							$old_name = $row['name'];
+
+    							$section = DB::table('fw_access_sections_ch')->where('name', '=', $old_name)->get();
+    							$count_sect = count($section);
+
+    							if($count_sect > 0){
+    								$section = json_decode(json_encode($section), true);
+    								foreach ($section as $sect){
+    									$section_id = $sect['id'];
+    								}
+
+    								$del_sec = DB::table('fw_access_sections_ch')->where('id', '=', $section_id)->delete();
+
+    								if($del_sec){
+    									Log::info("Se actualizó sección");
+    								}else{
+    									Log::info("NO se actualizó sección");
+    								}
+    							}
+
+    						}elseif($row['type'] == "access-rule"){
+
+    							$old_name = $row['name'];
+
+    							$rule = DB::table('fw_access_rules_ch')->where('name', '=', $old_name)->get();
+    							$count_rule = count($rule);
+
+    							if($count_rule > 0){
+    								$rule = json_decode(json_encode($rule), true);
+    								foreach ($rule as $rul){
+    									$rule_id = $rul['id'];
+    								}
+
+    								$del_rule = DB::table('fw_access_rules_ch')->where('id', '=' ,$rule_id)->delete();
+
+    								if($del_rule){
+    									Log::info("se actualizó regla");
+    								}else{
+    									Log::info("NO se actualizó regla");
+    								}
+    							}
+    						}
+
+    					break;
+
+    					default:
+    						# code...
+    					break;
+    				}
+    			}
     		}
     }
 }

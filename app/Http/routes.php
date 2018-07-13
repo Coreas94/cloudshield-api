@@ -23,6 +23,7 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 
             Route::get('/order_objects', 'CheckpointController@orderObjectsBD'); //PEND
             Route::get('/get_objects', 'CheckpointController@getDynamicObjects');
+            Route::get('/access_rules', 'CheckpointController@getRules');
         });
 
         Route::group(['prefix' => 'access_control'], function(){
@@ -63,6 +64,6 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 
         Route::get('settings/get_countries', 'SettingController@getCountriesData');
     });
-    
+
     Route::post('auth/api_login', 'Auth\AuthController@api_login');
 });
