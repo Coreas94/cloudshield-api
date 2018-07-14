@@ -242,10 +242,11 @@ class CheckpointController extends Controller
     		$ip_last = $request['ip_last'];
 
     		$type_address_id = 7;//Pertenece a rango de ip para checkpoint
-
         Control::ssh(['172.16.3.*', ['112','113']])
           ->addIPRange($object_name, $ip_initial, $ip_last)
-          ->eSSH(function($response){}, true);
+          ->eSSH(function($response){
+            Log::info($response);
+          }, false);
         sleep(3);
 
     		$addr_obj = new AddressObject;
@@ -919,7 +920,7 @@ class CheckpointController extends Controller
 
                     Control::ssh(['172.16.3.*',['112','113']])
                     ->addIPRange($new_object_name, $ip_initial, $ip_last)
-                    ->eSSH(function($response){}, true);
+                    ->eSSH(function($response){}, false);
                     sleep(3);
 
       							Log::info("ip agregada ch");
@@ -1160,7 +1161,7 @@ class CheckpointController extends Controller
 
     		if($sid){
           Control::curl("172.16.3.114")
-          ->is("delete-dinamyc-object")
+          ->is("delete-dynamic-object")
           ->config([
               'name' => $object_name
           ])
@@ -1176,7 +1177,7 @@ class CheckpointController extends Controller
     			if(!$this->typeResponseCurl){
     				return response()->json([
     					'error' => [
-    						'message' => $err,
+    						'message' => $this->output,
     						'status_code' => 20
     					]
     				]);
@@ -2597,6 +2598,264 @@ class CheckpointController extends Controller
     					break;
     				}
     			}
+    		}
+    }
+    public function addRules($data){
+
+    		Log::info("DATA ADDRULES");
+    		Log::info($data);
+
+    		if(Session::has('sid_session')){
+    			$sid = Session::get('sid_session');
+    		}else{
+    			$sid = $this->getLastSession();
+    		}
+
+    		if($sid){
+
+    			$section = $data['section'];
+    			$rule_name = $data['name'];
+    			$src = $data['source'];
+    			$dst = $data['destination'];
+    			$vpn = $data['vpn'];
+    			$action = $data['action'];
+    			$company_id = $data['company_id'];
+    			$tag = $data['tag'];
+    			$section_id = $data['section_id'];
+
+          Control::curl("172.16.3.114")
+          ->is("add-access-rule")
+          ->config([
+              'layer' => 'Network',
+              'ignore-warnings' => true,
+              'position' => [
+                  'bottom' => $section
+              ],
+              'name' => $rule_name,
+              'source' => $src,
+              'destination' => $dst,
+              'action' => $action,
+              'vpn' => 'Any',
+              'comments' => 'no-editable'
+          ])
+          ->sid($sid)
+          ->eCurl(function($response){
+              $this->output = $response;
+              $this->typeResponseCurl = 1;
+          }, function($error){
+              $this->output = $error;
+              $this->typeResponseCurl = 0;
+          });
+    			sleep(3);
+
+    			if(!$this->typeResponseCurl){
+    				/*return response()->json([
+    					'error' => [
+    						'message' => $err,
+    						'status_code' => 20
+    					]
+    				]);*/
+    				return "error";
+    			}else{
+    				$publish2 = $this->publishChanges($sid);
+
+    				if($publish2 == 'success'){
+
+    					$result = json_decode($this->output, true);
+    					Log::info($result);
+
+    					if(isset($result['code'])){
+    						Log::info($result['code']);
+    						return response()->json([
+    							'error' => [
+    								'message' => $result['message'],
+    								'status_code' => 20,
+    								'error' => "Existe error en checkpoint"
+    							]
+    						]);
+    						//if($result['code'] == "generic_err_object_not_found"){}
+    					}else{
+    						$uid_rule = $result['uid'];
+
+    						$rule = new FwAccessRule;
+    						$rule->name = $rule_name;
+    						$rule->uid = $uid_rule;
+    						$rule->company_id = $company_id;
+    						$rule->tag = $tag;
+    						$rule->section_id = $section_id;
+    						$rule->editable = 0;
+    						$rule->save();
+
+    						if($rule->id){
+
+    							$rule_objects = new CheckPointRulesObjects;
+    							$rule_objects->rule_id = $rule->id;
+    							$rule_objects->object_src = $src;
+    							$rule_objects->object_dst = $dst;
+    							$rule_objects->save();
+
+    							return "success";
+    						}else{
+    							#Log::info("Se creó la regla ".$rule_name." pero no se guardó");
+    							return "success";
+    						}
+    					}
+    				}else{
+    					/*return response()->json([
+    						'error' => [
+    							'message' => "error",
+    							'status_code' => 20
+    						]
+    					]);*/
+    					return "error";
+    				}
+    			}
+    		}else{
+    			/*return response()->json([
+    				'error' => [
+    					'message' => "No existe sesión con el checkpoint",
+    					'status_code' => 20
+    				]
+    			]);*/
+    			return "error";
+    		}
+    }
+    public function addNewRule(Request $request){
+    		if(Session::has('sid_session')){
+    			$sid = Session::get('sid_session');
+    		}else{
+    			$sid = $this->getLastSession();
+    		}
+
+    		if($sid){
+
+    			$rule_name = $request['name'];
+    			$src = $request['source'];
+    			$dst = $request['destination'];
+    			$vpn = $request['vpn'];
+    			$action = $request['action'];
+    			$company_id = $request['company_id'];
+
+    			$section_company = FwSectionAccess::where('company_id', $company_id)->get();
+
+
+    			//CREAR UNA NUEVA SECCIÓN CON EL TAG ELEGIDO SI NO EXISTE
+    			/*if(count($section_company) == 0){
+
+    			}else{
+
+    			}*/
+
+    			Log::info($section_company);
+    			$name_section = $section_company[0]['name'];
+    			$tag = $section_company[0]['tag'];
+    			$section_id = $section_company[0]['id'];
+
+    			$rule_name = "CUST-".$tag."-$rule_name";
+
+          Control::curl("172.16.3.114")
+          ->is("add-access-rule")
+          ->config([
+              'layer' => 'Network',
+              'ignore-warnings' => true,
+              'position' => [
+                  'bottom' => $name_section
+              ],
+              'name' => $rule_name,
+              'source' => $src,
+              'destination' => $dst,
+              'action' => $action,
+              'vpn' => 'Any',
+              'comments' => 'editable'
+          ])
+          ->sid($sid)
+          ->eCurl(function($response){
+              $this->output = $response;
+              $this->typeResponseCurl = 1;
+          }, function($error){
+              $this->output = $error;
+              $this->typeResponseCurl = 0;
+          });
+
+    			if(!$this->typeResponseCurl){
+    				return response()->json([
+    					'error' => [
+    						'message' => $this->output,
+    						'status_code' => 20
+    					]
+    				]);
+    			}else{
+    				$publish2 = $this->publishChanges($sid);
+
+    				if($publish2 == 'success'){
+
+    					$result = json_decode($this->output, true);
+    					Log::info($result);
+
+    					if(isset($result['code'])){
+    						Log::info($result['code']);
+    						return response()->json([
+    							'error' => [
+    								'message' => $result['message'],
+    								'status_code' => 20,
+    								'error' => "Existe error en checkpoint"
+    							]
+    						]);
+    						//if($result['code'] == "generic_err_object_not_found"){}
+    					}else{
+
+    						$install = $this->installPolicy();
+
+    						$uid_rule = $result['uid'];
+
+    						$rule = new FwAccessRule;
+    						$rule->name = $rule_name;
+    						$rule->uid = $uid_rule;
+    						$rule->company_id = $company_id;
+    						$rule->tag = $tag;
+    						$rule->section_id = $section_id;
+    						$rule->editable = 1;
+    						$rule->save();
+
+    						if($rule->id && $install == "success"){
+
+    							$rule_objects = new CheckPointRulesObjects;
+    							$rule_objects->rule_id = $rule->id;
+    							$rule_objects->object_src = $src;
+    							$rule_objects->object_dst = $dst;
+    							$rule_objects->save();
+
+    							return response()->json([
+    								'success' => [
+    									'message' => "Regla creada e instalada exitosamente",
+    									'status_code' => 200
+    								]
+    							]);
+    						}else{
+    							return response()->json([
+    								'success' => [
+    									'message' => "Se creó la regla ".$rule_name." pero no se guardó o instaló.",
+    									'status_code' => 200
+    								]
+    							]);
+    						}
+    					}
+    				}else{
+    					return response()->json([
+    						'error' => [
+    							'message' => "error",
+    							'status_code' => 20
+    						]
+    					]);
+    				}
+    			}
+    		}else{
+    			return response()->json([
+    				'error' => [
+    					'message' => "No existe sesión con el checkpoint",
+    					'status_code' => 20
+    				]
+    			]);
     		}
     }
 }

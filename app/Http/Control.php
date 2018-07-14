@@ -162,9 +162,11 @@ class Control {
                             $response = $response.PHP_EOL;
                             Control::$sshResponse = $response;
                         });
+                        //usleep(10000);
+                        sleep(3);
                     }while(
-                        stripos(Control::$sshResponse, "try again") !== false ||
-                        stripos(Control::$sshResponse, "failed") !== false
+                        stripos(Control::$sshResponse, "try again") !== false /*||
+                        stripos(Control::$sshResponse, "command failed") !== false*/
                     );
                     $callback(Control::$sshResponse);
                 } else \SSH::into(Control::$server)->run($cmd, $callback);
