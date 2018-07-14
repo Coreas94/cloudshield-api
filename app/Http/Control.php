@@ -6,6 +6,7 @@ class Control {
 
     protected static $ip = "127.0.0.1";
     protected static $config = "{ }";
+    protected static $encode = "";
     protected static $sslVerifyPeer = false;
     protected static $sslVerifyHost = false;
     protected static $returnTransfer = true;
@@ -28,6 +29,14 @@ class Control {
     }
     public function config($config){
         Control::$config = json_encode($config, true);
+        return $this;
+    }
+    public function rawConfig($config){
+        Control::$config = $config;
+        return $this;
+    }
+    public function encoding($e){
+        Control::$encode = $e;
         return $this;
     }
     public function sslVerification($sslVerifyPeer, $sslVerifyHost){
@@ -62,6 +71,7 @@ class Control {
         return array(
             'ip' => Control::$ip,
             'is' => Control::$is,
+            'en' => Control::$encode,
             'ssl' => array(
                 "vp" => Control::$sslVerifyPeer,
                 "vh" => Control::$sslVerifyHost
@@ -75,37 +85,49 @@ class Control {
         );
     }
     public function eCurl(...$callback){
-        $get = $this->get();
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-      			CURLOPT_URL => "https://{$get['ip']}/web_api/{$get['is']}",
-      			CURLOPT_RETURNTRANSFER => $get['transfer'],
-      			CURLOPT_ENCODING => "",
-      			CURLOPT_MAXREDIRS => $get['redir'],
-      			CURLOPT_TIMEOUT => $get['timeout'],
-      			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      			CURLOPT_SSL_VERIFYPEER => $get['ssl']['vp'],
-      			CURLOPT_SSL_VERIFYHOST => $get['ssl']['vh'],
-      			CURLOPT_CUSTOMREQUEST => $get['request'],
-      			CURLOPT_POSTFIELDS => $get['fields'],
-      			CURLOPT_HTTPHEADER => array(
-        				"cache-control: no-cache",
-        				"content-type: application/json",
-                "postman-token: 67baa239-ddc9-c7a4-fece-5a05f2396e38",
-                "X-chkp-sid: {$get['sid']}"
-      			)
-    		));
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        curl_close($curl);
-        if($err){
-            if(isset($callback[1]))
-              $callback[1]($err);
-            else return $err;
-        }else{
-            if(isset($callback[0]))
-              $callback[0]($response);
-            else return $response;
+        if(is_array(Control::$ip))
+            $this->multipleHost($callback);
+        else{
+            $get = $this->get();
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+          			CURLOPT_URL => "https://{$get['ip']}/web_api/{$get['is']}",
+          			CURLOPT_RETURNTRANSFER => $get['transfer'],
+          			CURLOPT_ENCODING => $get['en'],
+          			CURLOPT_MAXREDIRS => $get['redir'],
+          			CURLOPT_TIMEOUT => $get['timeout'],
+          			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          			CURLOPT_SSL_VERIFYPEER => $get['ssl']['vp'],
+          			CURLOPT_SSL_VERIFYHOST => $get['ssl']['vh'],
+          			CURLOPT_CUSTOMREQUEST => $get['request'],
+          			CURLOPT_POSTFIELDS => $get['fields'],
+          			CURLOPT_HTTPHEADER => array(
+            				"cache-control: no-cache",
+            				"content-type: application/json",
+                    "postman-token: 67baa239-ddc9-c7a4-fece-5a05f2396e38",
+                    "X-chkp-sid: {$get['sid']}"
+          			)
+        		));
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+            if($err){
+                if(isset($callback[1]))
+                  $callback[1]($err);
+                else return $err;
+            }else{
+                if(isset($callback[0]))
+                  $callback[0]($response);
+                else return $response;
+            }
+        }
+    }
+    public function multipleHost(...$callback){
+        $multiple = Control::$ip;
+        foreach($multiple as $mult){
+            Control::$ip = $mult;
+            $this->eCurl($callback);
+            usleep(10000);
         }
     }
     public static function ssh($handl){
@@ -162,7 +184,6 @@ class Control {
                             $response = $response.PHP_EOL;
                             Control::$sshResponse = $response;
                         });
-                        //usleep(10000);
                         sleep(3);
                     }while(
                         stripos(Control::$sshResponse, "try again") !== false /*||

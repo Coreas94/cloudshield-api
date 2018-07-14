@@ -2614,11 +2614,10 @@ class CheckpointController extends Controller
     		Log::info("DATA ADDRULES");
     		Log::info($data);
 
-    		if(Session::has('sid_session')){
+    		if(Session::has('sid_session'))
     			$sid = Session::get('sid_session');
-    		}else{
-    			$sid = $this->getLastSession();
-    		}
+    		else $sid = $this->getLastSession();
+
 
     		if($sid){
 
@@ -2760,7 +2759,7 @@ class CheckpointController extends Controller
           Control::curl("172.16.3.114")
           ->is("add-access-rule")
           ->config([
-              'layer' => 'Network',
+              'layer' => "Network",
               'ignore-warnings' => true,
               'position' => [
                   'bottom' => $name_section

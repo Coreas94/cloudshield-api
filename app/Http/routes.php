@@ -78,4 +78,5 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
     });
 
     Route::post('auth/api_login', 'Auth\AuthController@api_login');
+    Route::get('validate_token', 'UserController@verifyToken');
 });

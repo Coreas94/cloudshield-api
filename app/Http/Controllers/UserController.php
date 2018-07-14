@@ -231,7 +231,7 @@ class UserController extends Controller
 
       	foreach($user as $row){
          	$name = $row['name'].' '.$row['lastname'];
-      	}	
+      	}
 
       	return response()->json([
          	"name" => $name
@@ -273,5 +273,4 @@ class UserController extends Controller
       	return response()->json(compact('user'));
 
    	}
-    
 }
