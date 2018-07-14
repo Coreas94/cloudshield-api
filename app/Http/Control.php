@@ -127,7 +127,7 @@ class Control {
         foreach($multiple as $mult){
             Control::$ip = $mult;
             $this->eCurl($callback);
-            usleep(10000);
+            usleep(1000);
         }
     }
     public static function ssh($handl){
