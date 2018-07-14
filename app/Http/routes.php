@@ -19,6 +19,7 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 
         Route::group(['prefix' => 'checkpoint'], function(){
             Route::post('/test', 'CheckpointController@test');
+
             Route::post('/new_object', 'CheckpointController@createDynamicObject');
             Route::post('/assignIpObject', 'CheckpointController@assignIpObject');
             Route::post('/removeIpObject', 'CheckpointController@removeIpObject');
@@ -32,7 +33,7 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
             Route::post('/move_rule', 'CheckpointController@moveRule');
             Route::post('/get_rules_company', 'CheckpointController@getRulesByCompany');
             Route::post('/edit_ips_object', 'CheckpointController@editIpsObject');
-            Route::post('checkpoint/getAllIps', 'CheckpointController@getAllIpsByObject');
+            Route::post('/getAllIps', 'CheckpointController@getAllIpsByObject');
         		//Ruta para traer los rangos de ip para eliminar una
         		Route::post('/getIpsForDelete', 'CheckpointController@getAllIpsForDelete');
 

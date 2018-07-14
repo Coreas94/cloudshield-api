@@ -81,7 +81,7 @@ class CheckpointController extends Controller
         if (!$this->typeResponseCurl){
             return response()->json([
                 'error' => [
-                    'message' => $err,
+                    'message' => $this->output,
                     'status_code' => 20
                 ]
             ]);
@@ -372,7 +372,7 @@ class CheckpointController extends Controller
               }, function($error){
                   $this->typeResponseCurl = 0;
               });
-      			if($this->typeResponseCurl){
+      			if(!$this->typeResponseCurl){
         				/*return response()->json([
         					'error' => [
         						'message' => $err,
@@ -454,7 +454,7 @@ class CheckpointController extends Controller
       			if (!$this->typeResponseCurl){
         				return response()->json([
           					'error' => [
-            						'message' => $err,
+            						'message' => $this->output,
             						'status_code' => 20
         					]
         				]);
@@ -505,7 +505,7 @@ class CheckpointController extends Controller
                     $this->typeResponseCurl = 0;
                 });
       				if (!$this->typeResponseCurl) {
-      				    return $err;
+      				    return $this->output;
       				} else {
         					$result = json_decode($this->output, true);
         				  $data[$i] = $result['objects'];
@@ -571,12 +571,14 @@ class CheckpointController extends Controller
             ->sid($sid)
             ->eCurl(function($response){
                 $this->typeResponseCurl = 1;
+                $this->output = $response;
             }, function($error){
                 $this->typeResponseCurl = 0;
+                $this->output = $error;
             });
-      			if($this->typeResponseCurl) return response()->json([
+      			if(!$this->typeResponseCurl) return response()->json([
         					'error' => [
-        						'message' => $err,
+        						'message' => $this->output,
         						'status_code' => 20
         					]
       				]);
@@ -619,13 +621,15 @@ class CheckpointController extends Controller
           ->sid($sid)
           ->eCurl(function($response){
               $this->typeResponseCurl = 1;
+              $this->output = $response;
           }, function($error){
               $this->typeResponseCurl = 0;
+              $this->output = $error;
           });
 
     			if(!$this->typeResponseCurl) return response()->json([
       					'error' => [
-      						'message' => $err,
+      						'message' => $this->output,
       						'status_code' => 20
       					]
     				]);
@@ -757,15 +761,18 @@ class CheckpointController extends Controller
     		]);
   	}
     public function getChanges(Request $request){
-    		$date_init = \Carbon\Carbon::now()->subDays(6);
+
+    		$date_init = \Carbon\Carbon::now()->subDays(1);
     		$date_last = \Carbon\Carbon::now();
+
+    		// Log::info("Se ejecutó el cron a las: ".$date_last);
+    		// return $date_last;
 
     		$date_init = $date_init->toDateString();
     		$date_last = $date_last->toDateString();
 
-    		if(Session::has('sid_session')){
-    			$sid = Session::get('sid_session');
-    		}else	$sid = $this->getLastSession();
+    		if(Session::has('sid_session')) $sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
 
         Control::curl("172.16.3.114")
         ->is('show-changes')
@@ -783,8 +790,8 @@ class CheckpointController extends Controller
 
     		if(isset($resp['task-id'])){
     			$task = $resp['task-id'];
-
-    			$result_task = $this->showTask($task);
+    			sleep(2);
+    			$result_task = $this->showTask($task, $sid);
     			$array_tasks = [];
     			$i = 0;
 
@@ -803,17 +810,24 @@ class CheckpointController extends Controller
     				foreach ($value as $key2 => $value2) {
     					$info_changes[$i]['type_change'] = $key2;
     					$info_changes[$i]['data'] = $value2;
+
     					$i++;
     				}
     			}
 
     			$result_changes = $this->evaluateChanges($info_changes);
-    			return $array_tasks;
-    		}else{
+
+    			return "success";
+    			//return $array_tasks;
+    		}elseif(isset($resp['code'])){
+    			Log::info($resp['message']);
+    			return "unchanged";
+    		}
+    		else{
     			//Log::info($resp['message']);
     			return "error";
     		}
-  	}
+    }
     public function createDynamicObject(Request $request){
     		//Log::info($request);
     		if(Session::has('sid_session'))
@@ -1072,7 +1086,7 @@ class CheckpointController extends Controller
   			if(!$this->typeResponseCurl){
   				return response()->json([
   					'error' => [
-  						'message' => $err,
+  						'message' => $this->output,
   						'status_code' => 20
   					]
   				]);
@@ -1729,7 +1743,7 @@ class CheckpointController extends Controller
     			if(!$this->typeResponseCurl){
     				return response()->json([
     					'error' => [
-    						'message' => $err,
+    						'message' => $this->output,
     						'status_code' => 20
     					]
     				]);
@@ -1797,7 +1811,7 @@ class CheckpointController extends Controller
   			if(!$this->typeResponseCurl){
   				return response()->json([
   					'error' => [
-  						'message' => $err,
+  						'message' => $this->output,
   						'status_code' => 20
   					]
   				]);
@@ -1868,7 +1882,7 @@ class CheckpointController extends Controller
 
           Control::ssh(['172.16.3.*',['112','113']])
           ->raw("-a delrip {$object_name} -r {$old_range}")
-          ->eSSH(function($response){}, true);
+          ->eSSH(function($response){}, false);
     			sleep(3);
 
     			$bd_ips_obj = DB::connection('checkpoint')->update("UPDATE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
@@ -2205,13 +2219,8 @@ class CheckpointController extends Controller
     }
     public function getRulesByCompany(Request $request){
 
-    		if(Session::has('sid_session')){
-    			Log::info("existe la session");
-    			$sid = Session::get('sid_session');
-    		}else{
-    			Log::info("no existe");
-    			$sid = $this->getLastSession();
-    		}
+    		if(Session::has('sid_session')) $sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
 
     		if($sid){
           Control::curl("172.16.3.114")
@@ -2235,7 +2244,7 @@ class CheckpointController extends Controller
     			if(!$this->typeResponseCurl){
     				return response()->json([
     					'error' => [
-    						'message' => $err,
+    						'message' => $this->output,
     						'status_code' => 20
     					]
     				]);
@@ -2646,8 +2655,6 @@ class CheckpointController extends Controller
               $this->output = $error;
               $this->typeResponseCurl = 0;
           });
-    			sleep(3);
-
     			if(!$this->typeResponseCurl){
     				/*return response()->json([
     					'error' => [
@@ -2721,11 +2728,8 @@ class CheckpointController extends Controller
     		}
     }
     public function addNewRule(Request $request){
-    		if(Session::has('sid_session')){
-    			$sid = Session::get('sid_session');
-    		}else{
-    			$sid = $this->getLastSession();
-    		}
+    		if(Session::has('sid_session')) $sid = Session::get('sid_session');
+    		else $sid = $this->getLastSession();
 
     		if($sid){
 
