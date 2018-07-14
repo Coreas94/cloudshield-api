@@ -61,7 +61,7 @@ class LayersController extends Controller
 	public function addIpList(Request $request, CheckpointController $checkpoint){
 
       $ip_initial = $request['ip_initial'];
-      $ip_last = $request['ip_last'];
+      $ip_last = $ip_initial;
       $comment = $request['comment'];
       $name_object = $request['object_name'];
       $server_id = $request['server_id'];
@@ -345,7 +345,7 @@ class LayersController extends Controller
 
       $object_name = $request['name_object'];
       $ip_initial = $request['ip_initial'];
-      $ip_last = $request['ip_last'];
+      $ip_last = $ip_initial;
       $id_list = $request['id'];
 
       $ssh_command = 'tscpgw_api -g "172.16.3.112" -a delrip -o '.$object_name.' -r '. $ip_initial.' '.$ip_last;
