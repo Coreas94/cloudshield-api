@@ -1239,6 +1239,7 @@ class CheckpointController extends Controller
  			}else{
 
  				$result = json_decode($this->output, true);
+            Log::info($result);
 
  				if(isset($result['code'])){
  					return response()->json([

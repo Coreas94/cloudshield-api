@@ -33,6 +33,11 @@
     "autoload-dev": {
         "classmap": [
             "tests/TestCase.php"
+        ],
+        "files": [
+           "app/Helpers/dataLogs.php",
+            "app/Helpers/getIpsByCompany.php",
+            "app/Helpers/dataCheckpoint.php"
         ]
     },
     "scripts": {
