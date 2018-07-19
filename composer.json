@@ -28,16 +28,16 @@
         ],
         "psr-4": {
             "App\\": "app/"
-        }
-    },
-    "autoload-dev": {
-        "classmap": [
-            "tests/TestCase.php"
-        ],
+        },
         "files": [
            "app/Helpers/dataLogs.php",
             "app/Helpers/getIpsByCompany.php",
             "app/Helpers/dataCheckpoint.php"
+        ]
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/TestCase.php"
         ]
     },
     "scripts": {

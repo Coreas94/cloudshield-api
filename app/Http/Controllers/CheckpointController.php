@@ -131,7 +131,7 @@ class CheckpointController extends Controller
   	}
 
    public function publishChanges($sid){
-      Control::curl("172.16.3.114")
+      /*Control::curl("172.16.3.114")
       ->is('publish')
       ->sid($sid)
       ->eCurl(function($response){
@@ -142,7 +142,38 @@ class CheckpointController extends Controller
          $this->typeResponseCurl = 0;
       });
  		if(!$this->typeResponseCurl) return "error";
- 		else return "success";
+ 		else return "success";*/
+      $curl = curl_init();
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => "https://172.16.3.114/web_api/publish",
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => "",
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 30,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_SSL_VERIFYHOST => false,
+			CURLOPT_CUSTOMREQUEST => "POST",
+			CURLOPT_POSTFIELDS => "{ }",
+			CURLOPT_HTTPHEADER => array(
+				"cache-control: no-cache",
+				"content-type: application/json",
+				"X-chkp-sid: ".$sid
+			),
+		));
+
+		$response = curl_exec($curl);
+		#Log::info(print_r($response, true));
+		$err = curl_error($curl);
+
+		curl_close($curl);
+
+		if($err){
+			return "error";
+		} else {
+			return "success";
+		}
   	}
 
    public function discardChanges(){
@@ -166,7 +197,7 @@ class CheckpointController extends Controller
             'policy-package' => 'standard',
             'access' => true,
             'threat-prevention' => true,
-            'target' => ['CLUSTER-IP-REPUTATION']
+            'targets' => ['CLUSTER-IP-REPUTATION']
          ])
          ->sid($sid)
          ->eCurl(function($response){
@@ -182,9 +213,14 @@ class CheckpointController extends Controller
             return "error";
          }else{
             $resp = json_decode($this->output, true);
+            Log::info("RESPUESTA INSTALL");
+            Log::info($resp);
             if(isset($resp['task-id'])){
                $task = $resp['task-id'];
                $result_task = $this->showTask($task);
+
+               Log::info("RESULT TASK");
+               Log::info($result_task);
 
                foreach($result_task['tasks'] as $key => $value){
                   if($value['status'] == "succeeded")
@@ -885,32 +921,40 @@ class CheckpointController extends Controller
  			$company_data2 = json_decode(json_encode($company_data), true);
  			$tag = $company_data2[0]['tag'];
 
- 			//$new_object_name = 'CUST-'.$tag.'-'.$new_object_name;
-         Control::curl("172.16.3.114")
-         ->is("add-dynamic-object")
-         ->config([
-            'name' => $new_object_name,
-            'comments' => $comment,
-            'tags' => $tag
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $error;
-            $this->typeResponseCurl = 0;
-         });
+         $curl = curl_init();
 
- 			if(!$this->typeResponseCurl){
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/add-dynamic-object",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"$new_object_name\",\r\n  \"comments\" : \"$comment\",\r\n  \"tags\" : [ \"$tag\"]\r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+ 			if($err){
  				return response()->json([
  					'error' => [
- 						'message' => $this->output,
+ 						'message' => $err,
  						'status_code' => 20
  					]
  				]);
  			}else{
- 				$result = json_decode($this->output, true);
+ 				$result = json_decode($response, true);
  				Log::info("RESULT:****");
  				Log::info($result);
 
@@ -926,6 +970,7 @@ class CheckpointController extends Controller
  						]);
  					}
  				}else{
+
 					$uid = $result['uid'];
 
 					$object_type = 4; //Es object dynamic
@@ -952,71 +997,129 @@ class CheckpointController extends Controller
 							Log::info("No se guardó en bd checkpoint");
 						}
 
-                  Control::ssh(['172.16.3.*', ['112','113']])
-                  ->addObject($new_object_name)
-                  ->eSSH(function($response){}, true);
+                  $curl = curl_init();
 
-						sleep(3);
+                  curl_setopt_array($curl, array(
+                  	CURLOPT_URL => "http://172.16.20.85:3500/new_object",
+                  	CURLOPT_RETURNTRANSFER => true,
+                  	CURLOPT_ENCODING => "",
+                  	CURLOPT_MAXREDIRS => 10,
+                  	CURLOPT_TIMEOUT => 30,
+                  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                  	CURLOPT_SSL_VERIFYPEER => false,
+                  	CURLOPT_SSL_VERIFYHOST => false,
+                  	CURLOPT_CUSTOMREQUEST => "POST",
+                  	CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$new_object_name\"\r\n}",
+                  	CURLOPT_HTTPHEADER => array(
+                  		"content-type: application/json",
+                  	),
+                  ));
 
-						$publish = $this->publishChanges($sid);
+                  $response = curl_exec($curl);
+                  $err = curl_error($curl);
 
-						if($publish == 'success'){
+                  curl_close($curl);
 
-							$ip_initial = $request['ip_initial'];
-							$ip_last = $request['ip_last'];
+                  if($err){
 
-							//Ingreso el rango de ip
-							$object_id = $object_new->id;
-							$type_address_id = 7;//Pertenece a rango de ip para checkpoint
+                     return response()->json([
+                        'error' => [
+                           'message' => "El objeto no pudo ser creado",
+                           'status_code' => 20
+                        ]
+                     ]);
 
-                     Control::ssh(['172.16.3.*',['112','113']])
-                     ->addIPRange($new_object_name, $ip_initial, $ip_last)
-                     ->eSSH(function($response){}, false);
-                     sleep(3);
+               	}else{
 
-							Log::info("ip agregada ch");
-							$addr_obj = new AddressObject;
-							$addr_obj->ip_initial = $ip_initial;
-							$addr_obj->ip_last = $ip_last;
-							$addr_obj->object_id = $object_id;
-							$addr_obj->type_address_id = $type_address_id;
-							$addr_obj->save();
+                     $publish = $this->publishChanges($sid);
 
-							if($addr_obj){
-								$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-								'updated_at' => \Carbon\Carbon::now()]);
+   						if($publish == 'success'){
 
-								if($bd_ips_check){
-									return response()->json([
-										'success' => [
-											'message' => "Objeto creado exitosamente",
-											'status_code' => 200
-										]
-									]);
-								}else{
-									return response()->json([
-										'success' => [
-											'message' => "Se creó el objeto pero no las ips",
-											'status_code' => 200
-										]
-									]);
-								}
-							}else{
-								return response()->json([
-									'success' => [
-										'message' => "Se creó el objeto pero no las ips",
-										'status_code' => 200
-									]
-								]);
-							}
-						}else{
-							return response()->json([
-								'error' => [
-									'message' => "El objeto no pudo ser creado",
-									'status_code' => 20
-								]
-							]);
-						}
+   							$ip_initial = $request['ip_initial'];
+   							$ip_last = $request['ip_last'];
+
+   							//Ingreso el rango de ip
+   							$object_id = $object_new->id;
+   							$type_address_id = 7;//Pertenece a rango de ip para checkpoint
+
+                        $curl = curl_init();
+
+                        curl_setopt_array($curl, array(
+                        	CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                        	CURLOPT_RETURNTRANSFER => true,
+                        	CURLOPT_ENCODING => "",
+                        	CURLOPT_MAXREDIRS => 10,
+                        	CURLOPT_TIMEOUT => 30,
+                        	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        	CURLOPT_SSL_VERIFYPEER => false,
+                        	CURLOPT_SSL_VERIFYHOST => false,
+                        	CURLOPT_CUSTOMREQUEST => "POST",
+                        	CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$new_object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
+                        	CURLOPT_HTTPHEADER => array(
+                        		"content-type: application/json",
+                        	),
+                        ));
+
+                        $response = curl_exec($curl);
+                        $err = curl_error($curl);
+
+                        curl_close($curl);
+
+                        if($err){
+                           return response()->json([
+      								'error' => [
+      									'message' => "El objeto se creó pero no las Ips",
+      									'status_code' => 20
+      								]
+      							]);
+                     	}else{
+                           Log::info("ip agregada ch");
+      							$addr_obj = new AddressObject;
+      							$addr_obj->ip_initial = $ip_initial;
+      							$addr_obj->ip_last = $ip_last;
+      							$addr_obj->object_id = $object_id;
+      							$addr_obj->type_address_id = $type_address_id;
+      							$addr_obj->save();
+
+      							if($addr_obj){
+                              $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
+      								'updated_at' => \Carbon\Carbon::now()]);
+
+      								if($bd_ips_check){
+      									return response()->json([
+      										'success' => [
+      											'message' => "Objeto creado exitosamente",
+      											'status_code' => 200
+      										]
+      									]);
+      								}else{
+      									return response()->json([
+      										'success' => [
+      											'message' => "Se creó el objeto pero no las ips",
+      											'status_code' => 200
+      										]
+      									]);
+      								}
+      							}else{
+      								return response()->json([
+      									'success' => [
+      										'message' => "Se creó el objeto pero no las ips",
+      										'status_code' => 200
+      									]
+      								]);
+      							}
+                        }
+   						}else{
+   							return response()->json([
+   								'error' => [
+   									'message' => "El objeto no pudo ser creado",
+   									'status_code' => 20
+   								]
+   							]);
+   						}
+
+                  }
+
 					}else{
 						return response()->json([
 							'error' => [
@@ -1167,7 +1270,7 @@ class CheckpointController extends Controller
   							#Log::info("No se guardó en bd checkpoint");
   						}
 
-                  Control::ssh(['172.16.3.*', ['112','113']])
+                  Control::ssh(['172.16.3.*', ['112','113', '116']])
                   ->addObject($new_object_name)
                   ->eSSH(function($response){}, false);
   						sleep(3);
@@ -1178,7 +1281,7 @@ class CheckpointController extends Controller
  							$object_id = $object_new->id;
  							$type_address_id = 7;//Pertenece a rango de ip para checkpoint
  							#$ip_address = $ip_initial.'-'.$ip_last;
-                     Control::ssh(['172.16.3.*', ['112', '113']])
+                     Control::ssh(['172.16.3.*', ['112', '113', '116']])
                      ->addIPRange($new_object_name, $ip_initial, $ip_last)
                      ->eSSH(function($response){}, false);
  							sleep(3);
@@ -1215,7 +1318,7 @@ class CheckpointController extends Controller
  		else $sid = $this->getLastSession();
 
       if($sid){
-         Control::curl("172.16.3.114")
+         /*Control::curl("172.16.3.114")
          ->is("delete-dynamic-object")
          ->config([
             'name' => $object_name
@@ -1236,7 +1339,42 @@ class CheckpointController extends Controller
  						'status_code' => 20
  					]
  				]);
- 			}else{
+ 			}else{*/
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+			  	CURLOPT_URL => "https://172.16.3.114/web_api/delete-dynamic-object",
+			  	CURLOPT_RETURNTRANSFER => true,
+			  	CURLOPT_ENCODING => "",
+			  	CURLOPT_MAXREDIRS => 10,
+			  	CURLOPT_TIMEOUT => 30,
+			  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			  	CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$object_name\"\r\n}",
+			  	CURLOPT_HTTPHEADER => array(
+			    	"cache-control: no-cache",
+			    	"content-type: application/json",
+			    	"postman-token: 67baa239-ddc9-c7a4-fece-5a05f2396e38",
+			    	"x-chkp-sid: ".$sid
+			  	),
+			));
+
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return response()->json([
+					'error' => [
+						'message' => $err,
+						'status_code' => 20
+					]
+				]);
+			}else{
 
  				$result = json_decode($this->output, true);
             Log::info($result);
@@ -1252,55 +1390,96 @@ class CheckpointController extends Controller
  					$publish = $this->publishChanges($sid);
 
  					if($publish == "success"){
-                  Control::ssh(['172.16.3.*',['112','113']])
+                  /*Control::ssh(['172.16.3.*',['112','113']])
                   ->deleteObjetc($object_name)
                   ->eSSH(function($response){}, true);
                   sleep(3);
 
-                  $delete = DB::table('fw_objects')->where('id', '=', $object_id)->delete();
+                  Control::ssh(['172.16.3.116'])
+                  ->deleteObjetc($object_name)
+                  ->eSSH(function($response){}, true);
+                  sleep(2);
 
- 						if($delete){
+                  Control::ssh(['172.16.3.117'])
+                  ->deleteObjetc($object_name)
+                  ->eSSH(function($response){}, true);*/
 
- 							$delete_adds = DB::table('fw_address_objects')->where('object_id', '=', $object_id)->delete();
+                  $curl = curl_init();
 
- 							$obj_checkpoint_db = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$object_name.'" ');
- 							$object_id_bd = json_decode(json_encode($obj_checkpoint_db), true);
+         			curl_setopt_array($curl, array(
+         			  	CURLOPT_URL => "http://172.16.20.85:3500/del_object",
+         			  	CURLOPT_RETURNTRANSFER => true,
+         			  	CURLOPT_ENCODING => "",
+         			  	CURLOPT_MAXREDIRS => 10,
+         			  	CURLOPT_TIMEOUT => 30,
+         			  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+         			  	CURLOPT_CUSTOMREQUEST => "POST",
+         				CURLOPT_SSL_VERIFYPEER => false,
+         				CURLOPT_SSL_VERIFYHOST => false,
+         				CURLOPT_POSTFIELDS => "{\r\n \"object_name\" : \"$object_name\"\r\n}",
+         			  	CURLOPT_HTTPHEADER => array(
+         			    	"content-type: application/json"
+         			  	),
+         			));
 
- 							foreach($object_id_bd as $row){
- 								$id_obj_list = $row['id'];
- 							}
+         			$response = curl_exec($curl);
+         			$err = curl_error($curl);
 
- 							if($delete_adds){
+         			curl_close($curl);
 
- 								$delete_obj_db = DB::connection('checkpoint')->delete("DELETE FROM object_list WHERE id=".$id_obj_list);
- 								$delete_add_db = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE object_id=".$id_obj_list);
+         			if($err){
+         				return response()->json([
+         					'error' => [
+         						'message' => $err,
+         						'status_code' => 20
+         					]
+         				]);
+         			}else{
+                     $delete = DB::table('fw_objects')->where('id', '=', $object_id)->delete();
 
- 								return response()->json([
- 									'success' => [
- 										'message' => 'Objeto eliminado',
- 										'status_code' => 200
- 									]
- 								]);
- 							}else{
- 								return response()->json([
- 									'success' => [
- 										'message' => 'Objeto eliminado pero las ips asignadas no fueron eliminadas.',
- 										'status_code' => 200
- 									]
- 								]);
- 							}
- 						}else{
- 							return response()->json([
- 								'error' => [
- 									'message' => 'error al eliminar el objeto de la bdd',
- 									'status_code' => 20
- 								]
- 							]);
- 						}
+    						if($delete){
+
+    							$delete_adds = DB::table('fw_address_objects')->where('object_id', '=', $object_id)->delete();
+
+    							$obj_checkpoint_db = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$object_name.'" ');
+    							$object_id_bd = json_decode(json_encode($obj_checkpoint_db), true);
+
+    							foreach($object_id_bd as $row){
+    								$id_obj_list = $row['id'];
+    							}
+
+    							if($delete_adds){
+
+    								$delete_obj_db = DB::connection('checkpoint')->delete("DELETE FROM object_list WHERE id=".$id_obj_list);
+    								$delete_add_db = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE object_id=".$id_obj_list);
+
+    								return response()->json([
+    									'success' => [
+    										'message' => 'Objeto eliminado',
+    										'status_code' => 200
+    									]
+    								]);
+    							}else{
+    								return response()->json([
+    									'success' => [
+    										'message' => 'Objeto eliminado pero las ips asignadas no fueron eliminadas.',
+    										'status_code' => 200
+    									]
+    								]);
+    							}
+    						}else{
+    							return response()->json([
+    								'error' => [
+    									'message' => 'error al eliminar el objeto de la bdd',
+    									'status_code' => 20
+    								]
+    							]);
+    						}
+                  }
  					}else{
  						return response()->json([
  							'error' => [
- 								'message' => "No se eliminó la regla",
+ 								'message' => "No se eliminó el objeto",
  								'status_code' => 20
  							]
  						]);
@@ -2827,11 +3006,12 @@ class CheckpointController extends Controller
  					]
  				]);
  			}else{
+            $rsp = $this->output;
  				$publish2 = $this->publishChanges($sid);
 
  				if($publish2 == 'success'){
 
- 					$result = json_decode($this->output, true);
+ 					$result = json_decode($rsp, true);
  					Log::info($result);
 
  					if(isset($result['code'])){
@@ -2847,6 +3027,7 @@ class CheckpointController extends Controller
  					}else{
 
  						$install = $this->installPolicy();
+                  Log::info($install);
 
  						$uid_rule = $result['uid'];
 

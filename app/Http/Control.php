@@ -1,10 +1,11 @@
-   <?php
+<?php
 
-   namespace App\Http;
+namespace App\Http;
 
    class Control {
 
-      protected static $ip = "127.0.0.1";
+      // protected static $ip = "127.0.0.1";
+      protected static $ip = "http://172.16.20.130:3500/";
       protected static $config = "{ }";
       protected static $encode = "";
       protected static $sslVerifyPeer = false;
