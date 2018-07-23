@@ -485,7 +485,7 @@ class LayersController extends Controller
 
          sleep(3);
 
-         while (stripos($evaluate, "try again") !== false) {
+         while(stripos($evaluate, "try again") !== false) {
             Log::info("2 remove ip existe try again");
             \SSH::into('checkpoint')->run($ssh_command2, function($line2){
                Log::info($line2.PHP_EOL);
@@ -557,7 +557,6 @@ class LayersController extends Controller
 						'status_code' => 200
 					]
 				]);
-
          }else{
             return response()->json([
                'error' => [
@@ -575,7 +574,6 @@ class LayersController extends Controller
          ]);
       }
    }
-
 }
 
 /*usuario: control4
