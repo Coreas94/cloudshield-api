@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 
 use JWTAuth;
+use App\Company;
 use App\FwCompanyServer;
 use App\FwObject;
 use App\FwServer;
@@ -293,48 +294,75 @@ class CheckpointController extends Controller
  		$ip_last = $request['ip_last'];
 
 	   $type_address_id = 7;//Pertenece a rango de ip para checkpoint
-      Control::ssh(['172.16.3.*', ['112','113']])
-      ->addIPRange($object_name, $ip_initial, $ip_last)
-      ->eSSH(function($response){
-         Log::info($response);
-      }, false);
-      sleep(3);
 
- 		$addr_obj = new AddressObject;
- 		$addr_obj->ip_initial = $ip_initial;
- 		$addr_obj->ip_last = $ip_last;
- 		$addr_obj->object_id = $object_id;
- 		$addr_obj->type_address_id = $type_address_id;
- 		$addr_obj->save();
+      $curl = curl_init();
 
- 		if($addr_obj){
-			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-			'updated_at' => \Carbon\Carbon::now()]);
+      curl_setopt_array($curl, array(
+      CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_SSL_VERIFYPEER => false,
+      CURLOPT_SSL_VERIFYHOST => false,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
+      CURLOPT_HTTPHEADER => array(
+      	"content-type: application/json",
+      ),
+      ));
 
-			if($bd_ips_check){
-  				//Log::info("Se guardo el rango");
-  				return response()->json([
-  					'success' => [
-  						'message' => "¡IP guardada exitosamente!",
-  						'status_code' => 200
-  					]
-  				]);
-			}else{
-  				return response()->json([
-  					'error' => [
-  						'message' => 'error al guardar la IP',
-  						'status_code' => 20
-  					]
-  				]);
-			}
- 		}else{
-			return response()->json([
-				'error' => [
-					'message' => 'error al guardar la IP',
-					'status_code' => 20
-				]
-			]);
- 		}
+      $response = curl_exec($curl);
+      $err = curl_error($curl);
+
+      curl_close($curl);
+
+      if($err){
+         return response()->json([
+   			'error' => [
+   				'message' => "El objeto se creó pero no las Ips",
+   				'status_code' => 20
+   			]
+   		]);
+      }else{
+
+         $addr_obj = new AddressObject;
+    		$addr_obj->ip_initial = $ip_initial;
+    		$addr_obj->ip_last = $ip_last;
+    		$addr_obj->object_id = $object_id;
+    		$addr_obj->type_address_id = $type_address_id;
+    		$addr_obj->save();
+
+    		if($addr_obj){
+   			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
+   			'updated_at' => \Carbon\Carbon::now()]);
+
+   			if($bd_ips_check){
+     				//Log::info("Se guardo el rango");
+     				return response()->json([
+     					'success' => [
+     						'message' => "¡IP guardada exitosamente!",
+     						'status_code' => 200
+     					]
+     				]);
+   			}else{
+     				return response()->json([
+     					'error' => [
+     						'message' => 'error al guardar la IP',
+     						'status_code' => 20
+     					]
+     				]);
+   			}
+    		}else{
+   			return response()->json([
+   				'error' => [
+   					'message' => 'error al guardar la IP',
+   					'status_code' => 20
+   				]
+   			]);
+    		}
+      }
   	}
 
    public function orderObjectsBD(){
@@ -1545,41 +1573,63 @@ class CheckpointController extends Controller
  				if($ip_initial == $ip_last){
 
  					Log::info("rango igual");
-               Control::ssh(['172.16.3.*',['112','113']])
-               ->deleteIPRange($object_name, $ip_initial, $ip_last)
-               ->eSSH(function($response){}, true);
 
- 					sleep(3);
+               $curl = curl_init();
 
- 					$publish = $this->publishChanges($sid);
+               curl_setopt_array($curl, array(
+                  CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                  CURLOPT_RETURNTRANSFER => true,
+                  CURLOPT_ENCODING => "",
+                  CURLOPT_MAXREDIRS => 10,
+                  CURLOPT_TIMEOUT => 30,
+                  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                  CURLOPT_SSL_VERIFYPEER => false,
+                  CURLOPT_SSL_VERIFYHOST => false,
+                  CURLOPT_CUSTOMREQUEST => "POST",
+                  CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
+                  CURLOPT_HTTPHEADER => array(
+                  	"content-type: application/json",
+                  ),
+               ));
 
- 					if($publish == "success"){
- 						$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+               $response = curl_exec($curl);
+               $err = curl_error($curl);
 
- 						// $delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
- 						if($delete_add){
- 							return response()->json([
- 								'success' => [
- 									'data' => 'Rango de ips eliminado',
- 									'status_code' => 200
- 								]
- 							]);
- 						}else{
- 							return response()->json([
- 								'error' => [
- 									'message' => 'error al eliminar el rango de ips',
- 									'status_code' => 20
- 								]
- 							]);
- 						}
- 					}else{
- 						return response()->json([
- 							'error' => [
- 								'message' => 'error al eliminar el rango de ips',
- 								'status_code' => 20
- 							]
- 						]);
- 					}
+               curl_close($curl);
+
+               if($err){
+                  Log::info("No se creó el primer rango");
+               }else{
+                  $publish = $this->publishChanges($sid);
+
+    					if($publish == "success"){
+    						$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+
+    						// $delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
+    						if($delete_add){
+    							return response()->json([
+    								'success' => [
+    									'data' => 'Rango de ips eliminado',
+    									'status_code' => 200
+    								]
+    							]);
+    						}else{
+    							return response()->json([
+    								'error' => [
+    									'message' => 'error al eliminar el rango de ips',
+    									'status_code' => 20
+    								]
+    							]);
+    						}
+    					}else{
+    						return response()->json([
+    							'error' => [
+    								'message' => 'error al eliminar el rango de ips',
+    								'status_code' => 20
+    							]
+    						]);
+    					}
+               }
  				}else{//Si entra aquí es porque se eliminará un rango
 
  					Log::info("diferentes ip");
@@ -1604,50 +1654,46 @@ class CheckpointController extends Controller
  					$new_range_two = $third_new_ip.' '.$ip_last_range;
 
  					//Ejecuto el comando para eliminar el rango actual
-               Control::ssh(['172.16.3.*',['112','113']])
-               ->deleteObjetc($object_name, $ip_initial, $ip_last)
-               ->eSSH(function($response){}, true);
- 					sleep(3);
 
- 					//publico los nuevos cambios
- 					$publish = $this->publishChanges($sid);
+               $curl = curl_init();
 
- 					if(Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($second_new_ip)) && Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($third_new_ip))){
+               curl_setopt_array($curl, array(
+                  CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                  CURLOPT_RETURNTRANSFER => true,
+                  CURLOPT_ENCODING => "",
+                  CURLOPT_MAXREDIRS => 10,
+                  CURLOPT_TIMEOUT => 30,
+                  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                  CURLOPT_SSL_VERIFYPEER => false,
+                  CURLOPT_SSL_VERIFYHOST => false,
+                  CURLOPT_CUSTOMREQUEST => "POST",
+                  CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
+                  CURLOPT_HTTPHEADER => array(
+                  	"content-type: application/json",
+                  ),
+               ));
 
- 						if($publish == "success"){
+               $response = curl_exec($curl);
+               $err = curl_error($curl);
 
- 							//Elimino el rango de la bdd
- 							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+               curl_close($curl);
 
- 							if($delete_add){
- 								/**************/
-                        $curl = curl_init();
+               if($err){
+                  Log::info("No se creó el primer rango");
+               }else{
 
-                        curl_setopt_array($curl, array(
-                           CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
-                           CURLOPT_RETURNTRANSFER => true,
-                           CURLOPT_ENCODING => "",
-                           CURLOPT_MAXREDIRS => 10,
-                           CURLOPT_TIMEOUT => 30,
-                           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                           CURLOPT_SSL_VERIFYPEER => false,
-                           CURLOPT_SSL_VERIFYHOST => false,
-                           CURLOPT_CUSTOMREQUEST => "POST",
-                           CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial_range\", \"ip_last\" : \"$second_new_ip\", \r\n}",
-                           CURLOPT_HTTPHEADER => array(
-                           	"content-type: application/json",
-                           ),
-                        ));
+                  //publico los nuevos cambios
+    					$publish = $this->publishChanges($sid);
 
-                        $response = curl_exec($curl);
-                        $err = curl_error($curl);
+    					if(Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($second_new_ip)) && Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($third_new_ip))){
 
-                        curl_close($curl);
+    						if($publish == "success"){
 
-                        if($err){
-                           Log::info("No se creó el primer rango");
-                        }else{
+    							//Elimino el rango de la bdd
+    							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
+    							if($delete_add){
+    								/**************/
                            $curl = curl_init();
 
                            curl_setopt_array($curl, array(
@@ -1660,7 +1706,7 @@ class CheckpointController extends Controller
                               CURLOPT_SSL_VERIFYPEER => false,
                               CURLOPT_SSL_VERIFYHOST => false,
                               CURLOPT_CUSTOMREQUEST => "POST",
-                              CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$third_new_ip\", \"ip_last\" : \"$ip_last_range\", \r\n}",
+                              CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial_range\", \"ip_last\" : \"$second_new_ip\", \r\n}",
                               CURLOPT_HTTPHEADER => array(
                               	"content-type: application/json",
                               ),
@@ -1672,108 +1718,137 @@ class CheckpointController extends Controller
                            curl_close($curl);
 
                            if($err){
-                              Log::info("No se creó el segundo rango");
+                              Log::info("No se creó el primer rango");
                            }else{
 
-                              $publish2 = $this->publishChanges($sid);
+                              $curl = curl_init();
 
-       								if($publish2 == "success"){
-       									//Creo un array con los datos de los nuevos rangos
-       									$arr_addr = array(
-       										0 => array(
-       											'ip_initial' => $ip_initial_range,
-       											'ip_last' => $second_new_ip,
-       											'object_id' => $object_id,
-       											'type_address_id' => $type_address_id,
-       											'created_at' => date('Y-m-d H:i:s'),
-       											'updated_at' => date('Y-m-d H:i:s'),
-       										),
-       										1 => array(
-       											'ip_initial' => $third_new_ip,
-       											'ip_last' => $ip_last_range,
-       											'object_id' => $object_id,
-       											'type_address_id' => $type_address_id,
-       											'created_at' => date('Y-m-d H:i:s'),
-       											'updated_at' => date('Y-m-d H:i:s'),
-       										),
-       									);
+                              curl_setopt_array($curl, array(
+                                 CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                                 CURLOPT_RETURNTRANSFER => true,
+                                 CURLOPT_ENCODING => "",
+                                 CURLOPT_MAXREDIRS => 10,
+                                 CURLOPT_TIMEOUT => 30,
+                                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                 CURLOPT_SSL_VERIFYPEER => false,
+                                 CURLOPT_SSL_VERIFYHOST => false,
+                                 CURLOPT_CUSTOMREQUEST => "POST",
+                                 CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$third_new_ip\", \"ip_last\" : \"$ip_last_range\", \r\n}",
+                                 CURLOPT_HTTPHEADER => array(
+                                 	"content-type: application/json",
+                                 ),
+                              ));
 
-       									//inserto en la base los nuevos rangos
-       									$insert = DB::table('fw_address_objects')->insert($arr_addr);
+                              $response = curl_exec($curl);
+                              $err = curl_error($curl);
 
-       									if($insert){
-       										return response()->json([
-       											'success' => [
-       												'data' => "Rango eliminado correctamente",
-       												'status_code' => 200
-       											]
-       										]);
-       									}else{
-       										return response()->json([
-       											'error' => [
-       												'message' => 'Rangos publicado en checkpoint pero no se guardó en la bdd',
-       												'status_code' => 20
-       											]
-       										]);
-       									}
-       								}else{
-       									return response()->json([
-       										'error' => [
-       											'message' => 'No se pudieron guardar los nuevos rangos',
-       											'status_code' => 20
-       										]
-       									]);
-       								}
+                              curl_close($curl);
+
+                              if($err){
+                                 Log::info("No se creó el segundo rango");
+                              }else{
+
+                                 $publish2 = $this->publishChanges($sid);
+
+          								if($publish2 == "success"){
+          									//Creo un array con los datos de los nuevos rangos
+          									$arr_addr = array(
+          										0 => array(
+          											'ip_initial' => $ip_initial_range,
+          											'ip_last' => $second_new_ip,
+          											'object_id' => $object_id,
+          											'type_address_id' => $type_address_id,
+          											'created_at' => date('Y-m-d H:i:s'),
+          											'updated_at' => date('Y-m-d H:i:s'),
+          										),
+          										1 => array(
+          											'ip_initial' => $third_new_ip,
+          											'ip_last' => $ip_last_range,
+          											'object_id' => $object_id,
+          											'type_address_id' => $type_address_id,
+          											'created_at' => date('Y-m-d H:i:s'),
+          											'updated_at' => date('Y-m-d H:i:s'),
+          										),
+          									);
+
+          									//inserto en la base los nuevos rangos
+          									$insert = DB::table('fw_address_objects')->insert($arr_addr);
+
+          									if($insert){
+          										return response()->json([
+          											'success' => [
+          												'data' => "Rango eliminado correctamente",
+          												'status_code' => 200
+          											]
+          										]);
+          									}else{
+          										return response()->json([
+          											'error' => [
+          												'message' => 'Rangos publicado en checkpoint pero no se guardó en la bdd',
+          												'status_code' => 20
+          											]
+          										]);
+          									}
+          								}else{
+          									return response()->json([
+          										'error' => [
+          											'message' => 'No se pudieron guardar los nuevos rangos',
+          											'status_code' => 20
+          										]
+          									]);
+          								}
+                              }
                            }
-                        }
 
- 							}else{
- 								return response()->json([
- 									'error' => [
- 										'message' => 'No se pudieron guardar los nuevos rangos',
- 										'status_code' => 20
- 									]
- 								]);
- 							}
- 						}else{
- 							return response()->json([
- 								'error' => [
- 									'message' => 'No se pudo guardar el nuevo rango',
- 									'status_code' => 20
- 								]
- 							]);
- 						}
- 					}else{
+    							}else{
+    								return response()->json([
+    									'error' => [
+    										'message' => 'No se pudieron guardar los nuevos rangos',
+    										'status_code' => 20
+    									]
+    								]);
+    							}
+    						}else{
+    							return response()->json([
+    								'error' => [
+    									'message' => 'No se pudo guardar el nuevo rango',
+    									'status_code' => 20
+    								]
+    							]);
+    						}
+    					}else{
 
- 						if($publish == "success"){
+    						if($publish == "success"){
 
- 							//Elimino el rango de la bdd
- 							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+    							//Elimino el rango de la bdd
+    							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
- 							if($delete_add){
- 								return response()->json([
- 									'success' => [
- 										'data' => "Rango eliminado correctamente",
- 										'status_code' => 200
- 									]
- 								]);
- 							}else{
- 								return response()->json([
- 									'error' => [
- 										'message' => 'No se pudo eliminar el rango',
- 										'status_code' => 20
- 									]
- 								]);
- 							}
- 						}else{
- 							return response()->json([
- 								'error' => [
- 									'message' => 'No se pudo eliminar el rango',
- 									'status_code' => 20
- 								]
- 							]);
- 						}
- 					}
+    							if($delete_add){
+    								return response()->json([
+    									'success' => [
+    										'data' => "Rango eliminado correctamente",
+    										'status_code' => 200
+    									]
+    								]);
+    							}else{
+    								return response()->json([
+    									'error' => [
+    										'message' => 'No se pudo eliminar el rango',
+    										'status_code' => 20
+    									]
+    								]);
+    							}
+    						}else{
+    							return response()->json([
+    								'error' => [
+    									'message' => 'No se pudo eliminar el rango',
+    									'status_code' => 20
+    								]
+    							]);
+    						}
+    					}
+
+               }
  				}
  			}elseif($type_remove == 2) {//Elimina 1 ip del rango
 
@@ -1787,42 +1862,62 @@ class CheckpointController extends Controller
  				if($add_initial == $add_last){
  					Log::info("es una sola IP");
 
-               /**********BORRAR*********/
- 					//Ejecuto el comando para eliminar el rango actual
-               Control::ssh(['172.16.3.*',['112','113']])
-               ->deleteIPRange($object_name, $add_initial, $add_last)
-               ->eSSH(function($response){}, true);
- 					sleep(3);
+               $curl = curl_init();
 
- 					$publish = $this->publishChanges($sid);
+               curl_setopt_array($curl, array(
+                  CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                  CURLOPT_RETURNTRANSFER => true,
+                  CURLOPT_ENCODING => "",
+                  CURLOPT_MAXREDIRS => 10,
+                  CURLOPT_TIMEOUT => 30,
+                  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                  CURLOPT_SSL_VERIFYPEER => false,
+                  CURLOPT_SSL_VERIFYHOST => false,
+                  CURLOPT_CUSTOMREQUEST => "POST",
+                  CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$add_initial\", \"ip_last\" : \"$add_last\", \r\n}",
+                  CURLOPT_HTTPHEADER => array(
+                  	"content-type: application/json",
+                  ),
+               ));
 
- 					if($publish == "success"){
- 						//Elimino el rango de la bdd
- 						$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+               $response = curl_exec($curl);
+               $err = curl_error($curl);
 
- 						if($delete_add){
- 							return response()->json([
- 								'success' => [
- 									'message' => 'Se eliminó correctamente',
- 									'status_code' => 200
- 								]
- 							]);
- 						}else{
- 							return response()->json([
- 								'error' => [
- 									'message' => 'Se eliminó del checkpoint pero no en la bdd',
- 									'status_code' => 20
- 								]
- 							]);
- 						}
- 					}else{
- 						return response()->json([
- 							'error' => [
- 								'message' => 'No se pudo publicar el cambio',
- 								'status_code' => 20
- 							]
- 						]);
- 					}
+               curl_close($curl);
+
+               if($err){
+                  Log::info("No se creó el primer rango");
+               }else{
+                  $publish = $this->publishChanges($sid);
+
+    					if($publish == "success"){
+    						//Elimino el rango de la bdd
+    						$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+
+    						if($delete_add){
+    							return response()->json([
+    								'success' => [
+    									'message' => 'Se eliminó correctamente',
+    									'status_code' => 200
+    								]
+    							]);
+    						}else{
+    							return response()->json([
+    								'error' => [
+    									'message' => 'Se eliminó del checkpoint pero no en la bdd',
+    									'status_code' => 20
+    								]
+    							]);
+    						}
+    					}else{
+    						return response()->json([
+    							'error' => [
+    								'message' => 'No se pudo publicar el cambio',
+    								'status_code' => 20
+    							]
+    						]);
+    					}
+               }
  				}else{
  					Log::info("Es una IP entre un rango");
 
@@ -1841,48 +1936,41 @@ class CheckpointController extends Controller
  						$range_one = $add_initial.' '.$second_ip;
  						$range_two = $third_ip.' '.$add_last;
 
-                  /*********BORRAR********/
- 						//Ejecuto el comando para eliminar el rango actual
-                  Control::ssh(['172.16.3.*', ['112','113']])
-                  ->deleteIPRange($object_name, $add_initial, $add_last)
-                  ->eSSH(function($response){}, true);
- 						sleep(3);
+                  $curl = curl_init();
 
- 						//publico los nuevos cambios
- 						$publish = $this->publishChanges($sid);
+                  curl_setopt_array($curl, array(
+                     CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                     CURLOPT_RETURNTRANSFER => true,
+                     CURLOPT_ENCODING => "",
+                     CURLOPT_MAXREDIRS => 10,
+                     CURLOPT_TIMEOUT => 30,
+                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                     CURLOPT_SSL_VERIFYPEER => false,
+                     CURLOPT_SSL_VERIFYHOST => false,
+                     CURLOPT_CUSTOMREQUEST => "POST",
+                     CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$add_initial\", \"ip_last\" : \"$add_last\", \r\n}",
+                     CURLOPT_HTTPHEADER => array(
+                     	"content-type: application/json",
+                     ),
+                  ));
 
- 						if($publish == "success"){
- 							//Elimino el rango de la bdd
- 							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+                  $response = curl_exec($curl);
+                  $err = curl_error($curl);
 
- 							if($delete_add){
+                  curl_close($curl);
 
-                        $curl = curl_init();
+                  if($err){
+                     Log::info("No se creó el primer rango");
+                  }else{
 
-                        curl_setopt_array($curl, array(
-                           CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
-                           CURLOPT_RETURNTRANSFER => true,
-                           CURLOPT_ENCODING => "",
-                           CURLOPT_MAXREDIRS => 10,
-                           CURLOPT_TIMEOUT => 30,
-                           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                           CURLOPT_SSL_VERIFYPEER => false,
-                           CURLOPT_SSL_VERIFYHOST => false,
-                           CURLOPT_CUSTOMREQUEST => "POST",
-                           CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$add_initial\", \"ip_last\" : \"$add_last\", \r\n}",
-                           CURLOPT_HTTPHEADER => array(
-                           	"content-type: application/json",
-                           ),
-                        ));
+                     //publico los nuevos cambios
+    						$publish = $this->publishChanges($sid);
 
-                        $response = curl_exec($curl);
-                        $err = curl_error($curl);
+    						if($publish == "success"){
+    							//Elimino el rango de la bdd
+    							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
-                        curl_close($curl);
-
-                        if($err){
-                           Log::info("No se creó el primer rango");
-                        }else{
+    							if($delete_add){
 
                            $curl = curl_init();
 
@@ -1896,7 +1984,7 @@ class CheckpointController extends Controller
                               CURLOPT_SSL_VERIFYPEER => false,
                               CURLOPT_SSL_VERIFYHOST => false,
                               CURLOPT_CUSTOMREQUEST => "POST",
-                              CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$third_ip\", \"ip_last\" : \"$add_last\", \r\n}",
+                              CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$add_initial\", \"ip_last\" : \"$add_last\", \r\n}",
                               CURLOPT_HTTPHEADER => array(
                               	"content-type: application/json",
                               ),
@@ -1908,77 +1996,110 @@ class CheckpointController extends Controller
                            curl_close($curl);
 
                            if($err){
-                              Log::info("No se creó el segundo rango");
+                              Log::info("No se creó el primer rango");
                            }else{
 
-                              $publish2 = $this->publishChanges($sid);
+                              $curl = curl_init();
 
-       								if($publish2 == "success"){
-       									//Creo un array con los datos de los nuevos rangos
-       									$arr_addr = array(
-       										0 => array(
-       											'ip_initial' => $add_initial,
-       											'ip_last' => $second_ip,
-       											'object_id' => $object_id,
-       											'type_address_id' => $type_address_id,
-       											'created_at' => date('Y-m-d H:i:s'),
-       											'updated_at' => date('Y-m-d H:i:s'),
-       										),
-       										1 => array(
-       											'ip_initial' => $third_ip,
-       											'ip_last' => $add_last,
-       											'object_id' => $object_id,
-       											'type_address_id' => $type_address_id,
-       											'created_at' => date('Y-m-d H:i:s'),
-       											'updated_at' => date('Y-m-d H:i:s'),
-       										),
-       									);
+                              curl_setopt_array($curl, array(
+                                 CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                                 CURLOPT_RETURNTRANSFER => true,
+                                 CURLOPT_ENCODING => "",
+                                 CURLOPT_MAXREDIRS => 10,
+                                 CURLOPT_TIMEOUT => 30,
+                                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                 CURLOPT_SSL_VERIFYPEER => false,
+                                 CURLOPT_SSL_VERIFYHOST => false,
+                                 CURLOPT_CUSTOMREQUEST => "POST",
+                                 CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$third_ip\", \"ip_last\" : \"$add_last\", \r\n}",
+                                 CURLOPT_HTTPHEADER => array(
+                                 	"content-type: application/json",
+                                 ),
+                              ));
 
-       									//inserto en la base los nuevos rangos
-       									$insert = DB::table('fw_address_objects')->insert($arr_addr);
+                              $response = curl_exec($curl);
+                              $err = curl_error($curl);
 
-       									if($insert){
-       										return response()->json([
-       											'success' => [
-       												'data' => "IP eliminada correctamente",
-       												'status_code' => 200
-       											]
-       										]);
-       									}else{
-       										return response()->json([
-       											'error' => [
-       												'message' => 'Rango publicado en checkpoint pero no se guardó en la bdd',
-       												'status_code' => 20
-       											]
-       										]);
-       									}
-       								}else{
-       									return response()->json([
-       										'error' => [
-       											'message' => 'No se pudo guardar el nuevo rango',
-       											'status_code' => 20
-       										]
-       									]);
-       								}
+                              curl_close($curl);
 
-                           }
- 								}
- 							}else{
- 								return response()->json([
- 									'error' => [
- 										'message' => 'No se pudo guardar el nuevo rango',
- 										'status_code' => 20
- 									]
- 								]);
- 							}
- 						}else{
- 							return response()->json([
- 								'error' => [
- 									'message' => 'No se pudo guardar el nuevo rango',
- 									'status_code' => 20
- 								]
- 							]);
- 						}
+                              if($err){
+                                 Log::info("No se creó el segundo rango");
+                              }else{
+
+                                 $publish2 = $this->publishChanges($sid);
+
+          								if($publish2 == "success"){
+          									//Creo un array con los datos de los nuevos rangos
+          									$arr_addr = array(
+          										0 => array(
+          											'ip_initial' => $add_initial,
+          											'ip_last' => $second_ip,
+          											'object_id' => $object_id,
+          											'type_address_id' => $type_address_id,
+          											'created_at' => date('Y-m-d H:i:s'),
+          											'updated_at' => date('Y-m-d H:i:s'),
+          										),
+          										1 => array(
+          											'ip_initial' => $third_ip,
+          											'ip_last' => $add_last,
+          											'object_id' => $object_id,
+          											'type_address_id' => $type_address_id,
+          											'created_at' => date('Y-m-d H:i:s'),
+          											'updated_at' => date('Y-m-d H:i:s'),
+          										),
+          									);
+
+          									//inserto en la base los nuevos rangos
+          									$insert = DB::table('fw_address_objects')->insert($arr_addr);
+
+          									if($insert){
+          										return response()->json([
+          											'success' => [
+          												'data' => "IP eliminada correctamente",
+          												'status_code' => 200
+          											]
+          										]);
+          									}else{
+          										return response()->json([
+          											'error' => [
+          												'message' => 'Rango publicado en checkpoint pero no se guardó en la bdd',
+          												'status_code' => 20
+          											]
+          										]);
+          									}
+          								}else{
+          									return response()->json([
+          										'error' => [
+          											'message' => 'No se pudo guardar el nuevo rango',
+          											'status_code' => 20
+          										]
+          									]);
+          								}
+
+                              }
+    								}
+    							}else{
+    								return response()->json([
+    									'error' => [
+    										'message' => 'No se pudo guardar el nuevo rango',
+    										'status_code' => 20
+    									]
+    								]);
+    							}
+    						}else{
+    							return response()->json([
+    								'error' => [
+    									'message' =>
+
+
+ 						'No se pudo guardar el nuevo rango',
+    									'status_code' => 20
+    								]
+    							]);
+    						}
+
+                  }
+
  					}else{
  						return response()->json([
  							'error' => [
@@ -2195,6 +2316,8 @@ class CheckpointController extends Controller
  		$object_id = $request['object_info']['object_id'];
  		$object_name = $request['object_info']['objeto'];
  		$new_range = $request['new_ip_initial'].' '.$request['new_ip_last'];
+      $new_ip_initial = $request['new_ip_initial'];
+      $new_ip_last = $request['new_ip_last'];
  		$old_range = $request['object_info']['ip_initial'].' '.$request['object_info']['ip_last'];
  		$ip1 = $request['new_ip_initial'];
  		$ip2 = $request['new_ip_last'];
@@ -2235,7 +2358,7 @@ class CheckpointController extends Controller
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$request['new_ip_initial']\", \"ip_last\" : \"$request['new_ip_last']\", \r\n}",
+            CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$new_ip_initial\", \"ip_last\" : \"$new_ip_last\", \r\n}",
             CURLOPT_HTTPHEADER => array(
             	"content-type: application/json",
             ),
