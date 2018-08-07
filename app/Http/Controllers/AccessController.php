@@ -64,7 +64,6 @@ class AccessController extends Controller{
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
 
-
 		$v = Validator::make($request->all(), [
    		"name_company" => "required",
       	"address_company" => "required",
@@ -359,6 +358,154 @@ class AccessController extends Controller{
 		}
 	}
 
+	public function createUserCompany($data){
 
+		$name_sep = explode(' ', $data['name']);
+		$role_id_user = 2; //Administrador
+
+		try{
+			$user = new User;
+			$user->name = $name_sep[0];
+			$user->lastname = $name_sep[1];
+			$user->username = $data['username'];
+			$user->email = $data['email'];
+			$user->password = Hash::make($data['password']);
+			$user->phone = $data['phone'];
+			$user->company_id = $data['company_id'];
+			$user->active = 1;
+			$user->api_token = str_random(40);//api token
+			$user->save();
+
+			if($user->id){
+				$id = DB::table('role_user')->insertGetId(
+					['user_id' => $user->id, 'role_id' => $role_id_user]
+				);
+			}
+
+			return "success";
+		}catch(Exception $e){
+			// do task when error
+			Log::info($e->getMessage());
+
+			return "error";
+		}
+	}
+
+	public function validateCompany(){
+
+		$company = Company::count();
+		$users = User::count();
+
+		return response()->json([
+    		"company" => $company,
+			'user' => $users
+		]);
+	}
+
+	public function createFirstCompany(Request $request){
+		$name = $request['name_company'];
+		$address = $request['address_company'];
+		$email = $request['email_company'];
+		$phone = $request['phone_company'];
+		$description = isset($request['description_company']) ? $request['description_company'] : "";
+
+		$words = explode(" ", $name);
+		$acronym = "";
+
+		foreach ($words as $w) {
+		  	$acronym .= $w[0];
+		}
+
+		$random = rand(100, 999);
+		$account = '000'.$random;
+		$tag = $acronym.''.$random;
+		$country_id = $request['country_id'];
+
+		/*Mandaré a guardar el tag cuando se crea la compañía*/
+		try{
+			$client = new \GuzzleHttp\Client();
+			$data = $client->post("https://172.16.3.150/api?key=LUFRPT00eHE5UExyWEIrbnY3eEZ0SmRXMGVhcForVmc9bHphSCs4VGFSMk5QOS9CQnJkK1R1QT09&type=config&action=set&xpath=/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/tag/entry[@name='".$tag."']&element=<comments>Tag de la compañía: ".$name."</comments>", ["verify" => false]);
+			$response = $data->getBody()->getContents();
+
+			$xml = new \SimpleXMLElement($response);
+			$code = $xml['code'];
+
+			$tagCheck = $checkpoint->createTag($tag);
+			sleep(3);
+
+			if(($code == 19 || $code == 20) && $tagCheck == "success"){
+				$company = new Company;
+				$company->name = $name;
+				$company->address = $address;
+				$company->email = $email;
+				$company->phone = $phone;
+				$company->description = $description;
+				$company->account = $account;
+				$company->tag = $tag;
+				$company->country_id = $country_id;
+				$company->save();
+
+			}else{
+				Log::info("TAG NO CREADO");
+				return response()->json([
+					'error' => [
+						'message' => 'Company not created',
+						'status_code' => 20
+					]
+				]);
+			}
+
+		}
+		catch (GuzzleHttp\Exception\ClientException $e) {
+			$response = $e->getResponse();
+			$responseBodyAsString = $response->getBody()->getContents();
+
+			return response()->json([
+				'error' => [
+					'message' => $responseBodyAsString,
+					'status_code' => 20
+				]
+			]);
+		}
+	}
+
+	public function destroy(Request $request, CheckpointController $checkpoint, EmailController $emailCtrl){
+
+		$id = $request['company_id'];
+		$name = $request['company_name'];
+
+		$rules = FwAccessRule::where('company_id', '=', $id)->get();
+		$objects = FwObject::where('company_id', '=', $id)->get();
+		$sections = FwSectionAccess::where('company_id', '=', $id)->get();
+
+		$remove_rules = $checkpoint->removeRuleComplete($rules);
+		$remove_objects = $checkpoint->removeObjectComplete($objects);
+		$remove_section = $checkpoint->removeSectionComplete($sections);
+
+		$company = Company::find($id);
+		$company->delete();
+
+		if($company){
+			return response()->json([
+            'success' => [
+               'message' => 'Datos de compañía eliminados',
+               'status_code' => 200
+            ]
+         ]);
+		}else{
+			$type = "error";
+			$update_rule = Company::where('id', $id)
+				->update(['status_error' => 1]);
+
+			$emailCtrl->sendEmailCompany($name, $type);
+
+			return response()->json([
+            'error' => [
+               'message' => 'Compañía no pudo ser eliminada',
+               'status_code' => 20
+            ]
+         ]);
+		}
+ 	}
 
 }

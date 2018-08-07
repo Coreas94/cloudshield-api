@@ -26,6 +26,7 @@ use App\FwAccessRule;
 use App\CheckPointRulesObjects;
 use App\ServicesCheckpoint;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\CheckPointFunctionController;
 
 use IPTools\Range;
 use IPTools\Network;
@@ -36,9 +37,6 @@ class CheckpointController extends Controller
 {
    private $output = "";
    private $typeResponseCurl = 1;
-   public function test(){
-      return 'ok';
-   }
 
    //Comienza desde aqui
    public function __construct(){
@@ -47,7 +45,7 @@ class CheckpointController extends Controller
   	}
 
    public function servers(){
-      $server = FwServer::where('id', 1)->get();
+      $server = FwServer::where('type_id', 1)->get();
       $server->transform(function($item){
          $collect = [
 				'id' => $item->id,
@@ -91,6 +89,8 @@ class CheckpointController extends Controller
          ]);
       }else{
          $result = json_decode($this->output, true);
+         Log::info("RESULTADO LOGIN 114");
+         Log::info($result);
          $sid = $result['sid'];
          Session::put('sid_session', $sid);
          return $sid;
@@ -131,18 +131,6 @@ class CheckpointController extends Controller
   	}
 
    public function publishChanges($sid){
-      /*Control::curl("172.16.3.114")
-      ->is('publish')
-      ->sid($sid)
-      ->eCurl(function($response){
-         $this->output = $response;
-         $this->typeResponseCurl = 1;
-      }, function($error){
-         $this->output = $error;
-         $this->typeResponseCurl = 0;
-      });
- 		if(!$this->typeResponseCurl) return "error";
- 		else return "success";*/
       $curl = curl_init();
 
 		curl_setopt_array($curl, array(
@@ -308,9 +296,9 @@ class CheckpointController extends Controller
       CURLOPT_SSL_VERIFYHOST => false,
       CURLOPT_CUSTOMREQUEST => "POST",
       CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
-      CURLOPT_HTTPHEADER => array(
-      	"content-type: application/json",
-      ),
+         CURLOPT_HTTPHEADER => array(
+         	"content-type: application/json",
+         ),
       ));
 
       $response = curl_exec($curl);
@@ -434,93 +422,97 @@ class CheckpointController extends Controller
   	}
 
    public function createSections($tag, $company_id){
+      $checkpoint2 = new CheckPointFunctionController;
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
     		if($sid){
    			$name_section = 'CUST-'.$tag;
    			#$rule_name = $request['rule_name'];
-            Control::curl("172.16.3.114")
-            ->is('add-access-section')
-            ->config([
-               'layer' => 'Network',
-               'name' => $name_section,
-               'position' => [
-                  'below' => 'DATACENTER NETWORKS'
-               ]
-            ])
-            ->sid($sid)
-            ->eCurl(function($response){
-               $this->typeResponseCurl = 1;
-            }, function($error){
-               $this->typeResponseCurl = 0;
-            });
+            $curl = curl_init();
 
-            if(!$this->typeResponseCurl){
-     				/*return response()->json([
-     					'error' => [
-     						'message' => $err,
-     						'status_code' => 20
-     					]
-     				]);*/
-     				return "error";
+	         curl_setopt_array($curl, array(
+   				CURLOPT_URL => "https://172.16.3.114/web_api/add-access-section",
+   				CURLOPT_RETURNTRANSFER => true,
+   				CURLOPT_ENCODING => "",
+   				CURLOPT_MAXREDIRS => 10,
+   				CURLOPT_TIMEOUT => 30,
+   				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+   				CURLOPT_SSL_VERIFYPEER => false,
+   				CURLOPT_SSL_VERIFYHOST => false,
+   				CURLOPT_CUSTOMREQUEST => "POST",
+   				//CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n  \r\n  \"position\" : {\r\n    \"below\" : \"DATACENTER\"} \r\n}",
+   				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n, \"position\" : {\r\n \"below\" : \"DATACENTER NETWORKS\"} \r\n }",
+   				CURLOPT_HTTPHEADER => array(
+   					"cache-control: no-cache",
+   					"content-type: application/json",
+   					"postman-token: ad4a88fd-6b2d-1af7-ae0f-081b119c9d2f",
+   					"X-chkp-sid: ".$sid
+   				),
+   			));
+
+   			$response = curl_exec($curl);
+   			//Log::info("RESPONSE SECTION");
+   			//Log::info(print_r($response, true));
+   			sleep(3);
+   			$err = curl_error($curl);
+
+   			curl_close($curl);
+
+   			if($err){
+   				return "error";
    			}else{
      				$publish = $this->publishChanges($sid);
 
      				if($publish == 'success'){
 
-     					$section = new FwSectionAccess;
-     					$section->name = $name_section;
-     					$section->company_id = $company_id;
-     					$section->tag = $tag;
-     					$section->save();
+                  $section2 = $checkpoint2->createSections2($tag);
 
-     					if($section->id){
-     						return [$section->id, $name_section];
-     					}else{
-     						//Log::info("se creo la sección ".$name_section." pero no se guardó");
-     						return [1, $name_section];
-     					}
+                  $section = new FwSectionAccess;
+                  $section->name = $name_section;
+                  $section->company_id = $company_id;
+                  $section->tag = $tag;
+                  $section->save();
+
+                  if($section->id){
+                  	return [$section->id, $name_section];
+                  }else{
+                  	return [1, $name_section];
+                  }
      				}else{
-     					/*return response()->json([
-     						'message' => "error",
-     						'status_code' => 20
-     					]);*/
      					return "error";
      				}
    			}
     		}else{
-   			/*return response()->json([
-   				'message' => "error",
-   				'status_code' => 20
-   			]);*/
    			return "error";
     		}
   	}
 
    public function addObjectsToRule(Request $request){
+      $checkpoint2 = new CheckPointFunctionController;
+
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
 
  		if($sid){
-   			$uid_rule = $request['uid_rule'];
-   			$field_change = $request['field_change'];
-   			$new_changes = $request['field_change_value'];
+			$uid_rule = $request['uid_rule'];
+			$field_change = $request['field_change'];
+			$new_changes = $request['field_change_value'];
 
-   			if($field_change == "action"){
-   				$data_field2 = "\"$new_changes\"";
-   			}else{
-   				$fields = explode(",", $new_changes);
+			if($field_change == "action"){
+				$data_field2 = "\"$new_changes\"";
+			}else{
+				$fields = explode(",", $new_changes);
 
-   				$data_field = "";
-   				foreach($fields as $row){
-   					$data_field .= "\"$row\",";
-   				}
+				$data_field = "";
+				foreach($fields as $row){
+					$data_field .= "\"$row\",";
+				}
 
-   				$data_field2 = substr($data_field, 0, -1);
-   				$data_field2 = "[".$data_field2."]";
-   			}
+				$data_field2 = substr($data_field, 0, -1);
+				$data_field2 = "[".$data_field2."]";
+			}
 
          Control::curl("172.16.3.114")
          ->config([
@@ -548,12 +540,25 @@ class CheckpointController extends Controller
   				$result = json_decode($this->output, true);
   				//Log::info(print_r($result, true));
   				$publish = $this->publishChanges($sid);
-  				if($publish == "success") return response()->json([
-					'message' => "success",
-				]);
-  				else return response()->json([
-		         'message' => "error",
-				]);
+  				if($publish == "success"){
+
+               $resp_obj = $checkpoint2->addObjectsToRule2($request);
+
+               if($resp_obj == "success"){
+                  return response()->json([
+      					'message' => "success",
+      				]);
+               }else{
+                  return response()->json([
+      					'message' => "success",
+      				]);
+               }
+            }
+  				else{
+               return response()->json([
+   		         'message' => "error",
+   				]);
+            }
 			}
  		}else return response()->json([
 			'error' => [
@@ -640,6 +645,8 @@ class CheckpointController extends Controller
   	}
 
    public function disableRule(Request $request){
+      $checkpoint2 = new CheckPointFunctionController;
+
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
@@ -667,36 +674,48 @@ class CheckpointController extends Controller
             $this->output = $error;
          });
 
-			if(!$this->typeResponseCurl) return response()->json([
-				'error' => [
-					'message' => $this->output,
-					'status_code' => 20
-				]
-			]);
-			else{
+			if(!$this->typeResponseCurl){
+            return response()->json([
+   				'error' => [
+   					'message' => $this->output,
+   					'status_code' => 20
+   				]
+   			]);
+         }else{
   				$publish = $this->publishChanges($sid);
-  				if($publish == "success") return response()->json([
-					'success' => [
-						'message' => "Regla deshabilitada",
-						'status_code' => 200
-					]
-				]);
-  				else return response()->json([
-					'error' => [
-						'message' => "No se deshabilitó la regla",
-						'status_code' => 20
-					]
-				]);
+
+            if($publish == "success"){
+
+               $disable2 = $checkpoint2->disableRule2($request);
+
+               return response()->json([
+   					'success' => [
+   						'message' => "Regla deshabilitada",
+   						'status_code' => 200
+   					]
+   				]);
+            }else{
+               return response()->json([
+   					'error' => [
+   						'message' => "No se deshabilitó la regla",
+   						'status_code' => 20
+   					]
+   				]);
+            }
 			}
- 		}else return response()->json([
-			'error' => [
-				'message' => "No existe sesión con el checkpoint",
-				'status_code' => 20
-			]
-		]);
+ 		}else{
+         return response()->json([
+   			'error' => [
+   				'message' => "No existe sesión con el checkpoint",
+   				'status_code' => 20
+   			]
+   		]);
+      }
    }
 
    public function removeRule(Request $request){
+      $checkpoint2 = new CheckPointFunctionController;
+
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
@@ -719,16 +738,21 @@ class CheckpointController extends Controller
             $this->output = $error;
          });
 
- 			if(!$this->typeResponseCurl) return response()->json([
-				'error' => [
-					'message' => $this->output,
-					'status_code' => 20
-				]
-         ]);
- 			else{
+ 			if(!$this->typeResponseCurl){
+            return response()->json([
+   				'error' => [
+   					'message' => $this->output,
+   					'status_code' => 20
+   				]
+            ]);
+         }else{
  				$publish = $this->publishChanges($sid);
  				if($publish == "success"){
-					$install = $this->installPolicy();
+
+               $install = $this->installPolicy();
+
+               $remove2 = $checkpoint2->removeRule2($request);
+
 					return response()->json([
   						'success' => [
  							'message' => "Regla eliminada",
@@ -742,12 +766,14 @@ class CheckpointController extends Controller
 					]
             ]);
  			}
- 		}else return response()->json([
-			'error' => [
-				'message' => "No existe sesión con el checkpoint",
-				'status_code' => 20
-			]
-		]);
+ 		}else{
+         return response()->json([
+   			'error' => [
+   				'message' => "No existe sesión con el checkpoint",
+   				'status_code' => 20
+   			]
+   		]);
+      }
   	}
 
    public function getAllIpsForDelete(Request $request){
@@ -864,9 +890,6 @@ class CheckpointController extends Controller
  		$date_init = \Carbon\Carbon::now()->subDays(1);
  		$date_last = \Carbon\Carbon::now();
 
- 		// Log::info("Se ejecutó el cron a las: ".$date_last);
- 		// return $date_last;
-
  		$date_init = $date_init->toDateString();
  		$date_last = $date_last->toDateString();
 
@@ -929,7 +952,8 @@ class CheckpointController extends Controller
    }
 
    public function createDynamicObject(Request $request){
- 		//Log::info($request);
+      $checkpoint2 = new CheckPointFunctionController;
+
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
@@ -937,7 +961,6 @@ class CheckpointController extends Controller
  		if($sid){
 
  			$evaluate;
-
  			$server_ch = 1; //Es el id del checkpoint
  			$new_object_name = $request['object_name'];
  			//$tag = $request['tag'];
@@ -997,6 +1020,8 @@ class CheckpointController extends Controller
  						]);
  					}
  				}else{
+               $create2 = $checkpoint2->createDynamicObject2($request);
+               sleep(2);
 
 					$uid = $result['uid'];
 
@@ -1048,7 +1073,6 @@ class CheckpointController extends Controller
                   curl_close($curl);
 
                   if($err){
-
                      return response()->json([
                         'error' => [
                            'message' => "El objeto no pudo ser creado",
@@ -1218,6 +1242,8 @@ class CheckpointController extends Controller
 		Log::info($data);
 		Log::info("*************************************");
 
+      $checkpoint2 = new CheckPointFunctionController;
+
 		if(Session::has('sid_session'))
 			$sid = Session::get('sid_session');
   		else $sid = $this->getLastSession();
@@ -1234,31 +1260,42 @@ class CheckpointController extends Controller
 
   			$company_id = $data['company_id'];
 
-         Control::curl("172.16.3.114")
-         ->is("add-dynamic-object")
-         ->config([
-            'name' => $new_object_name,
-            'comments' => $comment,
-            'tags' => $tag
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $error;
-            $this->typeResponseCurl = 0;
-         });
+         $curl = curl_init();
 
-  			if(!$this->typeResponseCurl){
-  				return response()->json([
-  					'error' => [
-  						'message' => $this->output,
-  						'status_code' => 20
-  					]
-  				]);
-  			}else{
-  				$result = json_decode($this->output, true);
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/add-dynamic-object",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				//CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"$object_name\",\r\n  \"comments\" : \"$comment\",\r\n  \"color\" : \"$color\"\r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"$new_object_name\",\r\n  \"comments\" : \"$comment\",\r\n  \"tags\" : [ \"$tag\"]\r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			sleep(3);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return response()->json([
+					'error' => [
+						'message' => $err,
+						'status_code' => 20
+					]
+				]);
+			}else{
+  				$result = json_decode($response, true);
   				Log::info($result);
 
   				if(isset($result['code'])){
@@ -1272,8 +1309,10 @@ class CheckpointController extends Controller
   					]);
   					//if($result['code'] == "generic_err_object_not_found"){}
   				}else{
-  					$uid = $result['uid'];
+               $objectcompany2 = $checkpoint2->addObjectCompany2($data);
+               sleep(2);
 
+  					$uid = $result['uid'];
   					$object_type = 4; //Es object dynamic
 
   					$object_new = New FwObject;
@@ -1392,6 +1431,8 @@ class CheckpointController extends Controller
 
    public function removeObject(Request $request){
 
+      $checkpoint2 = new CheckPointFunctionController;
+
  		$object_id = $request['object_id'];
  		$object_name = $request['object_name'];
 
@@ -1450,6 +1491,9 @@ class CheckpointController extends Controller
  					$publish = $this->publishChanges($sid);
 
  					if($publish == "success"){
+
+                  $remove2 = $checkpoint2->removeObject2($request);
+                  sleep(2);
 
                   $curl = curl_init();
 
@@ -2089,15 +2133,11 @@ class CheckpointController extends Controller
     						}else{
     							return response()->json([
     								'error' => [
-    									'message' =>
-
-
- 						'No se pudo guardar el nuevo rango',
+    									'message' => 'No se pudo guardar el nuevo rango',
     									'status_code' => 20
     								]
     							]);
     						}
-
                   }
 
  					}else{
@@ -2124,6 +2164,7 @@ class CheckpointController extends Controller
    }
 
    public function createTag($tag){
+      $checkpoint2 = new CheckPointFunctionController;
 
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
@@ -2134,7 +2175,7 @@ class CheckpointController extends Controller
          Control::curl("172.16.3.114")
          ->is("add-tag")
          ->config([
-            'name' => 'Test002',
+            'name' => $tag,
             'tags' => $tag
          ])
          ->sid($sid)
@@ -2152,6 +2193,10 @@ class CheckpointController extends Controller
  			}else{
  				$publish = $this->publishChanges($sid);
  				if($publish == "success"){
+
+               $createtag2 = $checkpoint2->createTag2($tag);
+               sleep(2);
+
  					return "success";
  				}else{
  					return "error";
@@ -2228,6 +2273,8 @@ class CheckpointController extends Controller
    }
 
    public function moveRule(Request $request){
+      $checkpoint2 = new CheckPointFunctionController;
+
    	if(Session::has('sid_session'))
    		$sid = Session::get('sid_session');
    	else $sid = $this->getLastSession();
@@ -2283,6 +2330,10 @@ class CheckpointController extends Controller
   					$publish = $this->publishChanges($sid);
 
   					if($publish == "success"){
+
+                  $moverule2 = $checkpoint2->moveRule2($request);
+                  sleep(2);
+
   						return response()->json([
   							'success' => [
   								'message' => "Regla Movida",
@@ -2297,7 +2348,6 @@ class CheckpointController extends Controller
   							]
   						]);
   					}
-
   				}
   			}
   		}else{
@@ -3196,7 +3246,8 @@ class CheckpointController extends Controller
  		}
    }
 
-    public function addRules($data){
+   public function addRules($data){
+      $checkpoint2 = new CheckPointFunctionController;
 
  		Log::info("DATA ADDRULES");
  		Log::info($data);
@@ -3204,7 +3255,6 @@ class CheckpointController extends Controller
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
-
 
  		if($sid){
 
@@ -3218,39 +3268,38 @@ class CheckpointController extends Controller
  			$tag = $data['tag'];
  			$section_id = $data['section_id'];
 
-         Control::curl("172.16.3.114")
-         ->is("add-access-rule")
-         ->config([
-            'layer' => 'Network',
-            'ignore-warnings' => true,
-            'position' => [
-               'bottom' => $section
-            ],
-            'name' => $rule_name,
-            'source' => $src,
-            'destination' => $dst,
-            'action' => $action,
-            'vpn' => 'Any',
-            'comments' => 'no-editable'
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $error;
-            $this->typeResponseCurl = 0;
-         });
+         $curl = curl_init();
 
- 			if(!$this->typeResponseCurl){
- 				/*return response()->json([
- 					'error' => [
- 						'message' => $err,
- 						'status_code' => 20
- 					]
- 				]);*/
- 				return "error";
- 			}else{
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/add-access-rule",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\", \r\n  \"ignore-warnings\" : \"true\", \r\n  \"position\" : {\r\n \"bottom\" : \"$section\" \r\n },\r\n  \"name\" : \"$rule_name\",\r\n \"source\" : \"$src\", \r\n\t\"destination\" : \"$dst\", \r\n\t\"action\" : \"$action\", \r\n  \"vpn\" : \"Any\"\r\n, \r\n  \"comments\" : \"no-editable\"\r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"postman-token: cdc83805-2ac2-4f52-cc24-07495596d187",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info("RESPUESTA ADD RULES-----------------------------------");
+			//Log::info(print_r($response, true));
+			sleep(3);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
  				$publish2 = $this->publishChanges($sid);
 
  				if($publish2 == 'success'){
@@ -3267,8 +3316,11 @@ class CheckpointController extends Controller
  								'error' => "Existe error en checkpoint"
  							]
  						]);
- 						//if($result['code'] == "generic_err_object_not_found"){}
  					}else{
+
+                  $addrule2 = $checkpoint2->addRules2($data);
+                  sleep(2);
+
  						$uid_rule = $result['uid'];
 
  						$rule = new FwAccessRule;
@@ -3303,6 +3355,7 @@ class CheckpointController extends Controller
  		}
    }
 
+   /*********AQUI HAY QUE SEGUIR*********/
    public function addNewRule(Request $request){
  		if(Session::has('sid_session')) $sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
@@ -3318,12 +3371,9 @@ class CheckpointController extends Controller
 
  			$section_company = FwSectionAccess::where('company_id', $company_id)->get();
 
-
  			//CREAR UNA NUEVA SECCIÓN CON EL TAG ELEGIDO SI NO EXISTE
  			/*if(count($section_company) == 0){
-
  			}else{
-
  			}*/
 
  			Log::info($section_company);
@@ -3382,7 +3432,6 @@ class CheckpointController extends Controller
  								'error' => "Existe error en checkpoint"
  							]
  						]);
- 						//if($result['code'] == "generic_err_object_not_found"){}
  					}else{
 
  						$install = $this->installPolicy();

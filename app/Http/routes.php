@@ -15,6 +15,8 @@ Route::get('/', function () {
    return view('welcome');
 });
 
+Route::get('prueba', 'CheckPointFunctionController@loginCheckpoint');
+
 Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 
    Route::group(['middleware' => ['jwt-auth']], function(){
