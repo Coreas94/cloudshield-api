@@ -20,6 +20,7 @@ use App\FwAccessRule;
 use Hash;
 use App\FwSectionAccess;
 use App\FwObject;
+use App\Http\Controllers\CheckPointFunctionController;
 
 use JWTAuth;
 
@@ -63,6 +64,8 @@ class AccessController extends Controller{
 	}
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
+
+		$checkpoint2 = new CheckPointFunctionController;
 
 		$v = Validator::make($request->all(), [
    		"name_company" => "required",
@@ -114,7 +117,10 @@ class AccessController extends Controller{
 				$code = $xml['code'];
 
 				$tagCheck = $checkpoint->createTag($tag);
-				sleep(3);
+				sleep(2);
+
+				$createtag2 = $checkpoint2->createTag2($tag);
+				sleep(2);
 
 				if(($code == 19 || $code == 20) && $tagCheck == "success"){
 					$company = new Company;
@@ -147,11 +153,15 @@ class AccessController extends Controller{
 						$object = $firewall->createObjectsCh($dataArray, $checkpoint);
 						sleep(3);
 						Log::info($object);
+
 						if($object == "success"){
 							//Create section
 							$section = $checkpoint->createSections($tag, $company->id);
-							sleep(3);
+							sleep(2);
+							$section2 = $checkpoint2->createSections2($tag, $company->id);
+							sleep(2);
 							Log::info($section);
+
 							if($section != "error"){
 
 								$arrayRule = array(
@@ -209,6 +219,9 @@ class AccessController extends Controller{
 									sleep(3);
 									$rules = $checkpoint->addRules($row);
 
+									//Agrego las reglas en el checkpoint 118
+									$rules2 = $checkpoint2->addRules2($row);
+
 									Log::info($rules);
 									Log::info("regla creada SIGUIENTE");
 									Log::info($row);
@@ -223,25 +236,25 @@ class AccessController extends Controller{
 
 									#if($install == "success"){
 									sleep(3);
-										$user = $this->createUserCompany($data_user);
+									$user = $this->createUserCompany($data_user);
 
-										if($user == "success"){
-											//Log::info("Se instalaron los cambios");
-											return response()->json([
-												'success' => [
-													'tag_company' => $tag,
-													'message' => 'Compañía, objetos y usuario creados exitosamente',
-													'status_code' => 200
-												]
-											]);
-										}else{
-											return response()->json([
-												'success' => [
-													'message' => 'Se creó la compañía y objetos pero no el usuario',
-													'status_code' => 200
-												]
-											]);
-										}
+									if($user == "success"){
+										//Log::info("Se instalaron los cambios");
+										return response()->json([
+											'success' => [
+												'tag_company' => $tag,
+												'message' => 'Compañía, objetos y usuario creados exitosamente',
+												'status_code' => 200
+											]
+										]);
+									}else{
+										return response()->json([
+											'success' => [
+												'message' => 'Se creó la compañía y objetos pero no el usuario',
+												'status_code' => 200
+											]
+										]);
+									}
 									/*}else{
 										return response()->json([
 											'error' => [

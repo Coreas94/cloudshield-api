@@ -174,6 +174,8 @@ class CheckpointController extends Controller
    }
 
    public function installPolicy(){
+      $checkpoint2 = new CheckPointFunctionController;
+
       if(Session::has('sid_session'))
          $sid = Session::get('sid_session');
       else $sid = $this->getLastSession();
@@ -203,18 +205,39 @@ class CheckpointController extends Controller
             $resp = json_decode($this->output, true);
             Log::info("RESPUESTA INSTALL");
             Log::info($resp);
+
             if(isset($resp['task-id'])){
                $task = $resp['task-id'];
                $result_task = $this->showTask($task);
 
+               $installCh2 = $checkpoint2->installPolicy();
+
                Log::info("RESULT TASK");
                Log::info($result_task);
 
+               $textResp = "";
+
                foreach($result_task['tasks'] as $key => $value){
                   if($value['status'] == "succeeded")
-                     return "success";
+                     $textResp = "success";
+                     //return "success";
                   else
-                     return "error";
+                     $textResp = "error";
+                     //return "error";
+               }
+
+               if($textResp == "success" && $installCh2 == "success"){
+                  Log::info("Políticas instaladas correctamente en ambos checkpoint");
+                  return "Políticas instaladas correctamente en ambos checkpoint";
+               }elseif ($textResp == "success" && $installCh2 != "success") {
+                  Log::info("Políticas instaladas correctamente solo en el checkpoint 114");
+                  return "Políticas instaladas correctamente solo en el checkpoint 114";
+               }elseif ($textResp != "success" && $installCh2 == "success") {
+                  Log::info("Políticas instaladas correctamente solo en el checkpoint 118");
+                  return "Políticas instaladas correctamente solo en el checkpoint 118";
+               }else{
+                  Log::info("Politicas no instaladas");
+                  return "Politicas no instaladas";
                }
             }else return "error";
          }
@@ -423,7 +446,8 @@ class CheckpointController extends Controller
 
    public function createSections($tag, $company_id){
       $checkpoint2 = new CheckPointFunctionController;
- 		if(Session::has('sid_session'))
+
+      if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
     		if($sid){
@@ -446,7 +470,6 @@ class CheckpointController extends Controller
    				CURLOPT_HTTPHEADER => array(
    					"cache-control: no-cache",
    					"content-type: application/json",
-   					"postman-token: ad4a88fd-6b2d-1af7-ae0f-081b119c9d2f",
    					"X-chkp-sid: ".$sid
    				),
    			));
@@ -465,8 +488,6 @@ class CheckpointController extends Controller
      				$publish = $this->publishChanges($sid);
 
      				if($publish == 'success'){
-
-                  $section2 = $checkpoint2->createSections2($tag);
 
                   $section = new FwSectionAccess;
                   $section->name = $name_section;
@@ -746,13 +767,12 @@ class CheckpointController extends Controller
    				]
             ]);
          }else{
+            $remove2 = $checkpoint2->removeRule2($request);
+
  				$publish = $this->publishChanges($sid);
  				if($publish == "success"){
 
-               $install = $this->installPolicy();
-
-               $remove2 = $checkpoint2->removeRule2($request);
-
+               //$install = $this->installPolicy();
 					return response()->json([
   						'success' => [
  							'message' => "Regla eliminada",
@@ -1005,7 +1025,7 @@ class CheckpointController extends Controller
  				]);
  			}else{
  				$result = json_decode($response, true);
- 				Log::info("RESULT:****");
+ 				Log::info("RESULT: 114****");
  				Log::info($result);
 
  				if(isset($result['code'])){
@@ -1296,6 +1316,7 @@ class CheckpointController extends Controller
 				]);
 			}else{
   				$result = json_decode($response, true);
+            Log::info("Resutlado obj 114");
   				Log::info($result);
 
   				if(isset($result['code'])){
@@ -1309,8 +1330,6 @@ class CheckpointController extends Controller
   					]);
   					//if($result['code'] == "generic_err_object_not_found"){}
   				}else{
-               $objectcompany2 = $checkpoint2->addObjectCompany2($data);
-               sleep(2);
 
   					$uid = $result['uid'];
   					$object_type = 4; //Es object dynamic
@@ -2172,30 +2191,35 @@ class CheckpointController extends Controller
 
       if($sid){
 
-         Control::curl("172.16.3.114")
-         ->is("add-tag")
-         ->config([
-            'name' => $tag,
-            'tags' => $tag
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $error;
-            $this->typeResponseCurl = 0;
-         });
+         $curl = curl_init();
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/add-tag",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"Tag Name\",\r\n  \"tags\" : [ \"$tag\"]\r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
 
- 			if(!$this->typeResponseCurl){
- 				#Log::info($err);
- 				return "error";
- 			}else{
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
  				$publish = $this->publishChanges($sid);
  				if($publish == "success"){
-
-               $createtag2 = $checkpoint2->createTag2($tag);
-               sleep(2);
 
  					return "success";
  				}else{
@@ -3284,7 +3308,6 @@ class CheckpointController extends Controller
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
-					"postman-token: cdc83805-2ac2-4f52-cc24-07495596d187",
 					"X-chkp-sid: ".$sid
 				),
 			));
@@ -3304,7 +3327,7 @@ class CheckpointController extends Controller
 
  				if($publish2 == 'success'){
 
- 					$result = json_decode($this->output, true);
+ 					$result = json_decode($response, true);
  					Log::info($result);
 
  					if(isset($result['code'])){
@@ -3317,9 +3340,6 @@ class CheckpointController extends Controller
  							]
  						]);
  					}else{
-
-                  $addrule2 = $checkpoint2->addRules2($data);
-                  sleep(2);
 
  						$uid_rule = $result['uid'];
 
@@ -3357,6 +3377,8 @@ class CheckpointController extends Controller
 
    /*********AQUI HAY QUE SEGUIR*********/
    public function addNewRule(Request $request){
+      $checkpoint2 = new CheckPointFunctionController;
+
  		if(Session::has('sid_session')) $sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
 
@@ -3420,6 +3442,9 @@ class CheckpointController extends Controller
 
  				if($publish2 == 'success'){
 
+               $newrule2 = $checkpoint2->addNewRule2($request);
+               sleep(3);
+
  					$result = json_decode($rsp, true);
  					Log::info($result);
 
@@ -3434,8 +3459,8 @@ class CheckpointController extends Controller
  						]);
  					}else{
 
- 						$install = $this->installPolicy();
-                  Log::info($install);
+ 						/*$install = $this->installPolicy();
+                  Log::info($install);*/
 
  						$uid_rule = $result['uid'];
 
@@ -3448,24 +3473,24 @@ class CheckpointController extends Controller
  						$rule->editable = 1;
  						$rule->save();
 
- 						if($rule->id && $install == "success"){
+                  $rule_objects = new CheckPointRulesObjects;
+                  $rule_objects->rule_id = $rule->id;
+                  $rule_objects->object_src = $src;
+                  $rule_objects->object_dst = $dst;
+                  $rule_objects->save();
 
- 							$rule_objects = new CheckPointRulesObjects;
- 							$rule_objects->rule_id = $rule->id;
- 							$rule_objects->object_src = $src;
- 							$rule_objects->object_dst = $dst;
- 							$rule_objects->save();
+ 						if($rule->id){ //&& $install == "success"
 
  							return response()->json([
  								'success' => [
- 									'message' => "Regla creada e instalada exitosamente",
+ 									'message' => "Regla creada exitosamente",
  									'status_code' => 200
  								]
  							]);
  						}else{
  							return response()->json([
  								'success' => [
- 									'message' => "Se creó la regla ".$rule_name." pero no se guardó o instaló.",
+ 									'message' => "Se creó la regla ".$rule_name." pero no se guardó en la db.",
  									'status_code' => 200
  								]
  							]);

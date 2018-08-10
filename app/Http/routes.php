@@ -15,7 +15,7 @@ Route::get('/', function () {
    return view('welcome');
 });
 
-Route::get('prueba', 'CheckPointFunctionController@loginCheckpoint');
+Route::get('prueba', 'CheckPointFunctionController@installPolicy');
 
 Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 

@@ -19,6 +19,7 @@ use App\PoliciesDestination;
 use App\FwCompanyServer;
 use App\FwObject;
 use App\AddressObject;
+use App\Http\Controllers\CheckPointFunctionController;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -38,7 +39,7 @@ class FireWallController extends Controller{
 	private $servers;
 	private $connect;
 	private $user;
-	
+
 	public function __construct(Request $request){
 		//$this->middleware('auth');
    	#$this->user = JWTAuth::toUser($request['token']);
@@ -265,7 +266,7 @@ class FireWallController extends Controller{
 			/*************COMIENZO A GUARDAR EL OBJETO EN PALO ALTO***************/
 			Log::info("Llega a palo alto");
 			$object_data = DB::table('fw_address_types')->get();
-			$obj = collect($object_data);			
+			$obj = collect($object_data);
 			$company_data = DB::table('fw_companies')->where('id', $user['company_id'])->get();
 
 		  	/*if($role_user == 'superadmin'){
@@ -393,7 +394,7 @@ class FireWallController extends Controller{
 	}
 
 	public function createObjectsCh($data, CheckpointController $checkpoint){
-
+		$checkpoint2 = new CheckPointFunctionController;
 		$server_id = 1;
 
 		$tag = $data['tag'];
@@ -435,9 +436,9 @@ class FireWallController extends Controller{
 		$i = 0;
 		$arr = [];
 		foreach($arrObject as $row){
-			#Log::info("ROWWWWW");
-			#Log::info($row);
-			$response = $checkpoint->addObjectCompany($row); 
+			$response = $checkpoint->addObjectCompany($row);
+
+			$response2 = $checkpoint2->addObjectCompany2($row);
 			$arr[$i] = $response;
 
 			$i++;
@@ -448,7 +449,6 @@ class FireWallController extends Controller{
 		}else{
 			return "error";
 		}
-		#return $arr;
 	}
 
 	public function createRules($data, CheckpointController $checkpoint){

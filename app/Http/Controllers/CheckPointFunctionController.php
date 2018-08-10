@@ -37,7 +37,7 @@ class CheckPointFunctionController extends Controller
 
    public function __construct(){
       Log::info(Session::get('sid_session_2'));
- 		Session::forget('sid_session_2');
+ 		//Session::forget('sid_session_2');
  		$evaluate = "";
   	}
 
@@ -277,59 +277,64 @@ class CheckPointFunctionController extends Controller
   		return $response;
   	}
 
-   public function createSections2($tag){
+   public function createSections2($tag, $company_id){
+      Log::info("llega al section2");
       if(Session::has('sid_session_2')){
+         Log::info("Existe sesion 118");
          $sid = Session::get('sid_session_2');
       }else {
-
+         Log::info("No existe sesion 118");
          $sid = $this->getLastSession();
-         if($sid){
-            $name_section = 'CUST-'.$tag;
-            #$rule_name = $request['rule_name'];
-            $curl = curl_init();
+      }
 
-   			curl_setopt_array($curl, array(
-   				CURLOPT_URL => "https://172.16.3.118/web_api/add-access-section",
-   				CURLOPT_RETURNTRANSFER => true,
-   				CURLOPT_ENCODING => "",
-   				CURLOPT_MAXREDIRS => 10,
-   				CURLOPT_TIMEOUT => 30,
-   				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-   				CURLOPT_SSL_VERIFYPEER => false,
-   				CURLOPT_SSL_VERIFYHOST => false,
-   				CURLOPT_CUSTOMREQUEST => "POST",
-   				//CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n  \r\n  \"position\" : {\r\n    \"below\" : \"DATACENTER\"} \r\n}",
-   				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n, \"position\" : {\r\n \"below\" : \"DATACENTER NETWORKS\"} \r\n }",
-   				CURLOPT_HTTPHEADER => array(
-   					"cache-control: no-cache",
-   					"content-type: application/json",
-   					"postman-token: ad4a88fd-6b2d-1af7-ae0f-081b119c9d2f",
-   					"X-chkp-sid: ".$sid
-   				),
-   			));
+      if($sid){
+         $name_section = 'CUST-'.$tag;
+         #$rule_name = $request['rule_name'];
+         $curl = curl_init();
 
-   			$response = curl_exec($curl);
-   			//Log::info("RESPONSE SECTION");
-   			//Log::info(print_r($response, true));
-   			sleep(3);
-   			$err = curl_error($curl);
+         curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://172.16.3.118/web_api/add-access-section",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            //CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n  \r\n  \"position\" : {\r\n    \"below\" : \"DATACENTER\"} \r\n}",
+            CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n, \"position\" : {\r\n \"below\" : \"DATACENTER NETWORKS\"} \r\n }",
+            CURLOPT_HTTPHEADER => array(
+               "cache-control: no-cache",
+               "content-type: application/json",
+               "X-chkp-sid: ".$sid
+            ),
+         ));
 
-   			curl_close($curl);
+         $response = curl_exec($curl);
 
-   			if($err){
-   				return "error";
-   			}else{
-               $publish = $this->publishChanges($sid);
+         $err = curl_error($curl);
 
-               if($publish == 'success'){
-                  return "success";
-               }else{
-                  return "error";
-               }
-            }
-         }else{
+         curl_close($curl);
+
+         $result = json_decode($response, true);
+         Log::info("CREACION DE SECTION 118");
+         Log::info(print_r($result, true));
+
+         if($err){
             return "error";
+         }else{
+            $publish = $this->publishChanges($sid);
+
+            if($publish == 'success'){
+               return "success";
+            }else{
+               return "error";
+            }
          }
+      }else{
+         Log::info("Retorna error 118");
+         return "error";
       }
    }
 
@@ -440,6 +445,7 @@ class CheckPointFunctionController extends Controller
    }
 
    public function removeRule2($request){
+      Log::info("Llega al remove 118");
  		if(Session::has('sid_session_2'))
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
@@ -473,7 +479,7 @@ class CheckPointFunctionController extends Controller
  				$publish = $this->publishChanges($sid);
 
  				if($publish == "success"){
-					$install = $this->installPolicy();
+					//$install = $this->installPolicy();
 
 					return "success";
  				}else{
@@ -533,6 +539,10 @@ class CheckPointFunctionController extends Controller
             return "error";
          }else{
 
+            $result = json_decode($response, true);
+ 				Log::info("RESULT: 118****");
+ 				Log::info($result);
+
             $publish = $this->publishChanges($sid);
 
  				if($publish == "success"){
@@ -587,7 +597,7 @@ class CheckPointFunctionController extends Controller
 				return "error";
 			}else{
 
- 				$result = json_decode($this->output, true);
+ 				$result = json_decode($response, true);
             Log::info($result);
 
  				if(isset($result['code'])){
@@ -616,25 +626,33 @@ class CheckPointFunctionController extends Controller
 
       if($sid){
 
-         Control::curl("172.16.3.118")
-         ->is("add-tag")
-         ->config([
-            'name' => $tag,
-            'tags' => $tag
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $error;
-            $this->typeResponseCurl = 0;
-         });
+         $curl = curl_init();
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.118/web_api/add-tag",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"Tag Name\",\r\n  \"tags\" : [ \"$tag\"]\r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
 
- 			if(!$this->typeResponseCurl){
- 				#Log::info($err);
- 				return "error";
- 			}else{
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
  				$publish = $this->publishChanges($sid);
  				if($publish == "success"){
  					return "success";
@@ -743,22 +761,24 @@ class CheckPointFunctionController extends Controller
          	CURLOPT_HTTPHEADER => array(
          		"cache-control: no-cache",
          		"content-type: application/json",
-         		"postman-token: cdc83805-2ac2-4f52-cc24-07495596d187",
          		"X-chkp-sid: ".$sid
          	),
          ));
 
          $response = curl_exec($curl);
-         Log::info("RESPUESTA ADD RULES-----------------------------------");
-         //Log::info(print_r($response, true));
-         sleep(3);
+         Log::info("RESPUESTA ADD RULES 118-----------------------------------");
+
          $err = curl_error($curl);
 
          curl_close($curl);
 
          if($err){
+            Log::info($err);
          	return "error";
          }else{
+            $result = json_decode($response, true);
+            Log::info(print_r($result, true));
+
  				$publish2 = $this->publishChanges($sid);
 
  				if($publish2 == 'success'){
@@ -825,6 +845,7 @@ class CheckPointFunctionController extends Controller
          	]);
          }else{
   				$result = json_decode($response, true);
+            Log::info("Resutlado obj 118");
   				Log::info($result);
 
   				if(isset($result['code'])){
@@ -836,6 +857,99 @@ class CheckPointFunctionController extends Controller
       }else{
          return "error";
       }
+   }
+
+   public function addNewRule2($request){
+      Log::info("Llega al addNewRule2");
+      if(Session::has('sid_session_2'))
+         $sid = Session::get('sid_session_2');
+ 		else
+         $sid = $this->getLastSession();
+
+ 		if($sid){
+         Log::info("existe sid addNewRule2");
+ 			$rule_name = $request['name'];
+ 			$src = $request['source'];
+ 			$dst = $request['destination'];
+ 			$vpn = $request['vpn'];
+ 			$action = $request['action'];
+ 			$company_id = $request['company_id'];
+
+ 			$section_company = FwSectionAccess::where('company_id', $company_id)->get();
+
+ 			//CREAR UNA NUEVA SECCIÓN CON EL TAG ELEGIDO SI NO EXISTE
+ 			/*if(count($section_company) == 0){
+ 			}else{
+ 			}*/
+
+ 			Log::info($section_company);
+ 			$name_section = $section_company[0]['name'];
+ 			$tag = $section_company[0]['tag'];
+ 			$section_id = $section_company[0]['id'];
+
+ 			$rule_name = "CUST-".$tag."-$rule_name";
+
+         Control::curl("172.16.3.118")
+         ->is("add-access-rule")
+         ->config([
+            'layer' => "Network",
+            'ignore-warnings' => true,
+            'position' => [
+               'bottom' => $name_section
+            ],
+            'name' => $rule_name,
+            'source' => $src,
+            'destination' => $dst,
+            'action' => $action,
+            'vpn' => 'Any',
+            'comments' => 'editable'
+         ])
+         ->sid($sid)
+         ->eCurl(function($response){
+            $this->output = $response;
+            $this->typeResponseCurl = 1;
+         }, function($error){
+            $this->output = $error;
+            $this->typeResponseCurl = 0;
+         });
+
+ 			if(!$this->typeResponseCurl){
+ 				return "error";
+ 			}else{
+            $rsp = $this->output;
+ 				$publish2 = $this->publishChanges($sid);
+
+ 				if($publish2 == 'success'){
+
+ 					$result = json_decode($rsp, true);
+ 					Log::info($result);
+
+ 					if(isset($result['code'])){
+ 						Log::info($result['code']);
+                  Log::info("Existe error en checkpoint");
+ 						return "error";
+ 					}else{
+                  Log::info("SUCCESS RULEEE");
+                  return "success";
+ 						/*$install = $this->installPolicy();
+                  Log::info($install);
+
+ 						if($rule->id && $install == "success"){
+                     Log::info("regla creada");
+
+ 							return "success";
+ 						}else{
+ 							return "error";
+ 						}*/
+ 					}
+ 				}else{
+ 					return "error";
+ 				}
+ 			}
+ 		}else{
+         Log::info("no existe sid addNewRule2");
+ 			return "error";
+ 		}
    }
 
 }
