@@ -480,7 +480,6 @@ class CheckPointFunctionController extends Controller
 
  				if($publish == "success"){
 					//$install = $this->installPolicy();
-
 					return "success";
  				}else{
                return "error";
