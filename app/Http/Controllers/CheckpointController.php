@@ -1092,7 +1092,12 @@ class CheckpointController extends Controller
 
                   curl_close($curl);
 
+                  $result = json_decode($response, true);
+                  Log::info("RESPUESTA 3500 1");
+                  Log::info($result);
+
                   if($err){
+                     Log::info($err);
                      return response()->json([
                         'error' => [
                            'message' => "El objeto no pudo ser creado",
@@ -1101,7 +1106,7 @@ class CheckpointController extends Controller
                      ]);
 
                	}else{
-
+                     Log::info("entra al else de node3500");
                      $publish = $this->publishChanges($sid);
 
    						if($publish == 'success'){
@@ -1136,7 +1141,12 @@ class CheckpointController extends Controller
 
                         curl_close($curl);
 
+                        $result = json_decode($response, true);
+                        Log::info("RESPUESTA 3500 2");
+                        Log::info($result);
+
                         if($err){
+                           Log::info($err);
                            return response()->json([
       								'error' => [
       									'message' => "El objeto se creó pero no las Ips",
@@ -1181,6 +1191,7 @@ class CheckpointController extends Controller
       							}
                         }
    						}else{
+                        Log::info("Error al publicar!!");
    							return response()->json([
    								'error' => [
    									'message' => "El objeto no pudo ser creado",
@@ -1190,6 +1201,7 @@ class CheckpointController extends Controller
    						}
                   }
 					}else{
+                  Log::info("Error al guardar obj en la bdd!!");
 						return response()->json([
 							'error' => [
 								'message' => "El objeto no pudo ser creado",

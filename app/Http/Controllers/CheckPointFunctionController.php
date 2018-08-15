@@ -497,7 +497,7 @@ class CheckPointFunctionController extends Controller
       else $sid = $this->getLastSession();
 
       if($sid){
-
+         Log::info("Existe sid en obj 118");
          $evaluate;
          $server_ch = 1; //Es el id del checkpoint
          $new_object_name = $request['object_name'];
