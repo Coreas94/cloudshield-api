@@ -362,31 +362,42 @@ class CheckPointFunctionController extends Controller
 				$data_field2 = "[".$data_field2."]";
 			}
 
-         Control::curl("172.16.3.118")
-         ->config([
-            'uid' => $uid_rule,
-            'layer' => 'Network',
-            $field_change => $data_field2
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $response;
-            $this->typeResponseCurl = 0;
-         });
+         $curl = curl_init();
 
-			if (!$this->typeResponseCurl){
-  				return response()->json([
- 					'error' => [
-						'message' => $this->output,
+			curl_setopt_array($curl, array(
+			  	CURLOPT_URL => "https://172.16.3.118/web_api/set-access-rule",
+			  	CURLOPT_RETURNTRANSFER => true,
+			  	CURLOPT_ENCODING => "",
+			  	CURLOPT_MAXREDIRS => 10,
+			  	CURLOPT_TIMEOUT => 30,
+			  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			  	CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_POSTFIELDS => "{\r\n \"uid\" : \"$uid_rule\",\r\n \"layer\" : \"Network\",\r\n  \"$field_change\" : $data_field2 \r\n}",
+			  	CURLOPT_HTTPHEADER => array(
+			    	"cache-control: no-cache",
+			    	"content-type: application/json",
+			    	"postman-token: 67baa239-ddc9-c7a4-fece-5a05f2396e38",
+			    	"x-chkp-sid: ".$sid
+			  	),
+			));
+
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if ($err) {
+				return response()->json([
+					'error' => [
+						'message' => $err,
 						'status_code' => 20
-  					]
-  				]);
+					]
+				]);
 			}else{
-  				$result = json_decode($this->output, true);
-  				//Log::info(print_r($result, true));
+  				$result = json_decode($response, true);
+  				Log::info(print_r($result, true));
   				$publish = $this->publishChanges($sid);
   				if($publish == "success"){
                return "success";
