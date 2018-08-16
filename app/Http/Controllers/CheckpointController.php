@@ -309,7 +309,7 @@ class CheckpointController extends Controller
       $curl = curl_init();
 
       curl_setopt_array($curl, array(
-      CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+      CURLOPT_URL => "http://localhost:3500/new_object_ips",
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
       CURLOPT_MAXREDIRS => 10,
@@ -1078,7 +1078,7 @@ class CheckpointController extends Controller
                   $curl = curl_init();
 
                   curl_setopt_array($curl, array(
-                  	CURLOPT_URL => "http://172.16.20.85:3500/new_object",
+                  	CURLOPT_URL => "http://localhost:3500/new_object",
                   	CURLOPT_RETURNTRANSFER => true,
                   	CURLOPT_ENCODING => "",
                   	CURLOPT_MAXREDIRS => 10,
@@ -1127,7 +1127,7 @@ class CheckpointController extends Controller
                         $curl = curl_init();
 
                         curl_setopt_array($curl, array(
-                        	CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                        	CURLOPT_URL => "http://localhost:3500/new_object_ips",
                         	CURLOPT_RETURNTRANSFER => true,
                         	CURLOPT_ENCODING => "",
                         	CURLOPT_MAXREDIRS => 10,
@@ -1374,7 +1374,7 @@ class CheckpointController extends Controller
                   $curl = curl_init();
 
                   curl_setopt_array($curl, array(
-                     CURLOPT_URL => "http://172.16.20.85:3500/new_object",
+                     CURLOPT_URL => "http://localhost:3500/new_object",
                      CURLOPT_RETURNTRANSFER => true,
                      CURLOPT_ENCODING => "",
                      CURLOPT_MAXREDIRS => 10,
@@ -1414,7 +1414,7 @@ class CheckpointController extends Controller
                         $curl = curl_init();
 
                         curl_setopt_array($curl, array(
-                        	CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                        	CURLOPT_URL => "http://localhost:3500/new_object_ips",
                         	CURLOPT_RETURNTRANSFER => true,
                         	CURLOPT_ENCODING => "",
                         	CURLOPT_MAXREDIRS => 10,
@@ -1535,7 +1535,7 @@ class CheckpointController extends Controller
                   $curl = curl_init();
 
          			curl_setopt_array($curl, array(
-         			  	CURLOPT_URL => "http://172.16.20.85:3500/del_object",
+         			  	CURLOPT_URL => "http://localhost:3500/del_object",
          			  	CURLOPT_RETURNTRANSFER => true,
          			  	CURLOPT_ENCODING => "",
          			  	CURLOPT_MAXREDIRS => 10,
@@ -1658,7 +1658,7 @@ class CheckpointController extends Controller
                $curl = curl_init();
 
                curl_setopt_array($curl, array(
-                  CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                  CURLOPT_URL => "http://localhost:3500/del_object_ips",
                   CURLOPT_RETURNTRANSFER => true,
                   CURLOPT_ENCODING => "",
                   CURLOPT_MAXREDIRS => 10,
@@ -1739,7 +1739,7 @@ class CheckpointController extends Controller
                $curl = curl_init();
 
                curl_setopt_array($curl, array(
-                  CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                  CURLOPT_URL => "http://localhost:3500/del_object_ips",
                   CURLOPT_RETURNTRANSFER => true,
                   CURLOPT_ENCODING => "",
                   CURLOPT_MAXREDIRS => 10,
@@ -1778,7 +1778,7 @@ class CheckpointController extends Controller
                            $curl = curl_init();
 
                            curl_setopt_array($curl, array(
-                              CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                              CURLOPT_URL => "http://localhost:3500/new_object_ips",
                               CURLOPT_RETURNTRANSFER => true,
                               CURLOPT_ENCODING => "",
                               CURLOPT_MAXREDIRS => 10,
@@ -1805,7 +1805,7 @@ class CheckpointController extends Controller
                               $curl = curl_init();
 
                               curl_setopt_array($curl, array(
-                                 CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                                 CURLOPT_URL => "http://localhost:3500/new_object_ips",
                                  CURLOPT_RETURNTRANSFER => true,
                                  CURLOPT_ENCODING => "",
                                  CURLOPT_MAXREDIRS => 10,
@@ -1946,7 +1946,7 @@ class CheckpointController extends Controller
                $curl = curl_init();
 
                curl_setopt_array($curl, array(
-                  CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                  CURLOPT_URL => "http://localhost:3500/del_object_ips",
                   CURLOPT_RETURNTRANSFER => true,
                   CURLOPT_ENCODING => "",
                   CURLOPT_MAXREDIRS => 10,
@@ -2020,7 +2020,7 @@ class CheckpointController extends Controller
                   $curl = curl_init();
 
                   curl_setopt_array($curl, array(
-                     CURLOPT_URL => "http://172.16.20.85:3500/del_object_ips",
+                     CURLOPT_URL => "http://localhost:3500/del_object_ips",
                      CURLOPT_RETURNTRANSFER => true,
                      CURLOPT_ENCODING => "",
                      CURLOPT_MAXREDIRS => 10,
@@ -2056,7 +2056,7 @@ class CheckpointController extends Controller
                            $curl = curl_init();
 
                            curl_setopt_array($curl, array(
-                              CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                              CURLOPT_URL => "http://localhost:3500/new_object_ips",
                               CURLOPT_RETURNTRANSFER => true,
                               CURLOPT_ENCODING => "",
                               CURLOPT_MAXREDIRS => 10,
@@ -2083,7 +2083,7 @@ class CheckpointController extends Controller
                               $curl = curl_init();
 
                               curl_setopt_array($curl, array(
-                                 CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                                 CURLOPT_URL => "http://localhost:3500/new_object_ips",
                                  CURLOPT_RETURNTRANSFER => true,
                                  CURLOPT_ENCODING => "",
                                  CURLOPT_MAXREDIRS => 10,
@@ -2441,7 +2441,7 @@ class CheckpointController extends Controller
          $curl = curl_init();
 
          curl_setopt_array($curl, array(
-            CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+            CURLOPT_URL => "http://localhost:3500/new_object_ips",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -2515,7 +2515,7 @@ class CheckpointController extends Controller
                   $curl = curl_init();
 
                   curl_setopt_array($curl, array(
-                    	CURLOPT_URL => "http://172.16.20.85:3500/del_object",
+                    	CURLOPT_URL => "http://localhost:3500/del_object",
                     	CURLOPT_RETURNTRANSFER => true,
                     	CURLOPT_ENCODING => "",
                     	CURLOPT_MAXREDIRS => 10,
@@ -2963,7 +2963,7 @@ class CheckpointController extends Controller
                               $curl = curl_init();
 
                               curl_setopt_array($curl, array(
-                                 CURLOPT_URL => "http://172.16.20.85:3500/new_object",
+                                 CURLOPT_URL => "http://localhost:3500/new_object",
                                  CURLOPT_RETURNTRANSFER => true,
                                  CURLOPT_ENCODING => "",
                                  CURLOPT_MAXREDIRS => 10,
@@ -3007,7 +3007,7 @@ class CheckpointController extends Controller
                                     $curl = curl_init();
 
                                     curl_setopt_array($curl, array(
-                                    	CURLOPT_URL => "http://172.16.20.85:3500/new_object_ips",
+                                    	CURLOPT_URL => "http://localhost:3500/new_object_ips",
                                     	CURLOPT_RETURNTRANSFER => true,
                                     	CURLOPT_ENCODING => "",
                                     	CURLOPT_MAXREDIRS => 10,
@@ -3203,7 +3203,7 @@ class CheckpointController extends Controller
  									$curl = curl_init();
 
                            curl_setopt_array($curl, array(
-                             	CURLOPT_URL => "http://172.16.20.85:3500/del_object",
+                             	CURLOPT_URL => "http://localhost:3500/del_object",
                              	CURLOPT_RETURNTRANSFER => true,
                              	CURLOPT_ENCODING => "",
                              	CURLOPT_MAXREDIRS => 10,
