@@ -571,20 +571,15 @@ class CheckpointController extends Controller
 			}else{
   				$result = json_decode($response, true);
   				Log::info(print_r($result, true));
+
+            $resp_obj = $checkpoint2->addObjectsToRule2($request);
+            sleep(2);
+
   				$publish = $this->publishChanges($sid);
   				if($publish == "success"){
-
-               $resp_obj = $checkpoint2->addObjectsToRule2($request);
-
-               if($resp_obj == "success"){
-                  return response()->json([
-      					'message' => "success",
-      				]);
-               }else{
-                  return response()->json([
-      					'message' => "success",
-      				]);
-               }
+               return response()->json([
+                  'message' => "success",
+               ]);
             }
   				else{
                return response()->json([
