@@ -36,8 +36,8 @@ class CheckPointFunctionController extends Controller
 {
 
    public function __construct(){
-      Log::info(Session::get('sid_session_2'));
- 		//Session::forget('sid_session_2');
+      //Log::info(Session::get('sid_session_2'));
+ 		Session::forget('sid_session_2');
  		$evaluate = "";
   	}
 
@@ -339,6 +339,8 @@ class CheckPointFunctionController extends Controller
    }
 
    public function addObjectsToRule2($request){
+      Log::info("Llega al addObjectsToRule2");
+      Log::info($request);
  		if(Session::has('sid_session_2'))
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
@@ -378,7 +380,6 @@ class CheckPointFunctionController extends Controller
 			  	CURLOPT_HTTPHEADER => array(
 			    	"cache-control: no-cache",
 			    	"content-type: application/json",
-			    	"postman-token: 67baa239-ddc9-c7a4-fece-5a05f2396e38",
 			    	"x-chkp-sid: ".$sid
 			  	),
 			));
@@ -397,6 +398,7 @@ class CheckPointFunctionController extends Controller
 				]);
 			}else{
   				$result = json_decode($response, true);
+            Log::info("RESULT addObjectsToRule2 118");
   				Log::info(print_r($result, true));
   				$publish = $this->publishChanges($sid);
   				if($publish == "success"){
