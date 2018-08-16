@@ -84,4 +84,6 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
    });
 
    Route::post('auth/api_login', 'Auth\AuthController@api_login');
+
+   Route::post('auth/signup', ['as' =>'auth/signup', 'uses' => 'Auth\AuthController@api_signup']);
 });

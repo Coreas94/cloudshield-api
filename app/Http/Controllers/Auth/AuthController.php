@@ -106,4 +106,69 @@ class AuthController extends Controller
   			]
   		]);
 	}
+
+   public function api_signup(Request $request){
+
+		Log::info("llega al controller");
+      Log::info($request);
+
+		$v = Validator::make($request->all(), [
+			'name_new_user' => 'required',
+			"username_new_user" => "required",
+			"email_new_user" => "required|email",
+			"phone_new_user" => "required|numeric",
+			"password_new_user" => "required|min:4",
+		]);
+
+		if($v->fails()){
+			return $v->errors();
+		}else{
+
+			try{
+
+				$name_sep = explode(' ', $request['name_new_user']);
+
+				$user = new User;
+				$user->name = $name_sep[0];
+            $user->lastname = $name_sep[1];
+				$user->username = $request['username_new_user'];
+				$user->email = $request['email_new_user'];
+				$user->password = Hash::make($request['password_new_user']);
+				$user->phone = $request['phone_new_user'];
+				$user->company_id = $request['user_company_id'];
+				$user->active = 1;
+				$user->api_token = str_random(40); //our api token
+				$user->save();
+
+				if($user->api_token){
+
+					if($user->id){
+	               $id = DB::table('role_user')->insertGetId(
+	                  ['user_id' => $user->id, 'role_id' => $request['role_new_user']]
+	               );
+	            }
+
+					return response()->json([
+						'success' => [
+							'api_token' => $user->api_token,
+							'message' => 'User created successful',
+							'status_code' => 200
+						]
+					]);
+				}
+				//Session::flash("user_success", "¡User created successfully!");
+			}catch(Exception $e){
+				// do task when error
+				Log::info($e->getMessage());
+				Session::flash("errorUser", "¡Error, User not created!");
+				return response()->json([
+					'error' => [
+						'message' => 'User not created',
+						'status_code' => 20
+					]
+				]);
+			}
+			//return redirect("user/user_index");
+		}
+	}
 }

@@ -104,6 +104,8 @@ class UserController extends Controller
 		$userLog = JWTAuth::toUser($request['token']);
 		$role_user = $userLog->roles->first()->name;
 
+		Log::info($role_user);
+
 		if($role_user == "superadmin"){
 			$users = DB::table('users')
 			->join('fw_companies', 'users.company_id', '=', 'fw_companies.id')
