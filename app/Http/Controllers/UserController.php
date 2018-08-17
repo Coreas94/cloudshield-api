@@ -104,8 +104,6 @@ class UserController extends Controller
 		$userLog = JWTAuth::toUser($request['token']);
 		$role_user = $userLog->roles->first()->name;
 
-		Log::info($role_user);
-
 		if($role_user == "superadmin"){
 			$users = DB::table('users')
 			->join('fw_companies', 'users.company_id', '=', 'fw_companies.id')
@@ -114,6 +112,7 @@ class UserController extends Controller
 			->select('users.id AS id', 'users.name AS uname', 'users.lastname AS ulastname', 'users.username', 'users.email', 'users.phone', 'fw_companies.name AS company', 'roles.display_name AS role')
 			->where('users.deleted_at', NULL)
 			->get();
+
 		}else{
 			$users = DB::table('users')
 			->join('fw_companies', 'users.company_id', '=', 'fw_companies.id')
@@ -143,8 +142,7 @@ class UserController extends Controller
 		 	$i++;
 		}
 
-  		$arreglo = new Collection($array_user);
-  		return response()->json($arreglo);
+  		return response()->json($array_user);
 	}
 
 	public function addUser(Request $request){
