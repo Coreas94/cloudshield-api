@@ -3401,8 +3401,7 @@ class CheckpointController extends Controller
 
    /*********AQUI HAY QUE SEGUIR*********/
    public function addNewRule(Request $request){
-      Log::info($request);
-      die();
+
       $checkpoint2 = new CheckPointFunctionController;
 
  		if(Session::has('sid_session')) $sid = Session::get('sid_session');
@@ -3418,11 +3417,6 @@ class CheckpointController extends Controller
  			$company_id = $request['company_id'];
 
  			$section_company = FwSectionAccess::where('company_id', $company_id)->get();
-
- 			//CREAR UNA NUEVA SECCIÓN CON EL TAG ELEGIDO SI NO EXISTE
- 			/*if(count($section_company) == 0){
- 			}else{
- 			}*/
 
  			Log::info($section_company);
  			$name_section = $section_company[0]['name'];
