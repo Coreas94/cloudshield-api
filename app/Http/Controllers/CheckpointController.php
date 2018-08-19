@@ -510,6 +510,8 @@ class CheckpointController extends Controller
   	}
 
    public function addObjectsToRule(Request $request){
+
+      Log::info($request);
       $checkpoint2 = new CheckPointFunctionController;
 
  		if(Session::has('sid_session'))
@@ -672,6 +674,7 @@ class CheckpointController extends Controller
   	}
 
    public function disableRule(Request $request){
+
       $checkpoint2 = new CheckPointFunctionController;
 
  		if(Session::has('sid_session'))
@@ -741,6 +744,7 @@ class CheckpointController extends Controller
    }
 
    public function removeRule(Request $request){
+
       $checkpoint2 = new CheckPointFunctionController;
 
  		if(Session::has('sid_session'))
@@ -774,6 +778,7 @@ class CheckpointController extends Controller
             ]);
          }else{
             $remove2 = $checkpoint2->removeRule2($request);
+            sleep(2);
 
  				$publish = $this->publishChanges($sid);
  				if($publish == "success"){

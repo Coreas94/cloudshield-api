@@ -347,6 +347,7 @@ class CheckPointFunctionController extends Controller
 
  		if($sid){
 			$uid_rule = $request['uid_rule'];
+         $name_rule = $request['name_rule'];
 			$field_change = $request['field_change'];
 			$new_changes = $request['field_change_value'];
 
@@ -376,7 +377,7 @@ class CheckPointFunctionController extends Controller
 			  	CURLOPT_CUSTOMREQUEST => "POST",
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
-				CURLOPT_POSTFIELDS => "{\r\n \"uid\" : \"$uid_rule\",\r\n \"layer\" : \"Network\",\r\n  \"$field_change\" : $data_field2 \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\",\r\n \"layer\" : \"Network\",\r\n  \"$field_change\" : $data_field2 \r\n}",
 			  	CURLOPT_HTTPHEADER => array(
 			    	"cache-control: no-cache",
 			    	"content-type: application/json",
@@ -420,6 +421,7 @@ class CheckPointFunctionController extends Controller
 
  		if($sid){
 			$uid_rule = $request['uid'];
+         $name_rule = $request['name'];
 			$status = $request['enabled'];
 
 			if($status == true) $value_enable = 'false';
@@ -428,7 +430,7 @@ class CheckPointFunctionController extends Controller
          Control::curl("172.16.3.118")
          ->is("set-access-rule")
          ->config([
-            'uid' => $uid_rule,
+            'name' => $name_rule,
             'layer' => 'Network',
             'enabled' => $value_enable
          ])
@@ -466,10 +468,11 @@ class CheckPointFunctionController extends Controller
  		if($sid){
 
          $uid_rule = $request['uid'];
+         $name_rule = $request['name'];
          Control::curl("172.16.3.118")
          ->is("delete-access-rule")
          ->config([
-            'uid' => $uid_rule,
+            'name' => $name_rule,
             'layer' => 'Network'
          ])
          ->sid($sid)
@@ -480,7 +483,7 @@ class CheckPointFunctionController extends Controller
             $this->typeResponseCurl = 0;
             $this->output = $error;
          });
-
+         Log::info($this->output);
  			if(!$this->typeResponseCurl){
             return response()->json([
    				'error' => [
