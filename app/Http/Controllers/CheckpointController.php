@@ -2350,7 +2350,8 @@ class CheckpointController extends Controller
             $this->output = $error;
             $this->typeResponseCurl = 0;
          });
-
+         Log::info("INFO move RUle 114");
+         Log::info($this->output);
   			if(!$this->typeResponseCurl){
   				return response()->json([
   					'error' => [
@@ -3400,6 +3401,8 @@ class CheckpointController extends Controller
 
    /*********AQUI HAY QUE SEGUIR*********/
    public function addNewRule(Request $request){
+      Log::info($request);
+      die();
       $checkpoint2 = new CheckPointFunctionController;
 
  		if(Session::has('sid_session')) $sid = Session::get('sid_session');

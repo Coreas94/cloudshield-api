@@ -709,7 +709,8 @@ class CheckPointFunctionController extends Controller
             $this->output = $error;
             $this->typeResponseCurl = 0;
          });
-
+         Log::info("INFO move RUle 118");
+         Log::info($this->output);
   			if(!$this->typeResponseCurl){
   				return response()->json([
   					'error' => [
