@@ -55,6 +55,12 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
      		Route::get('/get_changes', 'CheckpointController@getChanges');
       });
 
+      Route::group(['prefix' => 'fortisiem'], function(){
+
+         Route::get('/organizations', 'FortisiemController@getOrganizations');
+         Route::get('/incidents', 'FortisiemController@getIncidentsByOrg');
+      });
+
       Route::group(['prefix' => 'access_control'], function(){
          Route::get('/companies_data', 'AccessController@getDataCompanies'); //GET DATA COMPANIES
          Route::post('/newCompany', 'AccessController@addCompany'); //ADD NEW COMPANY
