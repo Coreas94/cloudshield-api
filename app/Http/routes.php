@@ -15,7 +15,7 @@ Route::get('/', function () {
    return view('welcome');
 });
 
-Route::get('prueba', 'Controller@prueba2');
+Route::get('prueba', 'Controller@test');
 
 Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 
@@ -56,9 +56,10 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){
-
          Route::get('/organizations', 'FortisiemController@getOrganizations');
-         Route::get('/incidents', 'FortisiemController@getIncidentsByOrg');
+         Route::get('/incidents', 'FortisiemController@getIncidents');
+         Route::post('/new_organization', 'FortisiemController@saveNewOrganization');
+         Route::get('/run_report', 'FortisiemController@runReport');
       });
 
       Route::group(['prefix' => 'access_control'], function(){

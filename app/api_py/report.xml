@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<Reports>
+   <Report id="2361801" group="">
+      <Name>Detailed Failed Login At Any Device </Name>
+      <CustomerScope groupByEachCustomer="true"> <Include all="true"/> <Exclude/> </CustomerScope>
+      <Description>Captures detailed failed logins at any device or application - servers, network devices,
+      domain controllers, VPN gateways, WLAN controllers and applications </Description>
+      <SelectClause numEntries="All">
+         <AttrList>phRecvTime,reptDevIpAddr,eventType,srcIpAddr,srcMACAddr,user,domain,rawEventMsg </AttrList>
+      </SelectClause>
+      <ReportInterval><Window unit="Hourly" val="1"/></ReportInterval>
+      <PatternClause window="3600">
+         <SubPattern displayName="Filter_Auth_1" name="Filter_Auth_1">
+         <SingleEvtConstr> eventType IN (Group@PH_SYS_EVENT_DomainLogonFailure, Group@PH_SYS_EVENT_HostLogonFailure,
+         Group@PH_SYS_EVENT_HostPrivLogonFailure,Group@PH_SYS_EVENT_DomainLogonFailure,Group@PH_SYS_EVENT_
+         VPNLogonFailure, Group@PH_SYS_EVENT_WirelessLogonFailure,Group@PH_SYS_EVENT_AppLogonFailure)</SingleEvtConstr>
+         </SubPattern>
+      </PatternClause>
+   </Report>
+</Reports>

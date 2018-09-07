@@ -120,6 +120,15 @@ return [
          ]
       ],
 
+      'elastic' => [
+         //'driver'   => 'mongodb',
+         'host'     => env('ELASTICSEARCH_HOST', 'localhost'),
+         'port'     => env('ELASTICSEARCH_PORT', 27017),
+         //'database' => env('DB_MONGO_DATABASE'),
+         'username' => env('ELASTICSEARCH_USER'),
+         'password' => env('ELASTICSEARCH_PASS'),
+      ],
+
       'c4_sql' => [
          'driver' => 'sqlsrv',
          'host' => env('DB_SQL_HOST', 'localhost'),

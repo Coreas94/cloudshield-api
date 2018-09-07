@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Elasticsearch\ClientBuilder;
+require 'vendor/autoload.php';
+
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -36,5 +39,33 @@ class Controller extends BaseController
       Log::info($result);
       print($result);
       // die();
+   }
+
+   public function test(){
+
+      $hosts = [
+         'host' => '172.16.3.151',
+         'port' => '9200',
+         'scheme' => 'http',
+         'user' => '',
+         'pass' => ''
+      ];
+
+      $client_config = [
+         'hosts' => [
+            'https://172.16.3.151:9200'
+         ],
+         'retries' => 0
+      ];
+
+      $client = ClientBuilder::fromConfig($client_config);
+      //$result = json_decode($client, true);
+      // $client = ClientBuilder::create() //Instantiate a new ClientBuilder
+      //    ->setHosts($hosts) //Set the hosts
+      //    ->build(); //Build the client object
+
+      //$return = \Elasticsearch::connection('elastic')->index($data);
+      Log::info(print_r($client, true));
+      print_r($client, true);
    }
 }

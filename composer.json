@@ -14,7 +14,8 @@
         "laravelcollective/remote": "^5.2.0",
         "jenssegers/mongodb": "v3.0.0",
         "zizaco/entrust": "5.2.x-dev",
-        "symfony/process": "^2.8.44"
+        "symfony/process": "^2.8.44",
+        "cviebrock/laravel-elasticsearch": "^2.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

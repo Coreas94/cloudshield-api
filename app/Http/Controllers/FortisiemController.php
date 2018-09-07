@@ -43,9 +43,9 @@ class FortisiemController extends Controller
       return $result;
    }
 
-   public function getIncidentsByOrg(Request $request){
+   public function getIncidents(Request $request){
 
-      $process = new Process("python ".app_path()."/api_py/GetIncidentsByOrg.py");
+      $process = new Process("python ".app_path()."/api_py/GetIncidentsByOrg.py Super");
       $process->run();
 
       // executes after the command finishes
@@ -58,4 +58,36 @@ class FortisiemController extends Controller
       return $result;
    }
 
+   public function saveNewOrganization(Request $request){
+
+      $process = new Process("python ".app_path()."/api_py/AddOrg.py ejemplo.xml");
+      $process->run();
+
+      if(!$process->isSuccessful()){
+         Log::info("is error");
+         throw new ProcessFailedException($process);
+      }
+
+      $result = json_decode($process->getOutput(), true);
+      Log::info($result);
+      return $result;
+   }
+
+   public function runReport(){
+
+      $process = new Process("python ".app_path()."/api_py/reports.py report.xml");
+      $process->run();
+
+      if(!$process->isSuccessful()){
+         Log::info("is error");
+         throw new ProcessFailedException($process);
+      }
+
+      Log::info(print_r($process, true));
+
+      $result = json_decode($process->getOutput(), true);
+      Log::info($result);
+      //return $result;
+
+   }
 }
