@@ -138,6 +138,8 @@ def FlaskServer(org):
 	param=GetQueryResultByOrg(appServer, user, password, name, inXml)
 	return generateResult(param)
 
+    appServer
+
 if __name__=='__main__':
     import sys
     if len(sys.argv)!=6:
@@ -145,5 +147,5 @@ if __name__=='__main__':
         exit()
     data=GetQueryResultByOrg(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
     generateResult(data)
-    print FlaskServer()
+    #print FlaskServer()
     #print FlaskServer(sys.argv[1])

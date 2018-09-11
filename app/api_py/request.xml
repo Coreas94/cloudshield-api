@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<DataRequest custId="0" dbId="" end="0" entityVersion="21" id="" issueCustId="3" type="Query">
+   <Name>CUST-R5002_2</Name>
+   <Description>Report test</Description>
+   <CustomerScope groupByEachCustomer="false">
+       <Include all="true">2017,1,2002</Include>
+       <Exclude/>
+   </CustomerScope>
+   <SelectClause>
+       <AttrList>phRecvTime,eventType,eventName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,ruleName,rawEventMsg,attackName,attackInfo,count</AttrList>
+   </SelectClause>
+   <PatternClause window="0">
+       <SubPattern id="" name="">
+            <SingleEvtConstr>phRecvTime BETWEEN (::starttime,::endtime) AND relayDevIpAddr = 172.16.3.114</SingleEvtConstr>
+       </SubPattern>
+   </PatternClause>
+   <userRoles>
+       <roles custId="0">1686450</roles>
+   </userRoles>
+   <SyncOrgs/>
+   <ReportInterval>
+       <Low>1536689720</Low>
+       <High>1536693319</High>
+   </ReportInterval>
+</DataRequest>

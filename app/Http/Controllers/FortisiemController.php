@@ -74,8 +74,12 @@ class FortisiemController extends Controller
    }
 
    public function runReport(){
+      $dt = \Carbon\Carbon::now();
+      $fecha_fin = $dt->timestamp;
+      $fecha_inicio = $dt->subHour(3);
+      $fecha_inicio = $fecha_inicio->timestamp;
 
-      $process = new Process("python ".app_path()."/api_py/reports.py report.xml");
+      $process = new Process("python ".app_path()."/api_py/GetQueryResultsByOrg.py ".app_path()."/api_py/request.xml ".$fecha_inicio.' '. $fecha_fin);
       $process->run();
 
       if(!$process->isSuccessful()){
@@ -83,11 +87,8 @@ class FortisiemController extends Controller
          throw new ProcessFailedException($process);
       }
 
-      Log::info(print_r($process, true));
-
       $result = json_decode($process->getOutput(), true);
-      Log::info($result);
-      //return $result;
-
+      Log::info(count($result));
+      return $result;
    }
 }
