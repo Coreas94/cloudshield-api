@@ -59,7 +59,9 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
          Route::get('/organizations', 'FortisiemController@getOrganizations');
          Route::get('/incidents', 'FortisiemController@getIncidents');
          Route::post('/new_organization', 'FortisiemController@saveNewOrganization');
-         Route::get('/run_report', 'FortisiemController@runReport');
+         Route::get('/run_script_logs', 'FortisiemController@runScriptLogs');
+
+         Route::get('/get_logs', 'FortisiemController@getDataLogs');
       });
 
       Route::group(['prefix' => 'access_control'], function(){
