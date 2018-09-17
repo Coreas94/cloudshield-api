@@ -62,6 +62,7 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
          Route::get('/run_script_logs', 'FortisiemController@runScriptLogs');
 
          Route::get('/get_logs', 'FortisiemController@getDataLogs');
+         Route::get('/read_file', 'FortisiemController@readJsonFile');
       });
 
       Route::group(['prefix' => 'access_control'], function(){

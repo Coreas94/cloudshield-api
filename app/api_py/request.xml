@@ -9,6 +9,7 @@
    <SelectClause>
       <AttrList>phRecvTime,eventType,eventName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,ruleName,rawEventMsg,attackName,attackInfo,relayDevIpAddr</AttrList>
    </SelectClause>
+   <ReportInterval><Window unit="Hourly" val="1"/></ReportInterval>
    <PatternClause window="0">
       <SubPattern id="" name="">
          <SingleEvtConstr>relayDevIpAddr = 172.16.3.114</SingleEvtConstr>

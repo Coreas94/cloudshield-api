@@ -95,11 +95,13 @@ class FortisiemController extends Controller
       foreach ($result as $key => $value) {
          $array = json_decode($value, true);
 
-         /*$formatDate = \Carbon\Carbon::createFromFormat('Y-m-d H', $array['phRecvTime'])->toDateTimeString();
-         Log::info($formatDate);*/
+         $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
+         #$test = explode(",", $array['rawEventMsg']);
+
+         #Log::info($array['rawEventMsg']);
 
          $log = new LogsData;
-         $log->receive_time = $array['phRecvTime'];
+         $log->receive_time = $format_date;
          $log->event_type = $array['eventType'];
          $log->event_name = $array['eventName'];
          $log->src_ip = $array['srcIpAddr'];
@@ -110,10 +112,17 @@ class FortisiemController extends Controller
          $log->dst_country = $array['destGeoCountry'];
          $log->dst_latitude = $array['destGeoLatitude'];
          $log->dst_longitude = $array['destGeoLongitude'];
-         $log->rule_name = isset($array['rule_name']) ? $array['rule_name'] : "no-exist";
+         $log->rule_name = "vacio";
          $log->event_log = $array['rawEventMsg'];
          $log->relaying_ip = $array['relayDevIpAddr'];
+         $log->date_initial = $array['phRecvTime'];
          $log->save();
+
+         $list = ['38.103.38.6', '38.103.38.102', '38.103.38.72'];
+
+         $logs = LogsData::whereIn('dst_ip', $list)->orWhereIn('src_ip', $list)->orderBy('receive_time', 'desc')->take(10000)->get();
+
+         \Storage::put('user_test/file.json', $logs);
 
       }
    }
@@ -123,6 +132,7 @@ class FortisiemController extends Controller
       $list = ['38.103.38.6', '38.103.38.102', '38.103.38.72'];
 
       $logs = LogsData::whereIn('dst_ip', $list)->orWhereIn('src_ip', $list)->get();
+
       Log::info(count($logs));
 
       if(count($logs) > 0){
@@ -140,6 +150,30 @@ class FortisiemController extends Controller
             ]
          ]);
       }
+   }
+
+   public function readJsonFile(Request $request){
+
+      $path = storage_path() . "/app/user_test/file.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+
+      $json = json_decode(file_get_contents($path), true);
+
+      if(count($json) > 0){
+         return response()->json([
+            'success' => [
+              'data' => $json,
+              'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+            'error' => [
+              'message' => "No data",
+              'status_code' => 20
+            ]
+         ]);
+      }
+
    }
 
 }
