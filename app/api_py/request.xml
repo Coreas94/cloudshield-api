@@ -7,7 +7,7 @@
       <Exclude/>
    </CustomerScope>
    <SelectClause>
-      <AttrList>phRecvTime,eventType,eventName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,ruleName,rawEventMsg,attackName,attackInfo,relayDevIpAddr</AttrList>
+      <AttrList>phRecvTime,eventType,eventName,ruleName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,rawEventMsg,attackName,attackInfo,count,relayDevIpAddr</AttrList>
    </SelectClause>
    <ReportInterval><Window unit="Hourly" val="1"/></ReportInterval>
    <PatternClause window="0">

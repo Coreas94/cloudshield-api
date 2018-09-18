@@ -90,15 +90,23 @@ class FortisiemController extends Controller
 
       $result = json_decode($process->getOutput(), true);
       Log::info(count($result));
+
       //$insertData = LogsData::insert($result);
 
       foreach ($result as $key => $value) {
          $array = json_decode($value, true);
 
          $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
-         #$test = explode(",", $array['rawEventMsg']);
-
-         #Log::info($array['rawEventMsg']);
+         $test = explode("[rule_name]=", $array['rawEventMsg']);
+         $rule_name;
+         foreach($test as $k => $v){
+            if($k == 1){
+               $text_msg = explode(",",$v);
+               $rule_name = $text_msg[0];
+            }else{
+               $rule_name = "no-exist";
+            }
+         }
 
          $log = new LogsData;
          $log->receive_time = $format_date;
@@ -112,7 +120,7 @@ class FortisiemController extends Controller
          $log->dst_country = $array['destGeoCountry'];
          $log->dst_latitude = $array['destGeoLatitude'];
          $log->dst_longitude = $array['destGeoLongitude'];
-         $log->rule_name = "vacio";
+         $log->rule_name = $rule_name;
          $log->event_log = $array['rawEventMsg'];
          $log->relaying_ip = $array['relayDevIpAddr'];
          $log->date_initial = $array['phRecvTime'];
@@ -177,3 +185,14 @@ class FortisiemController extends Controller
    }
 
 }
+
+/*
+CADA 15 MIN SE INSERTA A LA BASE LOS LOG
+
+DE ESOS 18K GUARDAR 10K EN UN ARCHIVO JSON POR C/CLIENTE
+
+AL HACER PETICION DESDE LA VISTA PARA TRAER REGISTROS IR A CONSULTAR EL ARCHIVO
+
+CADA ARCHIVO ESTARÁ EN CARPETA CON TAG DE LA EMPRESA
+
+SI NO HAY REGISTROS EN EL ARCHIVO, RETORNAR VACIO
