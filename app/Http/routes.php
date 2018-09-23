@@ -44,7 +44,7 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
          Route::get('/order_objects', 'CheckpointController@orderObjectsBD'); //PEND
          Route::get('/get_objects', 'CheckpointController@getDynamicObjects');
          Route::get('/access_rules', 'CheckpointController@getRules');
-         Route::get('/get_objects', 'CheckpointController@getDynamicObjects');
+         //Route::get('/get_objects', 'CheckpointController@getDynamicObjects');
          Route::get('/get_objects_rules', 'CheckpointController@getObjectsRules');
          Route::get('/install', 'CheckpointController@installPolicy');
          Route::get('/discard', 'CheckpointController@discardChanges');

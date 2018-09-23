@@ -898,7 +898,7 @@ class CheckpointController extends Controller
  				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
  				->where('fw_objects.server_id', 1)
  				->where('fw_objects.type_object_id', 4)
- 				->select('fw_objects.*', 'fw_objects.name AS text', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+ 				->select('fw_objects.*', 'fw_objects.name AS short', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
  				->get();
  		}else{
  			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
@@ -911,8 +911,37 @@ class CheckpointController extends Controller
  				->get();
  		}
 
+      //ESTO HAY QUE REMOVER PARA MOSTRAR TODOS LOS OBJETOS
+ 		//AQUI HAY QUE DESCOMPONER LOS NOMBRES Y AGREGARLES 2 POSICIONES A LOS NUEVOS	|| $value['editable'] == 1
+      $list_obj = [];
+ 		$name2 = [];
+ 		foreach ($obj as  $value) {
+
+         if($role_user == "superadmin"){
+            if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
+               Log::info("existe");
+    				$name = explode('-', $value['name']);
+    				$complement_name = $name[2].' '.$name[3];
+
+    				$value['text'] = $value['name'];
+    				array_push($list_obj, $value);
+
+    			}elseif ($value['editable'] == 1 || strpos($value['name'], 'IP-ADDRESS') !== true) {
+    				$value['text'] = $value['name'];
+    				array_push($list_obj, $value);
+    			}
+         }else{
+            if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
+               Log::info("no agregar object");
+    			}elseif ($value['editable'] == 1 || strpos($value['name'], 'IP-ADDRESS') !== true) {
+    				$value['text'] = $value['name'];
+    				array_push($list_obj, $value);
+    			}
+         }
+ 		}
+
  		return response()->json([
- 			'data' => $obj,
+ 			'data' => $list_obj,
  		]);
   	}
 
@@ -1238,46 +1267,59 @@ class CheckpointController extends Controller
  		$role_user = $user->roles->first()->name;
 
  		if($role_user == "superadmin"){
+         Log::info("super");
  			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
  				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
  				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
  				->where('fw_objects.server_id', 1)
  				->where('fw_objects.type_object_id', 4)
- 				->select('fw_objects.*', 'fw_objects.name AS text', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+ 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
  				->get();
  		}else{
+         Log::info("else");
  			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
  				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
  				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
  				->where('company_id', $company_id)
  				->where('fw_objects.server_id', 1)
  				->where('fw_objects.type_object_id', 4)
- 				->select('fw_objects.*', 'fw_objects.name AS text', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+ 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
  				->get();
  		}
 
  		//ESTO HAY QUE REMOVER PARA MOSTRAR TODOS LOS OBJETOS
  		//AQUI HAY QUE DESCOMPONER LOS NOMBRES Y AGREGARLES 2 POSICIONES A LOS NUEVOS	|| $value['editable'] == 1
- 		$list_obj = [];
+      $list_obj = [];
  		$name2 = [];
  		foreach ($obj as  $value) {
- 			if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
- 				$name = explode('-', $value['name']);
- 				$complement_name = $name[2].' '.$name[3];
 
- 				$value['short_name'] = $complement_name;
- 				array_push($list_obj, $value);
+         if($role_user == "superadmin"){
+            if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
+               Log::info("existe");
+    				$name = explode('-', $value['name']);
+    				$complement_name = $name[2].' '.$name[3];
 
- 			}elseif ($value['editable'] == 1) {
- 				$value['short_name'] = $value['name'];
- 				array_push($list_obj, $value);
- 			}
+    				$value['short_name'] = $complement_name;
+    				array_push($list_obj, $value);
+
+    			}elseif ($value['editable'] == 1 || strpos($value['name'], 'IP-ADDRESS') !== true) {
+    				$value['short_name'] = $value['name'];
+    				array_push($list_obj, $value);
+    			}
+         }else{
+            if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
+               Log::info("no agregar object");
+    			}elseif ($value['editable'] == 1 || strpos($value['name'], 'IP-ADDRESS') !== true) {
+    				$value['short_name'] = $value['name'];
+    				array_push($list_obj, $value);
+    			}
+         }
  		}
 
  		$new_obj = json_decode(json_encode($list_obj), true);
-
+      //Log::info($obj);
  		return response()->json([
- 			'data' => $new_obj
+ 			'data' => $list_obj
  		]);
   	}
 

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
+
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -89,15 +92,14 @@ class FortisiemController extends Controller
       }
 
       $result = json_decode($process->getOutput(), true);
-      Log::info(count($result));
-
-      //$insertData = LogsData::insert($result);
+      Log::info("trae: ". count($result));
 
       foreach ($result as $key => $value) {
          $array = json_decode($value, true);
 
          $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
          $test = explode("[rule_name]=", $array['rawEventMsg']);
+
          $rule_name;
          foreach($test as $k => $v){
             if($k == 1){
@@ -125,23 +127,34 @@ class FortisiemController extends Controller
          $log->relaying_ip = $array['relayDevIpAddr'];
          $log->date_initial = $array['phRecvTime'];
          $log->save();
-
-         $list = ['38.103.38.6', '38.103.38.102', '38.103.38.72'];
-
-         $logs = LogsData::whereIn('dst_ip', $list)->orWhereIn('src_ip', $list)->orderBy('receive_time', 'desc')->take(10000)->get();
-
-         \Storage::put('user_test/file.json', $logs);
-
       }
+
+      /*$logs = LogsData::whereIn('dst_ip', $list)->orWhereIn('src_ip', $list)->orderBy('receive_time', 'desc')->take(10000)->get();
+      \Storage::put('user_test/file.json', $logs);*/
    }
 
    public function getDataLogs(Request $request){
+      Log::info("test");
+      $userLog = JWTAuth::toUser($request['token']);
+      $company_id = $userLog['company_id'];
 
-      $list = ['38.103.38.6', '38.103.38.102', '38.103.38.72'];
+      $ranges_ip = DB::table('fw_address_objects')->join('fw_objects', 'fw_objects.id', '=', 'fw_address_objects.object_id')->where('fw_objects.company_id', '=', $company_id)->get(['ip_initial', 'ip_last']);
+      $ranges_ip = json_decode(json_encode($ranges_ip), true);
 
-      $logs = LogsData::whereIn('dst_ip', $list)->orWhereIn('src_ip', $list)->get();
+      // Log::info($ranges_ip);
+      $new_array_ip = [];
+      foreach($ranges_ip as $val){
+
+         $range = Range::parse($val['ip_initial'].'-'.$val['ip_last']);
+         foreach($range as $ip) {
+         	array_push($new_array_ip, (string)$ip);
+         }
+      }
+
+      $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->orderBy('receive_time', 'desc')->take(5000)->get();
 
       Log::info(count($logs));
+      //die();
 
       if(count($logs) > 0){
          return response()->json([
@@ -162,8 +175,7 @@ class FortisiemController extends Controller
 
    public function readJsonFile(Request $request){
 
-      $path = storage_path() . "/app/user_test/file.json"; // ie: /var/www/laravel/app/storage/json/filename.json
-
+      $path = storage_path() ."/app/user_test/file.json";
       $json = json_decode(file_get_contents($path), true);
 
       if(count($json) > 0){
@@ -174,6 +186,9 @@ class FortisiemController extends Controller
             ]
          ]);
       }else{
+
+         $response = $this->getDataLogs();
+
          return response()->json([
             'error' => [
               'message' => "No data",
@@ -181,9 +196,7 @@ class FortisiemController extends Controller
             ]
          ]);
       }
-
    }
-
 }
 
 /*
