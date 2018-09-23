@@ -41,6 +41,12 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
      		//Ruta para traer los rangos de ip para eliminar una
      		Route::post('/getIpsForDelete', 'CheckpointController@getAllIpsForDelete');
 
+         //Ruta para obtener las ips de un rango
+         Route::post('/list_ips', 'CheckpointController@IpsByRange');
+
+
+
+
          Route::get('/order_objects', 'CheckpointController@orderObjectsBD'); //PEND
          Route::get('/get_objects', 'CheckpointController@getDynamicObjects');
          Route::get('/access_rules', 'CheckpointController@getRules');
@@ -63,6 +69,7 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 
          Route::get('/get_logs', 'FortisiemController@getDataLogs');
          Route::get('/read_file', 'FortisiemController@readJsonFile');
+
       });
 
       Route::group(['prefix' => 'access_control'], function(){

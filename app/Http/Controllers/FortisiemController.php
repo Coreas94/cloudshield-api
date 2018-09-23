@@ -80,7 +80,7 @@ class FortisiemController extends Controller
    public function runScriptLogs(){
       $dt = \Carbon\Carbon::now();
       $fecha_fin = $dt->timestamp;
-      $fecha_inicio = $dt->subHour(3);
+      $fecha_inicio = $dt->subHour(2);
       $fecha_inicio = $fecha_inicio->timestamp;
 
       $process = new Process("python ".app_path()."/api_py/GetQueryResultsByOrg.py ".app_path()."/api_py/request.xml ".$fecha_inicio.' '. $fecha_fin);
@@ -154,7 +154,6 @@ class FortisiemController extends Controller
       $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->orderBy('receive_time', 'desc')->take(5000)->get();
 
       Log::info(count($logs));
-      //die();
 
       if(count($logs) > 0){
          return response()->json([
@@ -197,15 +196,38 @@ class FortisiemController extends Controller
          ]);
       }
    }
+
+   public function getDataFilterd(Request $request){
+
+      $filter_type = "day";
+      $date_value = \Carbon\Carbon::now();
+      $userLog = JWTAuth::toUser($request['token']);
+      $company_id = $userLog['company_id'];
+
+      if($filter_type == "day"){
+         $initial_date = $date_value->subDays(1);
+      }elseif($filter_type == "week"){
+         $initil_date = $date_value->subWeekdays(7);
+      }
+
+      $ranges_ip = DB::table('fw_address_objects')->join('fw_objects', 'fw_objects.id', '=', 'fw_address_objects.object_id')->where('fw_objects.company_id', '=', $company_id)->get(['ip_initial', 'ip_last']);
+      $ranges_ip = json_decode(json_encode($ranges_ip), true);
+
+      $new_array_ip = [];
+      foreach($ranges_ip as $val){
+
+         $range = Range::parse($val['ip_initial'].'-'.$val['ip_last']);
+         foreach($range as $ip) {
+         	array_push($new_array_ip, (string)$ip);
+         }
+      }
+
+      $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->whereBetween('receive_time', array($initial_date, $date_value))->orderBy('receive_time', 'desc')->take(8000)->get();
+
+      Log::info(count($logs));
+
+   }
+
+
+
 }
-
-/*
-CADA 15 MIN SE INSERTA A LA BASE LOS LOG
-
-DE ESOS 18K GUARDAR 10K EN UN ARCHIVO JSON POR C/CLIENTE
-
-AL HACER PETICION DESDE LA VISTA PARA TRAER REGISTROS IR A CONSULTAR EL ARCHIVO
-
-CADA ARCHIVO ESTARÁ EN CARPETA CON TAG DE LA EMPRESA
-
-SI NO HAY REGISTROS EN EL ARCHIVO, RETORNAR VACIO

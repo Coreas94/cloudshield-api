@@ -1294,7 +1294,7 @@ class CheckpointController extends Controller
  		foreach ($obj as  $value) {
 
          if($role_user == "superadmin"){
-            if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
+            /*if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
                Log::info("existe");
     				$name = explode('-', $value['name']);
     				$complement_name = $name[2].' '.$name[3];
@@ -1303,9 +1303,20 @@ class CheckpointController extends Controller
     				array_push($list_obj, $value);
 
     			}elseif ($value['editable'] == 1 || strpos($value['name'], 'IP-ADDRESS') !== true) {
+
     				$value['short_name'] = $value['name'];
     				array_push($list_obj, $value);
-    			}
+    			}*/
+            if($value['editable'] == 1){
+               $value['short_name'] = $value['name'];
+    				array_push($list_obj, $value);
+            }else{
+               $name = explode('-', $value['name']);
+    				$complement_name = $name[2].' '.$name[3];
+
+    				$value['short_name'] = $complement_name;
+    				array_push($list_obj, $value);
+            }
          }else{
             if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
                Log::info("no agregar object");
@@ -1317,7 +1328,7 @@ class CheckpointController extends Controller
  		}
 
  		$new_obj = json_decode(json_encode($list_obj), true);
-      //Log::info($obj);
+
  		return response()->json([
  			'data' => $list_obj
  		]);
@@ -3576,4 +3587,45 @@ class CheckpointController extends Controller
  			]);
  		}
    }
+
+   public function IpsByRange(Request $request){
+
+      $range_id = $request['address_id'];
+
+      $ips = DB::table('fw_address_objects AS addr')
+         ->join('fw_objects AS obj', 'addr.object_id', '=', 'obj.id')
+         ->where('addr.id', '=', $range_id)
+         ->select('addr.id AS address_id', 'addr.ip_initial', 'addr.ip_last', 'obj.name', 'obj.id AS object_id')
+         ->get();
+
+      $ips = json_decode(json_encode($ips), true);
+      $ip_list = [];
+      $ip_array = [];
+
+      foreach ($ips as $key => $value) {
+         if($value['ip_initial'] == '1.1.1.1'){
+            unset($ips[$key]);
+         }else{
+            $networks = Range::parse($value['ip_initial'].'-'.$value['ip_last']);
+            foreach($networks as $network){
+               $ip_array['address'] = (string)$network;
+               $ip_array['address_id'] = $value['address_id'];
+               $ip_array['object_name'] = $value['name'];
+               $ip_array['object_id'] = $value['object_id'];
+               $ip_array['ip_initial'] = $value['ip_initial'];
+               $ip_array['ip_last'] = $value['ip_last'];
+               array_push($ip_list, $ip_array);
+            }
+         }
+      }
+
+      return response()->json([
+         'success' => [
+           'data' => $ip_list,
+           'status_code' => 200
+         ]
+      ]);
+   }
+
+
 }

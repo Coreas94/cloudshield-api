@@ -18,7 +18,7 @@
   </userRoles>
   <SyncOrgs/>
   <ReportInterval>
-     <Low>1537448147</Low>
-     <High>1537484147</High>
+     <Low>::starttime</Low>
+     <High>::endtime</High>
   </ReportInterval>
 </DataRequest>
