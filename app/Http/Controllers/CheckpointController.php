@@ -1320,10 +1320,17 @@ class CheckpointController extends Controller
          }else{
             if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
                Log::info("no agregar object");
-    			}elseif ($value['editable'] == 1 || strpos($value['name'], 'IP-ADDRESS') !== true) {
-    				$value['short_name'] = $value['name'];
+    			}elseif($value['editable'] == 1){
+               $value['short_name'] = $value['name'];
     				array_push($list_obj, $value);
-    			}
+            }else{
+               $name = explode('-', $value['name']);
+    				$complement_name = $name[2].' '.$name[3];
+
+    				$value['short_name'] = $complement_name;
+    				array_push($list_obj, $value);
+            }
+
          }
  		}
 
