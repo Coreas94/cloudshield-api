@@ -28,6 +28,6 @@ class Kernel extends ConsoleKernel
       //$schedule->command('inspire')
       //->hourly();
 
-      $schedule->command('fortisiem:getLogsFortisiem')->cron('*/5 * * * *');
+      //$schedule->command('fortisiem:getLogsFortisiem')->cron('*/5 * * * *');
    }
 }
