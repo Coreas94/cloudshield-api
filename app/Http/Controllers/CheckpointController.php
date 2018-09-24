@@ -288,6 +288,24 @@ class CheckpointController extends Controller
  			->where('object_id', $object_id)
  			->select('fw_address_objects.*', 'fw_objects.name as objeto')
  			->get();
+
+      $ips = json_decode(json_encode($ips), true);
+      Log::info($ips);
+
+      foreach ($ips as $key => $value) {
+         $rango = $value['ip_initial'].'-'.$value['ip_last'];
+
+         $test = Range::parse($rango)->contains(new IP('1.1.1.1'));
+
+         if($test){
+            unset($ips[$key]);
+         }else{
+            "no existe la ip";
+         }
+      }
+
+      Log::info($ips);
+
  		return response()->json([
  			'data' => $ips,
  			'object_id' => $object_id
@@ -1286,6 +1304,8 @@ class CheckpointController extends Controller
  				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
  				->get();
  		}
+
+      Log::info($obj);
 
  		//ESTO HAY QUE REMOVER PARA MOSTRAR TODOS LOS OBJETOS
  		//AQUI HAY QUE DESCOMPONER LOS NOMBRES Y AGREGARLES 2 POSICIONES A LOS NUEVOS	|| $value['editable'] == 1

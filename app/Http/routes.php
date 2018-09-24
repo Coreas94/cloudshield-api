@@ -38,14 +38,12 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
          Route::post('/get_rules_company', 'CheckpointController@getRulesByCompany');
          Route::post('/edit_ips_object', 'CheckpointController@editIpsObject');
          Route::post('/getAllIps', 'CheckpointController@getAllIpsByObject');
+
      		//Ruta para traer los rangos de ip para eliminar una
      		Route::post('/getIpsForDelete', 'CheckpointController@getAllIpsForDelete');
 
          //Ruta para obtener las ips de un rango
          Route::post('/list_ips', 'CheckpointController@IpsByRange');
-
-
-
 
          Route::get('/order_objects', 'CheckpointController@orderObjectsBD'); //PEND
          Route::get('/get_objects', 'CheckpointController@getDynamicObjects');
@@ -70,13 +68,15 @@ Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_logs', 'FortisiemController@getDataLogs');
          Route::get('/read_file', 'FortisiemController@readJsonFile');
 
+         //Ruta para obtener logs mediante filtros
+         Route::post('/filter_logs', 'FortisiemController@getDataFiltered');
       });
 
       Route::group(['prefix' => 'access_control'], function(){
          Route::get('/companies_data', 'AccessController@getDataCompanies'); //GET DATA COMPANIES
          Route::post('/newCompany', 'AccessController@addCompany'); //ADD NEW COMPANY
          Route::post('/update_company', 'AccessController@updateCompany'); //UPDATE COMPANY
-         Route::post('/delete_company', ['as' => 'access_control/delete_company', 'uses' => 'AccessController@destroy']); //DELETE COMPANY
+         Route::post('/delete_company', ['as' => 'access_control/delete _company', 'uses' => 'AccessController@destroy']); //DELETE COMPANY
       });
 
       Route::group(['prefix' => 'user'], function(){

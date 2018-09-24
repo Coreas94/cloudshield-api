@@ -197,7 +197,7 @@ class FortisiemController extends Controller
       }
    }
 
-   public function getDataFilterd(Request $request){
+   public function getDataFiltered(Request $request){
 
       $filter_type = "day";
       $date_value = \Carbon\Carbon::now();
@@ -225,9 +225,6 @@ class FortisiemController extends Controller
       $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->whereBetween('receive_time', array($initial_date, $date_value))->orderBy('receive_time', 'desc')->take(8000)->get();
 
       Log::info(count($logs));
-
    }
-
-
 
 }
