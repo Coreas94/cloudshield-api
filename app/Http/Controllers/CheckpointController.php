@@ -1213,7 +1213,7 @@ class CheckpointController extends Controller
    							$object_id = $object_new->id;
    							$type_address_id = 7;//Pertenece a rango de ip para checkpoint
 
-                        $curl = curl_init();
+                        /*$curl = curl_init();
 
                         curl_setopt_array($curl, array(
                         	CURLOPT_URL => "http://localhost:3500/new_object_ips",
@@ -1248,7 +1248,42 @@ class CheckpointController extends Controller
       									'status_code' => 20
       								]
       							]);
-                     	}else{
+                     	}else{*/
+
+                        $ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+                        $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+                        $ssh_command3 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+                        $ssh_command4 = "tscpgw_api -g '172.16.3.117' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+
+
+                  		\SSH::into('checkpoint')->run($ssh_command, function($line){
+                  			Log::info($line.PHP_EOL);
+                  			$evaluate = $line.PHP_EOL;
+                  		});
+
+                  		sleep(2);
+
+                  		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                  			Log::info($line2.PHP_EOL);
+                  			$evaluate = $line2.PHP_EOL;
+                  		});
+
+                        sleep(2);
+
+                  		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                  			Log::info($line3.PHP_EOL);
+                  			$evaluate = $line3.PHP_EOL;
+                  		});
+
+                        sleep(2);
+
+                  		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                  			Log::info($line4.PHP_EOL);
+                  			$evaluate = $line4.PHP_EOL;
+                  		});
+
+                        sleep(2);
+
                            Log::info("ip agregada ch");
       							$addr_obj = new AddressObject;
       							$addr_obj->ip_initial = $ip_initial;
@@ -1284,7 +1319,7 @@ class CheckpointController extends Controller
       									]
       								]);
       							}
-                        }
+                        //}
    						}else{
                         Log::info("Error al publicar!!");
    							return response()->json([
