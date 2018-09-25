@@ -312,6 +312,7 @@ class CheckpointController extends Controller
 
    public function assignIpObject(Request $request){
  		$object_id = $request['object_id'];
+      $evaluate = "";
 
  		$object = DB::table('fw_objects')->where('id', $object_id)->get();
  		$object = json_decode(json_encode($object), true);
@@ -369,12 +370,32 @@ class CheckpointController extends Controller
 			$evaluate = $line.PHP_EOL;
 		});
 
+      $evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 112");
+			\SSH::into('checkpoint')->run($ssh_command, function($line){
+				Log::info($line.PHP_EOL);
+				$evaluate = $line.PHP_EOL;
+			});
+		}
+
 		sleep(2);
 
 		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
 			Log::info($line2.PHP_EOL);
 			$evaluate = $line2.PHP_EOL;
 		});
+
+      $evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 113");
+			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+				Log::info($line2.PHP_EOL);
+				$evaluate = $line2.PHP_EOL;
+			});
+		}
 
       sleep(2);
 
@@ -383,12 +404,32 @@ class CheckpointController extends Controller
 			$evaluate = $line3.PHP_EOL;
 		});
 
+      $evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 116");
+			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+				Log::info($line3.PHP_EOL);
+				$evaluate = $line3.PHP_EOL;
+			});
+		}
+
       sleep(2);
 
 		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
 			Log::info($line4.PHP_EOL);
 			$evaluate = $line4.PHP_EOL;
 		});
+
+      $evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 117");
+			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+				Log::info($line4.PHP_EOL);
+				$evaluate = $line4.PHP_EOL;
+			});
+		}
 
       sleep(2);
 
@@ -1261,12 +1302,32 @@ class CheckpointController extends Controller
                   			$evaluate = $line.PHP_EOL;
                   		});
 
+                        $evaluate = $this->output;
+
+                     	while (stripos($evaluate, "try again") !== false) {
+                     		Log::info("1 existe try again 112");
+                     		\SSH::into('checkpoint')->run($ssh_command, function($line){
+                     			Log::info($line.PHP_EOL);
+                     			$evaluate = $line.PHP_EOL;
+                     		});
+                     	}
+
                   		sleep(2);
 
                   		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
                   			Log::info($line2.PHP_EOL);
                   			$evaluate = $line2.PHP_EOL;
                   		});
+
+                        $evaluate = $this->output;
+
+                     	while (stripos($evaluate, "try again") !== false) {
+                     		Log::info("1 existe try again 113");
+                     		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                     			Log::info($line2.PHP_EOL);
+                     			$evaluate = $line2.PHP_EOL;
+                     		});
+                     	}
 
                         sleep(2);
 
@@ -1275,12 +1336,32 @@ class CheckpointController extends Controller
                   			$evaluate = $line3.PHP_EOL;
                   		});
 
+                        $evaluate = $this->output;
+
+                     	while (stripos($evaluate, "try again") !== false) {
+                     		Log::info("1 existe try again 116");
+                     		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                     			Log::info($line3.PHP_EOL);
+                     			$evaluate = $line3.PHP_EOL;
+                     		});
+                     	}
+
                         sleep(2);
 
                   		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
                   			Log::info($line4.PHP_EOL);
                   			$evaluate = $line4.PHP_EOL;
                   		});
+
+                        $evaluate = $this->output;
+
+                     	while (stripos($evaluate, "try again") !== false) {
+                     		Log::info("1 existe try again 117");
+                     		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                     			Log::info($line4.PHP_EOL);
+                     			$evaluate = $line4.PHP_EOL;
+                     		});
+                     	}
 
                         sleep(2);
 
@@ -1783,6 +1864,7 @@ class CheckpointController extends Controller
 
    public function removeIpObject(Request $request){
  		Log::info($request);
+      $evaluate = "";
 
  		$object_id = $request['object_id'];
  		$address_id = $request['address_id'];
@@ -1849,12 +1931,32 @@ class CheckpointController extends Controller
          			$evaluate = $line.PHP_EOL;
          		});
 
+               $evaluate = $this->output;
+
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 112");
+            		\SSH::into('checkpoint')->run($ssh_command, function($line){
+            			Log::info($line.PHP_EOL);
+            			$evaluate = $line.PHP_EOL;
+            		});
+            	}
+
          		sleep(2);
 
          		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
          			Log::info($line2.PHP_EOL);
          			$evaluate = $line2.PHP_EOL;
          		});
+
+               $evaluate = $this->output;
+
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 113");
+            		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+            			Log::info($line2.PHP_EOL);
+            			$evaluate = $line2.PHP_EOL;
+            		});
+            	}
 
                sleep(2);
 
@@ -1863,6 +1965,16 @@ class CheckpointController extends Controller
          			$evaluate = $line3.PHP_EOL;
          		});
 
+               $evaluate = $this->output;
+
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 116");
+            		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+            			Log::info($line3.PHP_EOL);
+            			$evaluate = $line3.PHP_EOL;
+            		});
+            	}
+
                sleep(2);
 
          		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
@@ -1870,9 +1982,17 @@ class CheckpointController extends Controller
          			$evaluate = $line4.PHP_EOL;
          		});
 
+               $evaluate = $this->output;
+
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 117");
+            		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+            			Log::info($line4.PHP_EOL);
+            			$evaluate = $line4.PHP_EOL;
+            		});
+            	}
+
                sleep(2);
-
-
 
                   $publish = $this->publishChanges($sid);
 
