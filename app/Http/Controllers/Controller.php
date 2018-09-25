@@ -29,7 +29,7 @@ class Controller extends BaseController
 
    public function prueba2(){
 
-      $new_object_name = 'CUST-FI712-BLACKLIST-OUTGOING';
+      /*$new_object_name = 'CUST-FI712-BLACKLIST-OUTGOING';
       $ip_initial = '180.180.180.180';
       $ip_last = '180.180.180.180';
 
@@ -41,7 +41,7 @@ class Controller extends BaseController
 		\SSH::into('checkpoint')->run($ssh_command2, function($line){
 			Log::info($line.PHP_EOL);
 			$evaluate = $line.PHP_EOL;
-		});
+		});*/
    }
 
    public function test(){

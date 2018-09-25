@@ -174,6 +174,9 @@ class CheckpointController extends Controller
    }
 
    public function installPolicy(){
+
+      Log::info("llega al install");
+      die();
       $checkpoint2 = new CheckPointFunctionController;
 
       if(Session::has('sid_session'))
@@ -433,41 +436,41 @@ class CheckpointController extends Controller
 
       sleep(2);
 
-         $addr_obj = new AddressObject;
-    		$addr_obj->ip_initial = $ip_initial;
-    		$addr_obj->ip_last = $ip_last;
-    		$addr_obj->object_id = $object_id;
-    		$addr_obj->type_address_id = $type_address_id;
-    		$addr_obj->save();
+      $addr_obj = new AddressObject;
+ 		$addr_obj->ip_initial = $ip_initial;
+ 		$addr_obj->ip_last = $ip_last;
+ 		$addr_obj->object_id = $object_id;
+ 		$addr_obj->type_address_id = $type_address_id;
+ 		$addr_obj->save();
 
-    		if($addr_obj){
-   			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-   			'updated_at' => \Carbon\Carbon::now()]);
+ 		if($addr_obj){
+			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
+			'updated_at' => \Carbon\Carbon::now()]);
 
-   			if($bd_ips_check){
-     				//Log::info("Se guardo el rango");
-     				return response()->json([
-     					'success' => [
-     						'message' => "¡IP guardada exitosamente!",
-     						'status_code' => 200
-     					]
-     				]);
-   			}else{
-     				return response()->json([
-     					'error' => [
-     						'message' => 'error al guardar la IP',
-     						'status_code' => 20
-     					]
-     				]);
-   			}
-    		}else{
-   			return response()->json([
-   				'error' => [
-   					'message' => 'error al guardar la IP',
-   					'status_code' => 20
-   				]
-   			]);
-    		}
+			if($bd_ips_check){
+  				//Log::info("Se guardo el rango");
+  				return response()->json([
+  					'success' => [
+  						'message' => "¡IP guardada exitosamente!",
+  						'status_code' => 200
+  					]
+  				]);
+			}else{
+  				return response()->json([
+  					'error' => [
+  						'message' => 'error al guardar la IP',
+  						'status_code' => 20
+  					]
+  				]);
+			}
+ 		}else{
+			return response()->json([
+				'error' => [
+					'message' => 'error al guardar la IP',
+					'status_code' => 20
+				]
+			]);
+ 		}
       //}
   	}
 
@@ -1107,6 +1110,7 @@ class CheckpointController extends Controller
    }
 
    public function createDynamicObject(Request $request){
+      Log::info("llega al createDynamic");
       $checkpoint2 = new CheckPointFunctionController;
 
  		if(Session::has('sid_session'))
@@ -1154,7 +1158,8 @@ class CheckpointController extends Controller
  			if($err){
  				return response()->json([
  					'error' => [
- 						'message' => $err,
+                  'message_admin' => $err,
+ 						'message' => "Error al conectar con checkpoint. Contacte al administrador.",
  						'status_code' => 20
  					]
  				]);
@@ -1364,41 +1369,44 @@ class CheckpointController extends Controller
 
                         sleep(2);
 
-                           Log::info("ip agregada ch");
-      							$addr_obj = new AddressObject;
-      							$addr_obj->ip_initial = $ip_initial;
-      							$addr_obj->ip_last = $ip_last;
-      							$addr_obj->object_id = $object_id;
-      							$addr_obj->type_address_id = $type_address_id;
-      							$addr_obj->save();
+                        Log::info("ip agregada ch");
+   							$addr_obj = new AddressObject;
+   							$addr_obj->ip_initial = $ip_initial;
+   							$addr_obj->ip_last = $ip_last;
+   							$addr_obj->object_id = $object_id;
+   							$addr_obj->type_address_id = $type_address_id;
+   							$addr_obj->save();
 
-      							if($addr_obj){
-                              $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-      								'updated_at' => \Carbon\Carbon::now()]);
+   							if($addr_obj){
+                           $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
+   								'updated_at' => \Carbon\Carbon::now()]);
 
-      								if($bd_ips_check){
-      									return response()->json([
-      										'success' => [
-      											'message' => "Objeto creado exitosamente",
-      											'status_code' => 200
-      										]
-      									]);
-      								}else{
-      									return response()->json([
-      										'success' => [
-      											'message' => "Se creó el objeto pero no las ips",
-      											'status_code' => 200
-      										]
-      									]);
-      								}
-      							}else{
-      								return response()->json([
-      									'success' => [
-      										'message' => "Se creó el objeto pero no las ips",
-      										'status_code' => 200
-      									]
-      								]);
-      							}
+   								if($bd_ips_check){
+                              $now = \Carbon\Carbon::now();
+                              Session::put('time_execution', $now);
+
+   									return response()->json([
+   										'success' => [
+   											'message' => "Objeto creado exitosamente",
+   											'status_code' => 200
+   										]
+   									]);
+   								}else{
+   									return response()->json([
+   										'success' => [
+   											'message' => "Se creó el objeto pero no las ips",
+   											'status_code' => 200
+   										]
+   									]);
+   								}
+   							}else{
+   								return response()->json([
+   									'success' => [
+   										'message' => "Se creó el objeto pero no las ips",
+   										'status_code' => 200
+   									]
+   								]);
+   							}
                         //}
    						}else{
                         Log::info("Error al publicar!!");
@@ -4032,5 +4040,10 @@ class CheckpointController extends Controller
       ]);
    }
 
+   public function evaluateObjectsChanges(){
+
+
+
+   }
 
 }

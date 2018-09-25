@@ -64,7 +64,7 @@ class AccessController extends Controller{
 	}
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
-
+		
 		$checkpoint2 = new CheckPointFunctionController;
 
 		$v = Validator::make($request->all(), [

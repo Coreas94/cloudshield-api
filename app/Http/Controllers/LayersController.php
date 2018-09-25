@@ -47,9 +47,9 @@ class LayersController extends Controller
 
 		//$list = LayerSecurity::join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')->get();
 		$list = DB::table('layers_security_list')
-		    ->join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')
-		    ->select('layers_security_list.*', 'fw_servers.name AS name_server')
-		    ->get();
+		    	->join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')
+		    	->select('layers_security_list.*', 'fw_servers.name AS name_server')
+		    	->get();
 
 		$list = json_decode(json_encode($list), true);
 
@@ -60,285 +60,323 @@ class LayersController extends Controller
 
 	public function addIpList(Request $request, CheckpointController $checkpoint){
 
-      $ip_initial = $request['ip_initial'];
-      $ip_last = $ip_initial;
+      #$ip_initial = $request['ip_initial'];
+      #$ip_last = $ip_initial;
       $comment = $request['comment'];
       $name_object = $request['object_name'];
       $server_id = $request['server_id'];
+		$evaluate = "";
 
-      $xnumber = $ip_initial;
-      // Redes que nos pertenecen
-      $subnet='38.103.38';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+		foreach($request['ips'] as $value){
+			$ip_initial = $value['inicial'];
+			$ip_last = $value['final'];
 
-      $subnet='38.118.71';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+			$xnumber = $ip_initial;
+	      // Redes que nos pertenecen
+	      $subnet='38.103.38';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='190.120.9';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='38.118.71';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='190.120.8';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='190.120.9';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='190.120.12';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='190.120.8';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='190.120.26';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='190.120.12';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='190.120.4';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='190.120.26';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='190.120.15';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='190.120.4';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='200.13.160';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='190.120.15';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='192.168.1';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='200.13.160';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='10.10.0';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='192.168.1';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='172.16';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='10.10.0';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='0.0.0.0';
-      if(preg_match("/^$subnet$/", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' es privilegiada!');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' es privilegiada.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='172.16';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' pertenece al rango '.$subnet.'.0 que es una red propia.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='255.255.255.255';
-      if(preg_match("/^$subnet$/", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' es privilegiada!');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' es privilegiada.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='0.0.0.0';
+	      if(preg_match("/^$subnet$/", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' es privilegiada!');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' es privilegiada.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $subnet='127.0.0';
-      if(preg_match("/^$subnet./", $xnumber)){
-         $flag = false;
-         Log::info('Error! La IP '.$xnumber.' es privilegiada!');
-         return response()->json([
-            'error' => [
-               'message' => 'Error! La IP '.$xnumber.' es privilegiada.',
-               'status_code' => 20
-            ]
-         ]);
-      }
+	      $subnet='255.255.255.255';
+	      if(preg_match("/^$subnet$/", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' es privilegiada!');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' es privilegiada.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      $list_sec = new LayerSecurity;
-      $list_sec->name_object = $name_object;
-      $list_sec->ip_initial = $ip_initial;
-      $list_sec->ip_last = $ip_last;
-      $list_sec->comment = $comment;
-      $list_sec->server_id = $server_id;
-      $list_sec->save();
+	      $subnet='127.0.0';
+	      if(preg_match("/^$subnet./", $xnumber)){
+	         $flag = false;
+	         Log::info('Error! La IP '.$xnumber.' es privilegiada!');
+	         return response()->json([
+	            'error' => [
+	               'message' => 'Error! La IP '.$xnumber.' es privilegiada.',
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
 
-      if($list_sec){
+	      $list_sec = new LayerSecurity;
+	      $list_sec->name_object = $name_object;
+	      $list_sec->ip_initial = $ip_initial;
+	      $list_sec->ip_last = $ip_last;
+	      $list_sec->comment = $comment;
+	      $list_sec->server_id = $server_id;
+	      $list_sec->save();
 
-         $object_list = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$name_object.'"');
-         $object_list = json_decode(json_encode($object_list), true);
+	      if($list_sec){
 
-         Log::info($object_list);
+	         $object_list = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$name_object.'"');
+	         $object_list = json_decode(json_encode($object_list), true);
 
-         foreach ($object_list as $value){
-            $object_id_list = $value['id'];
-         }
+	         Log::info($object_list);
 
-         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id_list, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-         'updated_at' => \Carbon\Carbon::now()]);
+	         foreach ($object_list as $value){
+	            $object_id_list = $value['id'];
+	         }
 
-         Log::info($bd_ips_check);
+	         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id_list, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
+	         'updated_at' => \Carbon\Carbon::now()]);
 
-         if($bd_ips_check){
+	         Log::info($bd_ips_check);
 
-            $ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$name_object." -r ".$ip_initial." ".$ip_last;
-            $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$name_object." -r ".$ip_initial." ".$ip_last;
+	         if($bd_ips_check){
 
-            //Ejecuto los comandos para crear los 2 rangos nuevos
-            \SSH::into('checkpoint')->run($ssh_command, function($line){
-               Log::info($line.PHP_EOL);
-               $this->output = $line.PHP_EOL;
-            });
+	            $ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
+	            $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
+					$ssh_command3 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
+					$ssh_command4 = "tscpgw_api -g '172.16.3.117' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
 
-            sleep(3);
+					\SSH::into('checkpoint')->run($ssh_command, function($line){
+						Log::info($line.PHP_EOL);
+						$evaluate = $line.PHP_EOL;
+					});
 
-            $evaluate = $this->output;
-            while(stripos($evaluate, "try again") !== false) {
-               Log::info("existe try again layer 112");
-               \SSH::into('checkpoint')->run($ssh_command, function($line){
-                  Log::info($line.PHP_EOL);
-                  $this->output = $line.PHP_EOL;
-               });
-               $evaluate = $this->output;
-            }
+					$evaluate = $this->output;
 
-            sleep(3);
+					while (stripos($evaluate, "try again") !== false) {
+						Log::info("1 existe try again 112");
+						\SSH::into('checkpoint')->run($ssh_command, function($line){
+							Log::info($line.PHP_EOL);
+							$evaluate = $line.PHP_EOL;
+						});
+					}
 
-            //Ejecuto los comandos para crear los 2 rangos nuevos
-            \SSH::into('checkpoint')->run($ssh_command2, function($line2){
-               Log::info($line2.PHP_EOL);
-               $this->output = $line2.PHP_EOL;
-            });
+					sleep(2);
 
-            sleep(3);
+					\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+						Log::info($line2.PHP_EOL);
+						$evaluate = $line2.PHP_EOL;
+					});
 
-            $evaluate = $this->output;
-            while(stripos($evaluate, "try again") !== false) {
-               Log::info("existe try again layer 113");
-               \SSH::into('checkpoint')->run($ssh_command2, function($line2){
-                  Log::info($line2.PHP_EOL);
-                  $this->output = $line2.PHP_EOL;
-               });
-               $evaluate = $this->output;
-            }
+					$evaluate = $this->output;
 
-            sleep(3);
+					while (stripos($evaluate, "try again") !== false) {
+						Log::info("1 existe try again 113");
+						\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+							Log::info($line2.PHP_EOL);
+							$evaluate = $line2.PHP_EOL;
+						});
+					}
 
-            return response()->json([
-               'success' => [
-                  'message' => "Datos ingresados correctamente",
-                  'status_code' => 200
-               ]
-            ]);
-         }else{
-            return response()->json([
-               'error' => [
-                  'message' => "No se guardó en el checkpoint, solo localmente!",
-                  'status_code' => 20
-               ]
-            ]);
-         }
-      }else{
-         return response()->json([
-            'error' => [
-               'message' => "No se guardaron los datos",
-               'status_code' => 20
-            ]
-         ]);
-      }
+					sleep(2);
+
+					\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+						Log::info($line3.PHP_EOL);
+						$evaluate = $line3.PHP_EOL;
+					});
+
+					$evaluate = $this->output;
+
+					while (stripos($evaluate, "try again") !== false) {
+						Log::info("1 existe try again 116");
+						\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+							Log::info($line3.PHP_EOL);
+							$evaluate = $line3.PHP_EOL;
+						});
+					}
+
+					sleep(2);
+
+					\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+						Log::info($line4.PHP_EOL);
+						$evaluate = $line4.PHP_EOL;
+					});
+
+					$evaluate = $this->output;
+
+					while (stripos($evaluate, "try again") !== false) {
+						Log::info("1 existe try again 117");
+						\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+							Log::info($line4.PHP_EOL);
+							$evaluate = $line4.PHP_EOL;
+						});
+					}
+
+					sleep(2);
+
+	            return response()->json([
+	               'success' => [
+	                  'message' => "Datos ingresados correctamente",
+	                  'status_code' => 200
+	               ]
+	            ]);
+	         }else{
+	            return response()->json([
+	               'error' => [
+	                  'message' => "No se guardó en el checkpoint, solo localmente!",
+	                  'status_code' => 20
+	               ]
+	            ]);
+	         }
+	      }else{
+	         return response()->json([
+	            'error' => [
+	               'message' => "No se guardaron los datos",
+	               'status_code' => 20
+	            ]
+	         ]);
+	      }
+
+		}
+
    }
 
    public function removeIpList(Request $request, CheckpointController $checkpoint){

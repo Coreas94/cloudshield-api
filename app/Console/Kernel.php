@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
    */
    protected $commands = [
      // Commands\Inspire::class,
-     Commands\dataFortisiem::class
+     Commands\dataFortisiem::class,
+     Commands\installPolicy::class
    ];
 
    /**
@@ -29,5 +30,6 @@ class Kernel extends ConsoleKernel
       //->hourly();
 
       //$schedule->command('fortisiem:getLogsFortisiem')->cron('*/5 * * * *');
+      //$schedule->command('checkpoint:installPolicies')->everyFiveMinutes();
    }
 }
