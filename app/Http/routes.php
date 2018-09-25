@@ -15,14 +15,14 @@ Route::get('/', function () {
    return view('welcome');
 });
 
-Route::get('prueba', 'Controller@test');
+Route::get('prueba', 'Controller@prueba2');
 
 Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
 
    Route::group(['middleware' => ['jwt-auth']], function(){
 
       Route::group(['prefix' => 'checkpoint'], function(){
-         Route::post('/test', 'CheckpointController@test');
+         Route::post('/test', 'CheckpointController@prueba2');
 
          Route::post('/new_object', 'CheckpointController@createDynamicObject');
          Route::post('/assignIpObject', 'CheckpointController@assignIpObject');
