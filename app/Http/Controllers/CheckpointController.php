@@ -1119,7 +1119,7 @@ class CheckpointController extends Controller
 
  		if($sid){
 
- 			$evaluate;
+ 			$evaluate = "";
  			$server_ch = 1; //Es el id del checkpoint
  			$new_object_name = $request['object_name'];
  			//$tag = $request['tag'];
@@ -1209,7 +1209,7 @@ class CheckpointController extends Controller
 							Log::info("No se guardó en bd checkpoint");
 						}
 
-                  $curl = curl_init();
+                  /*$curl = curl_init();
 
                   curl_setopt_array($curl, array(
                   	CURLOPT_URL => "http://localhost:3500/new_object",
@@ -1245,7 +1245,80 @@ class CheckpointController extends Controller
                         ]
                      ]);
 
-               	}else{
+               	}else{*/
+                  $ssh_command = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
+                  $ssh_command2 = 'tscpgw_api -g "172.16.3.113" -a adddyo -o '.$new_object_name;
+                  $ssh_command3 = 'tscpgw_api -g "172.16.3.116" -a adddyo -o '.$new_object_name;
+                  $ssh_command4 = 'tscpgw_api -g "172.16.3.117" -a adddyo -o '.$new_object_name;
+
+                  \SSH::into('checkpoint')->run($ssh_command, function($line){
+                  	Log::info($line.PHP_EOL);
+                  	$evaluate = $line.PHP_EOL;
+                  });
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 112");
+                  	\SSH::into('checkpoint')->run($ssh_command, function($line){
+                  		Log::info($line.PHP_EOL);
+                  		$evaluate = $line.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+                  \SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                  	Log::info($line2.PHP_EOL);
+                  	$evaluate = $line2.PHP_EOL;
+                  });
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 113");
+                  	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                  		Log::info($line2.PHP_EOL);
+                  		$evaluate = $line2.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+                  \SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                  	Log::info($line3.PHP_EOL);
+                  	$evaluate = $line3.PHP_EOL;
+                  });
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 116");
+                  	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                  		Log::info($line3.PHP_EOL);
+                  		$evaluate = $line3.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+                  \SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                  	Log::info($line4.PHP_EOL);
+                  	$evaluate = $line4.PHP_EOL;
+                  });
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 117");
+                  	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                  		Log::info($line4.PHP_EOL);
+                  		$evaluate = $line4.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
                      Log::info("entra al else de node3500");
                      $publish = $this->publishChanges($sid);
 
@@ -1417,7 +1490,7 @@ class CheckpointController extends Controller
    								]
    							]);
    						}
-                  }
+                  //}
 					}else{
                   Log::info("Error al guardar obj en la bdd!!");
 						return response()->json([
@@ -1714,7 +1787,7 @@ class CheckpointController extends Controller
    public function removeObject(Request $request){
 
       $checkpoint2 = new CheckPointFunctionController;
-
+      $evaluate = "";
  		$object_id = $request['object_id'];
  		$object_name = $request['object_name'];
 
@@ -1777,7 +1850,7 @@ class CheckpointController extends Controller
                   $remove2 = $checkpoint2->removeObject2($request);
                   sleep(2);
 
-                  $curl = curl_init();
+                  /*$curl = curl_init();
 
          			curl_setopt_array($curl, array(
          			  	CURLOPT_URL => "http://localhost:3500/del_object",
@@ -1807,48 +1880,121 @@ class CheckpointController extends Controller
          						'status_code' => 20
          					]
          				]);
-         			}else{
-                     $delete = DB::table('fw_objects')->where('id', '=', $object_id)->delete();
+         			}else{*/
+                  $ssh_command = 'tscpgw_api -g "172.16.3.112" -a deldyo -o '.$object_name;
+                  $ssh_command2 = 'tscpgw_api -g "172.16.3.113" -a adddyo -o '.$object_name;
+                  $ssh_command3 = 'tscpgw_api -g "172.16.3.116" -a adddyo -o '.$object_name;
+                  $ssh_command4 = 'tscpgw_api -g "172.16.3.117" -a adddyo -o '.$object_name;
 
-    						if($delete){
+                  \SSH::into('checkpoint')->run($ssh_command, function($line){
+                  	Log::info($line.PHP_EOL);
+                  	$evaluate = $line.PHP_EOL;
+                  });
 
-    							$delete_adds = DB::table('fw_address_objects')->where('object_id', '=', $object_id)->delete();
+                  $evaluate = $this->output;
 
-    							$obj_checkpoint_db = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$object_name.'" ');
-    							$object_id_bd = json_decode(json_encode($obj_checkpoint_db), true);
-
-    							foreach($object_id_bd as $row){
-    								$id_obj_list = $row['id'];
-    							}
-
-    							if($delete_adds){
-
-    								$delete_obj_db = DB::connection('checkpoint')->delete("DELETE FROM object_list WHERE id=".$id_obj_list);
-    								$delete_add_db = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE object_id=".$id_obj_list);
-
-    								return response()->json([
-    									'success' => [
-    										'message' => 'Objeto eliminado',
-    										'status_code' => 200
-    									]
-    								]);
-    							}else{
-    								return response()->json([
-    									'success' => [
-    										'message' => 'Objeto eliminado pero las ips asignadas no fueron eliminadas.',
-    										'status_code' => 200
-    									]
-    								]);
-    							}
-    						}else{
-    							return response()->json([
-    								'error' => [
-    									'message' => 'error al eliminar el objeto de la bdd',
-    									'status_code' => 20
-    								]
-    							]);
-    						}
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 112");
+                  	\SSH::into('checkpoint')->run($ssh_command, function($line){
+                  		Log::info($line.PHP_EOL);
+                  		$evaluate = $line.PHP_EOL;
+                  	});
                   }
+
+               	sleep(2);
+
+               	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+               		Log::info($line2.PHP_EOL);
+               		$evaluate = $line2.PHP_EOL;
+               	});
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 113");
+                  	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                  		Log::info($line2.PHP_EOL);
+                  		$evaluate = $line2.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+               	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+               		Log::info($line3.PHP_EOL);
+               		$evaluate = $line3.PHP_EOL;
+               	});
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 116");
+                  	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                  		Log::info($line3.PHP_EOL);
+                  		$evaluate = $line3.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+               	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+               		Log::info($line4.PHP_EOL);
+               		$evaluate = $line4.PHP_EOL;
+               	});
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 117");
+                  	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                  		Log::info($line4.PHP_EOL);
+                  		$evaluate = $line4.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+                  $delete = DB::table('fw_objects')->where('id', '=', $object_id)->delete();
+
+ 						if($delete){
+
+ 							$delete_adds = DB::table('fw_address_objects')->where('object_id', '=', $object_id)->delete();
+
+ 							$obj_checkpoint_db = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$object_name.'" ');
+ 							$object_id_bd = json_decode(json_encode($obj_checkpoint_db), true);
+
+ 							foreach($object_id_bd as $row){
+ 								$id_obj_list = $row['id'];
+ 							}
+
+ 							if($delete_adds){
+
+ 								$delete_obj_db = DB::connection('checkpoint')->delete("DELETE FROM object_list WHERE id=".$id_obj_list);
+ 								$delete_add_db = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE object_id=".$id_obj_list);
+
+ 								return response()->json([
+ 									'success' => [
+ 										'message' => 'Objeto eliminado',
+ 										'status_code' => 200
+ 									]
+ 								]);
+ 							}else{
+ 								return response()->json([
+ 									'success' => [
+ 										'message' => 'Objeto eliminado pero las ips asignadas no fueron eliminadas.',
+ 										'status_code' => 200
+ 									]
+ 								]);
+ 							}
+ 						}else{
+ 							return response()->json([
+ 								'error' => [
+ 									'message' => 'error al eliminar el objeto de la bdd',
+ 									'status_code' => 20
+ 								]
+ 							]);
+ 						}
+                  //}
  					}else{
  						return response()->json([
  							'error' => [
@@ -2001,35 +2147,35 @@ class CheckpointController extends Controller
 
                sleep(2);
 
-                  $publish = $this->publishChanges($sid);
+               $publish = $this->publishChanges($sid);
 
-    					if($publish == "success"){
-    						$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+ 					if($publish == "success"){
+ 						$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
-    						//$delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
-    						if($delete_add){
-    							return response()->json([
-    								'success' => [
-    									'data' => 'Rango de ips eliminado',
-    									'status_code' => 200
-    								]
-    							]);
-    						}else{
-    							return response()->json([
-    								'error' => [
-    									'message' => 'error al eliminar el rango de ips',
-    									'status_code' => 20
-    								]
-    							]);
-    						}
-    					}else{
-    						return response()->json([
-    							'error' => [
-    								'message' => 'error al eliminar el rango de ips',
-    								'status_code' => 20
-    							]
-    						]);
-    					}
+ 						//$delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
+ 						if($delete_add){
+ 							return response()->json([
+ 								'success' => [
+ 									'data' => 'Rango de ips eliminado',
+ 									'status_code' => 200
+ 								]
+ 							]);
+ 						}else{
+ 							return response()->json([
+ 								'error' => [
+ 									'message' => 'error al eliminar el rango de ips',
+ 									'status_code' => 20
+ 								]
+ 							]);
+ 						}
+ 					}else{
+ 						return response()->json([
+ 							'error' => [
+ 								'message' => 'error al eliminar el rango de ips',
+ 								'status_code' => 20
+ 							]
+ 						]);
+ 					}
                //}
  				}else{//Si entra aquí es porque se eliminará un rango
 
@@ -2056,7 +2202,7 @@ class CheckpointController extends Controller
 
  					//Ejecuto el comando para eliminar el rango actual
 
-               $curl = curl_init();
+               /*$curl = curl_init();
 
                curl_setopt_array($curl, array(
                   CURLOPT_URL => "http://localhost:3500/del_object_ips",
@@ -2081,20 +2227,119 @@ class CheckpointController extends Controller
 
                if($err){
                   Log::info("No se creó el primer rango");
-               }else{
+               }else{*/
+               $ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+               $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+               $ssh_command3 = "tscpgw_api -g '172.16.3.116' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+               $ssh_command4 = "tscpgw_api -g '172.16.3.117' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
 
-                  //publico los nuevos cambios
-    					$publish = $this->publishChanges($sid);
+         		\SSH::into('checkpoint')->run($ssh_command, function($line){
+         			Log::info($line.PHP_EOL);
+         			$evaluate = $line.PHP_EOL;
+         		});
 
-    					if(Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($second_new_ip)) && Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($third_new_ip))){
+               $evaluate = $this->output;
 
-    						if($publish == "success"){
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 112");
+            		\SSH::into('checkpoint')->run($ssh_command, function($line){
+            			Log::info($line.PHP_EOL);
+            			$evaluate = $line.PHP_EOL;
+            		});
+            	}
 
-    							//Elimino el rango de la bdd
-    							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+         		sleep(2);
 
-    							if($delete_add){
-    								/**************/
+         		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+         			Log::info($line2.PHP_EOL);
+         			$evaluate = $line2.PHP_EOL;
+         		});
+
+               $evaluate = $this->output;
+
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 113");
+            		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+            			Log::info($line2.PHP_EOL);
+            			$evaluate = $line2.PHP_EOL;
+            		});
+            	}
+
+               sleep(2);
+
+         		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+         			Log::info($line3.PHP_EOL);
+         			$evaluate = $line3.PHP_EOL;
+         		});
+
+               $evaluate = $this->output;
+
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 116");
+            		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+            			Log::info($line3.PHP_EOL);
+            			$evaluate = $line3.PHP_EOL;
+            		});
+            	}
+
+               sleep(2);
+
+         		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+         			Log::info($line4.PHP_EOL);
+         			$evaluate = $line4.PHP_EOL;
+         		});
+
+               $evaluate = $this->output;
+
+            	while (stripos($evaluate, "try again") !== false) {
+            		Log::info("1 existe try again 117");
+            		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+            			Log::info($line4.PHP_EOL);
+            			$evaluate = $line4.PHP_EOL;
+            		});
+            	}
+
+               sleep(2);
+
+               //publico los nuevos cambios
+ 					$publish = $this->publishChanges($sid);
+
+ 					if(Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($second_new_ip)) && Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($third_new_ip))){
+
+ 						if($publish == "success"){
+
+ 							//Elimino el rango de la bdd
+ 							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+
+ 							if($delete_add){
+ 								/**************/
+                        /*$curl = curl_init();
+
+                        curl_setopt_array($curl, array(
+                           CURLOPT_URL => "http://localhost:3500/new_object_ips",
+                           CURLOPT_RETURNTRANSFER => true,
+                           CURLOPT_ENCODING => "",
+                           CURLOPT_MAXREDIRS => 10,
+                           CURLOPT_TIMEOUT => 30,
+                           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                           CURLOPT_SSL_VERIFYPEER => false,
+                           CURLOPT_SSL_VERIFYHOST => false,
+                           CURLOPT_CUSTOMREQUEST => "POST",
+                           CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial_range\", \"ip_last\" : \"$second_new_ip\", \r\n}",
+                           CURLOPT_HTTPHEADER => array(
+                           	"content-type: application/json",
+                           ),
+                        ));
+
+                        $response = curl_exec($curl);
+                        $err = curl_error($curl);
+
+                        curl_close($curl);
+
+                        if($err){
+                           Log::info("No se creó el primer rango");
+                        }else{*/
+
                            $curl = curl_init();
 
                            curl_setopt_array($curl, array(
@@ -2107,7 +2352,7 @@ class CheckpointController extends Controller
                               CURLOPT_SSL_VERIFYPEER => false,
                               CURLOPT_SSL_VERIFYHOST => false,
                               CURLOPT_CUSTOMREQUEST => "POST",
-                              CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$ip_initial_range\", \"ip_last\" : \"$second_new_ip\", \r\n}",
+                              CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$third_new_ip\", \"ip_last\" : \"$ip_last_range\", \r\n}",
                               CURLOPT_HTTPHEADER => array(
                               	"content-type: application/json",
                               ),
@@ -2119,137 +2364,110 @@ class CheckpointController extends Controller
                            curl_close($curl);
 
                            if($err){
-                              Log::info("No se creó el primer rango");
+                              Log::info("No se creó el segundo rango");
                            }else{
 
-                              $curl = curl_init();
+                              $publish2 = $this->publishChanges($sid);
 
-                              curl_setopt_array($curl, array(
-                                 CURLOPT_URL => "http://localhost:3500/new_object_ips",
-                                 CURLOPT_RETURNTRANSFER => true,
-                                 CURLOPT_ENCODING => "",
-                                 CURLOPT_MAXREDIRS => 10,
-                                 CURLOPT_TIMEOUT => 30,
-                                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                                 CURLOPT_SSL_VERIFYPEER => false,
-                                 CURLOPT_SSL_VERIFYHOST => false,
-                                 CURLOPT_CUSTOMREQUEST => "POST",
-                                 CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$object_name\", \"ip_init\" : \"$third_new_ip\", \"ip_last\" : \"$ip_last_range\", \r\n}",
-                                 CURLOPT_HTTPHEADER => array(
-                                 	"content-type: application/json",
-                                 ),
-                              ));
+       								if($publish2 == "success"){
+       									//Creo un array con los datos de los nuevos rangos
+       									$arr_addr = array(
+       										0 => array(
+       											'ip_initial' => $ip_initial_range,
+       											'ip_last' => $second_new_ip,
+       											'object_id' => $object_id,
+       											'type_address_id' => $type_address_id,
+       											'created_at' => date('Y-m-d H:i:s'),
+       											'updated_at' => date('Y-m-d H:i:s'),
+       										),
+       										1 => array(
+       											'ip_initial' => $third_new_ip,
+       											'ip_last' => $ip_last_range,
+       											'object_id' => $object_id,
+       											'type_address_id' => $type_address_id,
+       											'created_at' => date('Y-m-d H:i:s'),
+       											'updated_at' => date('Y-m-d H:i:s'),
+       										),
+       									);
 
-                              $response = curl_exec($curl);
-                              $err = curl_error($curl);
+       									//inserto en la base los nuevos rangos
+       									$insert = DB::table('fw_address_objects')->insert($arr_addr);
 
-                              curl_close($curl);
-
-                              if($err){
-                                 Log::info("No se creó el segundo rango");
-                              }else{
-
-                                 $publish2 = $this->publishChanges($sid);
-
-          								if($publish2 == "success"){
-          									//Creo un array con los datos de los nuevos rangos
-          									$arr_addr = array(
-          										0 => array(
-          											'ip_initial' => $ip_initial_range,
-          											'ip_last' => $second_new_ip,
-          											'object_id' => $object_id,
-          											'type_address_id' => $type_address_id,
-          											'created_at' => date('Y-m-d H:i:s'),
-          											'updated_at' => date('Y-m-d H:i:s'),
-          										),
-          										1 => array(
-          											'ip_initial' => $third_new_ip,
-          											'ip_last' => $ip_last_range,
-          											'object_id' => $object_id,
-          											'type_address_id' => $type_address_id,
-          											'created_at' => date('Y-m-d H:i:s'),
-          											'updated_at' => date('Y-m-d H:i:s'),
-          										),
-          									);
-
-          									//inserto en la base los nuevos rangos
-          									$insert = DB::table('fw_address_objects')->insert($arr_addr);
-
-          									if($insert){
-          										return response()->json([
-          											'success' => [
-          												'data' => "Rango eliminado correctamente",
-          												'status_code' => 200
-          											]
-          										]);
-          									}else{
-          										return response()->json([
-          											'error' => [
-          												'message' => 'Rangos publicado en checkpoint pero no se guardó en la bdd',
-          												'status_code' => 20
-          											]
-          										]);
-          									}
-          								}else{
-          									return response()->json([
-          										'error' => [
-          											'message' => 'No se pudieron guardar los nuevos rangos',
-          											'status_code' => 20
-          										]
-          									]);
-          								}
-                              }
+       									if($insert){
+       										return response()->json([
+       											'success' => [
+       												'data' => "Rango eliminado correctamente",
+       												'status_code' => 200
+       											]
+       										]);
+       									}else{
+       										return response()->json([
+       											'error' => [
+       												'message' => 'Rangos publicado en checkpoint pero no se guardó en la bdd',
+       												'status_code' => 20
+       											]
+       										]);
+       									}
+       								}else{
+       									return response()->json([
+       										'error' => [
+       											'message' => 'No se pudieron guardar los nuevos rangos',
+       											'status_code' => 20
+       										]
+       									]);
+       								}
                            }
+                        //}
 
-    							}else{
-    								return response()->json([
-    									'error' => [
-    										'message' => 'No se pudieron guardar los nuevos rangos',
-    										'status_code' => 20
-    									]
-    								]);
-    							}
-    						}else{
-    							return response()->json([
-    								'error' => [
-    									'message' => 'No se pudo guardar el nuevo rango',
-    									'status_code' => 20
-    								]
-    							]);
-    						}
-    					}else{
+ 							}else{
+ 								return response()->json([
+ 									'error' => [
+ 										'message' => 'No se pudieron guardar los nuevos rangos',
+ 										'status_code' => 20
+ 									]
+ 								]);
+ 							}
+ 						}else{
+ 							return response()->json([
+ 								'error' => [
+ 									'message' => 'No se pudo guardar el nuevo rango',
+ 									'status_code' => 20
+ 								]
+ 							]);
+ 						}
+ 					}else{
 
-    						if($publish == "success"){
+ 						if($publish == "success"){
 
-    							//Elimino el rango de la bdd
-    							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+ 							//Elimino el rango de la bdd
+ 							$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
-    							if($delete_add){
-    								return response()->json([
-    									'success' => [
-    										'data' => "Rango eliminado correctamente",
-    										'status_code' => 200
-    									]
-    								]);
-    							}else{
-    								return response()->json([
-    									'error' => [
-    										'message' => 'No se pudo eliminar el rango',
-    										'status_code' => 20
-    									]
-    								]);
-    							}
-    						}else{
-    							return response()->json([
-    								'error' => [
-    									'message' => 'No se pudo eliminar el rango',
-    									'status_code' => 20
-    								]
-    							]);
-    						}
-    					}
+ 							if($delete_add){
+ 								return response()->json([
+ 									'success' => [
+ 										'data' => "Rango eliminado correctamente",
+ 										'status_code' => 200
+ 									]
+ 								]);
+ 							}else{
+ 								return response()->json([
+ 									'error' => [
+ 										'message' => 'No se pudo eliminar el rango',
+ 										'status_code' => 20
+ 									]
+ 								]);
+ 							}
+ 						}else{
+ 							return response()->json([
+ 								'error' => [
+ 									'message' => 'No se pudo eliminar el rango',
+ 									'status_code' => 20
+ 								]
+ 							]);
+ 						}
+ 					}
 
-               }
+               //}
  				}
  			}elseif($type_remove == 2) {//Elimina 1 ip del rango
 
@@ -2949,6 +3167,7 @@ class CheckpointController extends Controller
    public function removeObjectComplete($object){
 
  		$emailCtrl = new EmailController;
+      $evaluate = "";
 
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
@@ -2984,7 +3203,7 @@ class CheckpointController extends Controller
 
  					if($publish == "success"){
 
-                  $curl = curl_init();
+                  /*$curl = curl_init();
 
                   curl_setopt_array($curl, array(
                     	CURLOPT_URL => "http://localhost:3500/del_object",
@@ -3014,28 +3233,101 @@ class CheckpointController extends Controller
                   			'status_code' => 20
                   		]
                   	]);
-                  }else{
+                  }else{*/
+                  $ssh_command = 'tscpgw_api -g "172.16.3.112" -a deldyo -o '.$object_name;
+                  $ssh_command2 = 'tscpgw_api -g "172.16.3.113" -a adddyo -o '.$object_name;
+                  $ssh_command3 = 'tscpgw_api -g "172.16.3.116" -a adddyo -o '.$object_name;
+                  $ssh_command4 = 'tscpgw_api -g "172.16.3.117" -a adddyo -o '.$object_name;
 
-                     $delete = FwObject::where('id', '=', $object_id)->delete();
+                  \SSH::into('checkpoint')->run($ssh_command, function($line){
+                  	Log::info($line.PHP_EOL);
+                  	$evaluate = $line.PHP_EOL;
+                  });
 
-    						if($delete){
-    							$delete_adds = AddressObject::where('object_id', '=', $object_id)->delete();
-    							if($delete_adds){
+                  $evaluate = $this->output;
 
-    							}else{
-    								$type = "error_ips";
-    								$update_rule = AddressObject::where('id', $id_section)
-    									->update(['status_error' => 1]);
-    								$emailCtrl->sendEmailSection($name_section, $type);
-    							}
-    						}else{
-    							$type = "error";
-    							$update_rule = FwObject::where('id', $object_id)
-    								->update(['status_error' => 1]);
-
-    							$emailCtrl->sendEmailObject($object_name, $type);
-    						}
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 112");
+                  	\SSH::into('checkpoint')->run($ssh_command, function($line){
+                  		Log::info($line.PHP_EOL);
+                  		$evaluate = $line.PHP_EOL;
+                  	});
                   }
+
+                  	sleep(2);
+
+                  	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                  		Log::info($line2.PHP_EOL);
+                  		$evaluate = $line2.PHP_EOL;
+                  	});
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 113");
+                  	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                  		Log::info($line2.PHP_EOL);
+                  		$evaluate = $line2.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+                  	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                  		Log::info($line3.PHP_EOL);
+                  		$evaluate = $line3.PHP_EOL;
+                  	});
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 116");
+                  	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                  		Log::info($line3.PHP_EOL);
+                  		$evaluate = $line3.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+                  	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                  		Log::info($line4.PHP_EOL);
+                  		$evaluate = $line4.PHP_EOL;
+                  	});
+
+                  $evaluate = $this->output;
+
+                  while (stripos($evaluate, "try again") !== false) {
+                  	Log::info("1 existe try again 117");
+                  	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                  		Log::info($line4.PHP_EOL);
+                  		$evaluate = $line4.PHP_EOL;
+                  	});
+                  }
+
+                  sleep(2);
+
+
+                  $delete = FwObject::where('id', '=', $object_id)->delete();
+
+ 						if($delete){
+ 							$delete_adds = AddressObject::where('object_id', '=', $object_id)->delete();
+ 							if($delete_adds){
+
+ 							}else{
+ 								$type = "error_ips";
+ 								$update_rule = AddressObject::where('id', $id_section)
+ 									->update(['status_error' => 1]);
+ 								$emailCtrl->sendEmailSection($name_section, $type);
+ 							}
+ 						}else{
+ 							$type = "error";
+ 							$update_rule = FwObject::where('id', $object_id)
+ 								->update(['status_error' => 1]);
+
+ 							$emailCtrl->sendEmailObject($object_name, $type);
+ 						}
+                  //}
  					}else{
  						$type = "error";
  						$update_rule = FwObject::where('id', $object_id)
@@ -3432,7 +3724,7 @@ class CheckpointController extends Controller
                               ->eSSH(function($response){}, true);
  										sleep(3);*/
 
-                              $curl = curl_init();
+                              /*$curl = curl_init();
 
                               curl_setopt_array($curl, array(
                                  CURLOPT_URL => "http://localhost:3500/new_object",
@@ -3464,73 +3756,220 @@ class CheckpointController extends Controller
                                     ]
                                  ]);
 
-                              }else{
-                                 $publish = $this->publishChanges($sid);
+                              }else{*/
+                              $ssh_command = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
+                              $ssh_command2 = 'tscpgw_api -g "172.16.3.113" -a adddyo -o '.$new_object_name;
+                              $ssh_command3 = 'tscpgw_api -g "172.16.3.116" -a adddyo -o '.$new_object_name;
+                              $ssh_command4 = 'tscpgw_api -g "172.16.3.117" -a adddyo -o '.$new_object_name;
 
-    										if($publish == 'success'){
+                              \SSH::into('checkpoint')->run($ssh_command, function($line){
+                              	Log::info($line.PHP_EOL);
+                              	$evaluate = $line.PHP_EOL;
+                              });
 
-    											$ip_initial = '1.1.1.1';
-    											$ip_last = '1.1.1.1';
+                              $evaluate = $this->output;
 
-    											//Ingreso el rango de ip
-    											$object_id = $object_new->id;
-    											$type_address_id = 7;//Pertenece a rango de ip para checkpoint
-
-                                    $curl = curl_init();
-
-                                    curl_setopt_array($curl, array(
-                                    	CURLOPT_URL => "http://localhost:3500/new_object_ips",
-                                    	CURLOPT_RETURNTRANSFER => true,
-                                    	CURLOPT_ENCODING => "",
-                                    	CURLOPT_MAXREDIRS => 10,
-                                    	CURLOPT_TIMEOUT => 30,
-                                    	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                                    	CURLOPT_SSL_VERIFYPEER => false,
-                                    	CURLOPT_SSL_VERIFYHOST => false,
-                                    	CURLOPT_CUSTOMREQUEST => "POST",
-                                    	CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$new_object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
-                                    	CURLOPT_HTTPHEADER => array(
-                                    		"content-type: application/json",
-                                    	),
-                                    ));
-
-                                    $response = curl_exec($curl);
-                                    $err = curl_error($curl);
-
-                                    curl_close($curl);
-
-                                    if($err){
-                                       return response()->json([
-                           					'error' => [
-                           						'message' => "El objeto se creó pero no las Ips",
-                           						'status_code' => 20
-                           					]
-                           				]);
-                                    }else{
-                                       Log::info("ip agregada ch");
-       											$addr_obj = new AddressObject;
-       											$addr_obj->ip_initial = $ip_initial;
-       											$addr_obj->ip_last = $ip_last;
-       											$addr_obj->object_id = $object_id;
-       											$addr_obj->type_address_id = $type_address_id;
-       											$addr_obj->save();
-
-       											if($addr_obj){
-       												$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
-
-       												if($bd_ips_check){
-       													Log::info("Objeto agregado correctamente");
-       												}else{
-       													Log::info("Se creó el objeto pero no las ips");
-       												}
-       											}else{
-       												Log::info("Se creó el objeto pero no las ips");
-       											}
-                                    }
-    										}else{
-    											Log::info("El objeto no pudo ser creado");
-    										}
+                              while (stripos($evaluate, "try again") !== false) {
+                              	Log::info("1 existe try again 112");
+                              	\SSH::into('checkpoint')->run($ssh_command, function($line){
+                              		Log::info($line.PHP_EOL);
+                              		$evaluate = $line.PHP_EOL;
+                              	});
                               }
+
+                           	sleep(2);
+
+                           	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                           		Log::info($line2.PHP_EOL);
+                           		$evaluate = $line2.PHP_EOL;
+                           	});
+
+                              $evaluate = $this->output;
+
+                              while (stripos($evaluate, "try again") !== false) {
+                              	Log::info("1 existe try again 113");
+                              	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                              		Log::info($line2.PHP_EOL);
+                              		$evaluate = $line2.PHP_EOL;
+                              	});
+                              }
+
+                              sleep(2);
+
+                              	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                              		Log::info($line3.PHP_EOL);
+                              		$evaluate = $line3.PHP_EOL;
+                              	});
+
+                              $evaluate = $this->output;
+
+                              while (stripos($evaluate, "try again") !== false) {
+                              	Log::info("1 existe try again 116");
+                              	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                              		Log::info($line3.PHP_EOL);
+                              		$evaluate = $line3.PHP_EOL;
+                              	});
+                              }
+
+                              sleep(2);
+
+                              	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                              		Log::info($line4.PHP_EOL);
+                              		$evaluate = $line4.PHP_EOL;
+                              	});
+
+                              $evaluate = $this->output;
+
+                              while (stripos($evaluate, "try again") !== false) {
+                              	Log::info("1 existe try again 117");
+                              	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                              		Log::info($line4.PHP_EOL);
+                              		$evaluate = $line4.PHP_EOL;
+                              	});
+                              }
+
+                              sleep(2);
+
+                              $publish = $this->publishChanges($sid);
+
+ 										if($publish == 'success'){
+
+ 											$ip_initial = '1.1.1.1';
+ 											$ip_last = '1.1.1.1';
+
+ 											//Ingreso el rango de ip
+ 											$object_id = $object_new->id;
+ 											$type_address_id = 7;//Pertenece a rango de ip para checkpoint
+
+                                 /*$curl = curl_init();
+
+                                 curl_setopt_array($curl, array(
+                                 	CURLOPT_URL => "http://localhost:3500/new_object_ips",
+                                 	CURLOPT_RETURNTRANSFER => true,
+                                 	CURLOPT_ENCODING => "",
+                                 	CURLOPT_MAXREDIRS => 10,
+                                 	CURLOPT_TIMEOUT => 30,
+                                 	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                 	CURLOPT_SSL_VERIFYPEER => false,
+                                 	CURLOPT_SSL_VERIFYHOST => false,
+                                 	CURLOPT_CUSTOMREQUEST => "POST",
+                                 	CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$new_object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
+                                 	CURLOPT_HTTPHEADER => array(
+                                 		"content-type: application/json",
+                                 	),
+                                 ));
+
+                                 $response = curl_exec($curl);
+                                 $err = curl_error($curl);
+
+                                 curl_close($curl);
+
+                                 if($err){
+                                    return response()->json([
+                        					'error' => [
+                        						'message' => "El objeto se creó pero no las Ips",
+                        						'status_code' => 20
+                        					]
+                        				]);
+                                 }else{*/
+                                 $ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+                                 $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+                                 $ssh_command3 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+                                 $ssh_command4 = "tscpgw_api -g '172.16.3.117' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+
+
+                                 \SSH::into('checkpoint')->run($ssh_command, function($line){
+                                 	Log::info($line.PHP_EOL);
+                                 	$evaluate = $line.PHP_EOL;
+                                 });
+
+                                 $evaluate = $this->output;
+
+                                 while (stripos($evaluate, "try again") !== false) {
+                                 	Log::info("1 existe try again 112");
+                                 	\SSH::into('checkpoint')->run($ssh_command, function($line){
+                                 		Log::info($line.PHP_EOL);
+                                 		$evaluate = $line.PHP_EOL;
+                                 	});
+                                 }
+
+                                 sleep(2);
+
+                                 \SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                                 	Log::info($line2.PHP_EOL);
+                                 	$evaluate = $line2.PHP_EOL;
+                                 });
+
+                                 $evaluate = $this->output;
+
+                                 while (stripos($evaluate, "try again") !== false) {
+                                 	Log::info("1 existe try again 113");
+                                 	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                                 		Log::info($line2.PHP_EOL);
+                                 		$evaluate = $line2.PHP_EOL;
+                                 	});
+                                 }
+
+                                 sleep(2);
+
+                                 \SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                                 	Log::info($line3.PHP_EOL);
+                                 	$evaluate = $line3.PHP_EOL;
+                                 });
+
+                                 $evaluate = $this->output;
+
+                                 while (stripos($evaluate, "try again") !== false) {
+                                 	Log::info("1 existe try again 116");
+                                 	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                                 		Log::info($line3.PHP_EOL);
+                                 		$evaluate = $line3.PHP_EOL;
+                                 	});
+                                 }
+
+                                 sleep(2);
+
+                                 \SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                                 	Log::info($line4.PHP_EOL);
+                                 	$evaluate = $line4.PHP_EOL;
+                                 });
+
+                                 $evaluate = $this->output;
+
+                                 while (stripos($evaluate, "try again") !== false) {
+                                 	Log::info("1 existe try again 117");
+                                 	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                                 		Log::info($line4.PHP_EOL);
+                                 		$evaluate = $line4.PHP_EOL;
+                                 	});
+                                 }
+
+                                 sleep(2);
+
+                                 Log::info("ip agregada ch");
+ 											$addr_obj = new AddressObject;
+ 											$addr_obj->ip_initial = $ip_initial;
+ 											$addr_obj->ip_last = $ip_last;
+ 											$addr_obj->object_id = $object_id;
+ 											$addr_obj->type_address_id = $type_address_id;
+ 											$addr_obj->save();
+
+ 											if($addr_obj){
+ 												$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
+
+ 												if($bd_ips_check){
+ 													Log::info("Objeto agregado correctamente");
+ 												}else{
+ 													Log::info("Se creó el objeto pero no las ips");
+ 												}
+ 											}else{
+ 												Log::info("Se creó el objeto pero no las ips");
+ 											}
+                                 //}
+ 										}else{
+ 											Log::info("El objeto no pudo ser creado");
+ 										}
+                              //}
  									}else{
  										Log::info("El objeto no pudo ser creado");
  									}
@@ -3672,7 +4111,7 @@ class CheckpointController extends Controller
  								$del_obj = DB::table('fw_objects')->where('id', '=', $id_object)->delete();
 
  								if($del_obj){
- 									$curl = curl_init();
+ 									/*$curl = curl_init();
 
                            curl_setopt_array($curl, array(
                              	CURLOPT_URL => "http://localhost:3500/del_object",
@@ -3699,7 +4138,81 @@ class CheckpointController extends Controller
                            	Log::info("No se eliminó con script");
                            }else{
                               Log::info("se eliminó objeto");
+                           }*/
+
+                           $ssh_command = 'tscpgw_api -g "172.16.3.112" -a deldyo -o '.$object_name;
+                           $ssh_command2 = 'tscpgw_api -g "172.16.3.113" -a adddyo -o '.$object_name;
+                           $ssh_command3 = 'tscpgw_api -g "172.16.3.116" -a adddyo -o '.$object_name;
+                           $ssh_command4 = 'tscpgw_api -g "172.16.3.117" -a adddyo -o '.$object_name;
+
+                           \SSH::into('checkpoint')->run($ssh_command, function($line){
+                           	Log::info($line.PHP_EOL);
+                           	$evaluate = $line.PHP_EOL;
+                           });
+
+                           $evaluate = $this->output;
+
+                           while (stripos($evaluate, "try again") !== false) {
+                           	Log::info("1 existe try again 112");
+                           	\SSH::into('checkpoint')->run($ssh_command, function($line){
+                           		Log::info($line.PHP_EOL);
+                           		$evaluate = $line.PHP_EOL;
+                           	});
                            }
+
+                           	sleep(2);
+
+                           	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                           		Log::info($line2.PHP_EOL);
+                           		$evaluate = $line2.PHP_EOL;
+                           	});
+
+                           $evaluate = $this->output;
+
+                           while (stripos($evaluate, "try again") !== false) {
+                           	Log::info("1 existe try again 113");
+                           	\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+                           		Log::info($line2.PHP_EOL);
+                           		$evaluate = $line2.PHP_EOL;
+                           	});
+                           }
+
+                           sleep(2);
+
+                           	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                           		Log::info($line3.PHP_EOL);
+                           		$evaluate = $line3.PHP_EOL;
+                           	});
+
+                           $evaluate = $this->output;
+
+                           while (stripos($evaluate, "try again") !== false) {
+                           	Log::info("1 existe try again 116");
+                           	\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+                           		Log::info($line3.PHP_EOL);
+                           		$evaluate = $line3.PHP_EOL;
+                           	});
+                           }
+
+                           sleep(2);
+
+                           	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                           		Log::info($line4.PHP_EOL);
+                           		$evaluate = $line4.PHP_EOL;
+                           	});
+
+                           $evaluate = $this->output;
+
+                           while (stripos($evaluate, "try again") !== false) {
+                           	Log::info("1 existe try again 117");
+                           	\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+                           		Log::info($line4.PHP_EOL);
+                           		$evaluate = $line4.PHP_EOL;
+                           	});
+                           }
+
+                           sleep(2);
+
  								}else{
  									Log::info("NO se eliminó objeto");
  								}
@@ -4042,7 +4555,70 @@ class CheckpointController extends Controller
 
    public function evaluateObjectsChanges(){
 
+      $date_init = \Carbon\Carbon::now()->subMinute(5);
+      $date_last = \Carbon\Carbon::now();
 
+      $date_init = $date_init->toIso8601ZuluString();
+      $date_last = $date_last->toIso8601ZuluString();
+
+      $date_init = str_replace('Z', '', $date_init);
+      $date_last = str_replace('Z', '', $date_last);
+      Log::info($date_init.' '.$date_last);
+
+      if(Session::has('sid_session')) $sid = Session::get('sid_session');
+      else $sid = $this->getLastSession();
+
+      Control::curl("172.16.3.114")
+      ->is('show-changes')
+      ->config([
+         'from-date' => '2018-09-26T11:30:51',
+         'to-date' => '2018-09-26T11:55:51'
+      ])
+      ->sid($sid)
+      ->eCurl(function($response){
+         $this->output = $response;
+         $this->typeResponseCurl = 1;
+      });
+
+      $resp = json_decode($this->output, true);
+
+      if(isset($resp['task-id'])){
+         $task = $resp['task-id'];
+         sleep(2);
+         $result_task = $this->showTask($task, $sid);
+         $array_tasks = [];
+         $i = 0;
+
+         foreach ($result_task['tasks'] as $key => $value) {
+            foreach ($value['task-details'] as $key2 => $value2) {
+               foreach($value2['changes'] as $row){
+                  $array_tasks[$i] = array_filter($row['operations']);
+                  $i++;
+               }
+            }
+         }
+
+         $i = 0;
+         $info_changes = [];
+         foreach ($array_tasks as $key => $value) {
+            foreach ($value as $key2 => $value2) {
+               $info_changes[$i]['type_change'] = $key2;
+               $info_changes[$i]['data'] = $value2;
+
+               $i++;
+            }
+         }
+         Log::info($info_changes);
+         //return "success";
+         //return $array_tasks;
+      }elseif(isset($resp['code'])){
+         Log::info($resp['message']);
+
+      }
+      else{
+         Log::info($resp['message']);
+         //return "error";
+      }
 
    }
 
