@@ -180,8 +180,8 @@ class FortisiemController extends Controller
       if(count($json) > 0){
          return response()->json([
             'success' => [
-              'data' => $json,
-              'status_code' => 200
+               'data' => $json,
+               'status_code' => 200
             ]
          ]);
       }else{
@@ -190,8 +190,8 @@ class FortisiemController extends Controller
 
          return response()->json([
             'error' => [
-              'message' => "No data",
-              'status_code' => 20
+               'message' => "No data",
+               'status_code' => 20
             ]
          ]);
       }
