@@ -176,7 +176,7 @@ class CheckpointController extends Controller
    public function installPolicy(){
 
       Log::info("llega al install");
-      die();
+
       $checkpoint2 = new CheckPointFunctionController;
 
       if(Session::has('sid_session'))
@@ -2006,7 +2006,7 @@ class CheckpointController extends Controller
     					if($publish == "success"){
     						$delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
-    						// $delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
+    						//$delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
     						if($delete_add){
     							return response()->json([
     								'success' => [

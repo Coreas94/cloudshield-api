@@ -352,30 +352,38 @@ class LayersController extends Controller
 
 					sleep(2);
 
-	            return response()->json([
+	            /*return response()->json([
 	               'success' => [
 	                  'message' => "Datos ingresados correctamente",
 	                  'status_code' => 200
 	               ]
-	            ]);
+	            ]);*/
 	         }else{
-	            return response()->json([
+					Log::info("No se guardó en el checkpoint, solo localmente!");
+	            /*return response()->json([
 	               'error' => [
 	                  'message' => "No se guardó en el checkpoint, solo localmente!",
 	                  'status_code' => 20
 	               ]
-	            ]);
+	            ]);*/
 	         }
 	      }else{
-	         return response()->json([
+				Log::info("No se guardaron los datos");
+	         /*return response()->json([
 	            'error' => [
 	               'message' => "No se guardaron los datos",
 	               'status_code' => 20
 	            ]
-	         ]);
+	         ]);*/
 	      }
-
 		}
+
+		return response()->json([
+			'success' => [
+				'message' => "Datos ingresados correctamente",
+				'status_code' => 200
+			]
+		]);
 
    }
 
@@ -385,52 +393,82 @@ class LayersController extends Controller
       $ip_initial = $request['ip_initial'];
       $ip_last = $ip_initial;
       $id_list = $request['id'];
+		$evaluate = "";
 
-      $ssh_command = 'tscpgw_api -g "172.16.3.112" -a delrip -o '.$object_name.' -r '. $ip_initial.' '.$ip_last;
-      \SSH::into('checkpoint')->run($ssh_command, function($line){
-         Log::info($line.PHP_EOL);
-         $this->output = $line.PHP_EOL;
-      });
 
-      sleep(3);
+		$ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+		$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+		$ssh_command3 = "tscpgw_api -g '172.16.3.116' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+		$ssh_command4 = "tscpgw_api -g '172.16.3.117' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
 
-      $evaluate = $this->output;
-      Log::info("1099 ". $evaluate);
 
-      while (stripos($evaluate, "try again") !== false) {
-         Log::info("remove ip existe try again");
-         \SSH::into('checkpoint')->run($ssh_command, function($line){
-            Log::info($line.PHP_EOL);
-            $this->output = $line.PHP_EOL;
-         });
+		\SSH::into('checkpoint')->run($ssh_command, function($line){
+			Log::info($line.PHP_EOL);
+			$evaluate = $line.PHP_EOL;
+		});
 
-         $evaluate = $this->output;
-      }
+		$evaluate = $this->output;
 
-      sleep(3);
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 112");
+			\SSH::into('checkpoint')->run($ssh_command, function($line){
+				Log::info($line.PHP_EOL);
+				$evaluate = $line.PHP_EOL;
+			});
+		}
 
-      $ssh_command2 = 'tscpgw_api -g "172.16.3.113" -a delrip -o '.$object_name.' -r '. $ip_initial.' '.$ip_last;
-      \SSH::into('checkpoint')->run($ssh_command2, function($line2){
-         Log::info($line2.PHP_EOL);
-         $this->output = $line2.PHP_EOL;
-      });
+		sleep(2);
 
-      $evaluate = $this->output;
-      Log::info("1120 ". $evaluate);
+		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+			Log::info($line2.PHP_EOL);
+			$evaluate = $line2.PHP_EOL;
+		});
 
-      sleep(3);
+		$evaluate = $this->output;
 
-      while (stripos($evaluate, "try again") !== false) {
-         Log::info("2 remove ip existe try again");
-         \SSH::into('checkpoint')->run($ssh_command2, function($line2){
-            Log::info($line2.PHP_EOL);
-            $this->output = $line2.PHP_EOL;
-         });
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 113");
+			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+				Log::info($line2.PHP_EOL);
+				$evaluate = $line2.PHP_EOL;
+			});
+		}
 
-         $evaluate = $this->output;
-      }
+		sleep(2);
 
-      sleep(3);
+		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+			Log::info($line3.PHP_EOL);
+			$evaluate = $line3.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 116");
+			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+				Log::info($line3.PHP_EOL);
+				$evaluate = $line3.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+			Log::info($line4.PHP_EOL);
+			$evaluate = $line4.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false) {
+			Log::info("1 existe try again 117");
+			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+				Log::info($line4.PHP_EOL);
+				$evaluate = $line4.PHP_EOL;
+			});
+		}
+
+		sleep(2);
 
       $delete_list = DB::table('layers_security_list')->where('id', '=', $id_list)->delete();
 
