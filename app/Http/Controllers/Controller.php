@@ -29,18 +29,19 @@ class Controller extends BaseController
 
    public function prueba2(){
 
-      $new_object_name = 'CUST-RM688-BLACKLIST-OUTGOING';
-      $ip_initial = '198.198.198.198';
-      $ip_last = '198.198.198.198';
+      $new_object_name = 'ObjetoParaBorrar';
+      $ip_initial = '198.198.198.5';
+      $ip_last = '198.198.198.1';
 
-      $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      //$ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
 
       Log::info($ssh_command2);
 		//$ssh_command3 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r ".$ip_initial." ".$ip_last;
 
 		\SSH::into('checkpoint')->run($ssh_command2, function($line){
 			Log::info($line.PHP_EOL);
-			$evaluate = $line.PHP_EOL;
+			//$evaluate = $line.PHP_EOL;
 		});
    }
 
