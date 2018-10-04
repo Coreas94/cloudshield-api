@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
    protected $commands = [
      // Commands\Inspire::class,
      Commands\dataFortisiem::class,
-     Commands\installPolicy::class
+     Commands\installPolicy::class,
+     Commands\resendDataCheckpoint::class
    ];
 
    /**

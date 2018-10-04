@@ -29,7 +29,22 @@ class Controller extends BaseController
 
    public function prueba2(){
 
-      $new_object_name = 'ObjetoParaBorrar';
+      $data = Session::get('data_tmp');
+      Log::info($data);
+
+      /*$object_name = 'ObjetoParaBorrar';
+      $ip_initial = '198.198.198.1';
+      $ip_last = '198.198.198.2';
+      $array_data = [];
+
+      $temp_data = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip");
+      array_push($array_data, $temp_data);
+
+      Session::put('data_tmp2', $array_data);
+
+
+      \Artisan::call('checkpoint:resendData');*/
+      /*$new_object_name = 'ObjetoParaBorrar';
       $ip_initial = '198.198.198.5';
       $ip_last = '198.198.198.1';
 
@@ -42,7 +57,7 @@ class Controller extends BaseController
 		\SSH::into('checkpoint')->run($ssh_command2, function($line){
 			Log::info($line.PHP_EOL);
 			//$evaluate = $line.PHP_EOL;
-		});
+		});*/
    }
 
    public function test(){

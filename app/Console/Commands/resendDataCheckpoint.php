@@ -4,25 +4,25 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Http\Controllers\CheckpointController;
+use App\Http\Controllers\ValidateCommandController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
-class installPolicy extends Command
+class resendDataCheckpoint extends Command
 {
-   private $test;
    /**
    * The name and signature of the console command.
    *
    * @var string
    */
-   protected $signature = 'checkpoint:installPolicies';
+   protected $signature = 'checkpoint:resendData';
 
    /**
    * The console command description.
    *
    * @var string
    */
-   protected $description = 'Command to execute install policy in checkpoint';
+   protected $description = 'Command for resend data temp to checkpoint';
 
    /**
    * Create a new command instance.
@@ -31,7 +31,7 @@ class installPolicy extends Command
    */
    public function __construct()
    {
-      parent::__construct();
+     parent::__construct();
    }
 
    /**
@@ -39,8 +39,9 @@ class installPolicy extends Command
    *
    * @return mixed
    */
-   public function handle(CheckpointController $checkpoint)
-   {
-      $checkpoint->installPolicy();
+   public function handle(ValidateCommandController $validate){
+      Log::info("LLega al resend");
+
+      $validate->resendDataTemp();
    }
 }
