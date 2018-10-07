@@ -9,11 +9,11 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '1d1b89d124cc9cb8219922c9d5569199' => __DIR__ . '/..' . '/hamcrest/hamcrest-php/hamcrest/Hamcrest.php',
+        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         'bd9634f2d41831496de0d3dfe4c94881' => __DIR__ . '/..' . '/symfony/polyfill-php56/bootstrap.php',
         '2c102faa651ef8ea5874edb585946bce' => __DIR__ . '/..' . '/swiftmailer/swiftmailer/lib/swift_required.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
-        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '3a37ebac017bc098e9a86b35401e7a68' => __DIR__ . '/..' . '/mongodb/mongodb/src/functions.php',
         '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
         'e7223560d890eab89cda23685e711e2c' => __DIR__ . '/..' . '/psy/psysh/src/Psy/functions.php',
@@ -71,7 +71,11 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
         ),
         'R' => 
         array (
+            'React\\Stream\\' => 13,
+            'React\\Socket\\' => 13,
             'React\\Promise\\' => 14,
+            'React\\EventLoop\\' => 16,
+            'Ratchet\\' => 8,
         ),
         'P' => 
         array (
@@ -124,6 +128,7 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
             'Cviebrock\\LaravelElasticsearch\\' => 31,
             'Cron\\' => 5,
             'Collective\\Remote\\' => 18,
+            'Codemash\\Socket\\' => 16,
             'ClassPreloader\\' => 15,
         ),
         'A' => 
@@ -227,9 +232,25 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
         array (
             0 => __DIR__ . '/..' . '/jeremeamia/SuperClosure/src',
         ),
+        'React\\Stream\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/stream/src',
+        ),
+        'React\\Socket\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/socket/src',
+        ),
         'React\\Promise\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/promise/src',
+        ),
+        'React\\EventLoop\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/event-loop/src',
+        ),
+        'Ratchet\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cboden/ratchet/src/Ratchet',
         ),
         'Psy\\' => 
         array (
@@ -319,6 +340,10 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
         array (
             0 => __DIR__ . '/..' . '/laravelcollective/remote/src',
         ),
+        'Codemash\\Socket\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/codemash/laravel-socket/src',
+        ),
         'ClassPreloader\\' => 
         array (
             0 => __DIR__ . '/..' . '/classpreloader/classpreloader/src',
@@ -365,6 +390,32 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
             'JakubOnderka\\PhpConsoleColor' => 
             array (
                 0 => __DIR__ . '/..' . '/jakub-onderka/php-console-color/src',
+            ),
+        ),
+        'G' => 
+        array (
+            'Guzzle\\Stream' => 
+            array (
+                0 => __DIR__ . '/..' . '/guzzle/stream',
+            ),
+            'Guzzle\\Parser' => 
+            array (
+                0 => __DIR__ . '/..' . '/guzzle/parser',
+            ),
+            'Guzzle\\Http' => 
+            array (
+                0 => __DIR__ . '/..' . '/guzzle/http',
+            ),
+            'Guzzle\\Common' => 
+            array (
+                0 => __DIR__ . '/..' . '/guzzle/common',
+            ),
+        ),
+        'E' => 
+        array (
+            'Evenement' => 
+            array (
+                0 => __DIR__ . '/..' . '/evenement/evenement/src',
             ),
         ),
         'D' => 

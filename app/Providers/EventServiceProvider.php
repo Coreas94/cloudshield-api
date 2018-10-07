@@ -7,27 +7,33 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
+   /**
      * The event listener mappings for the application.
      *
      * @var array
-     */
-    protected $listen = [
-        'App\Events\SomeEvent' => [
-            'App\Listeners\EventListener',
-        ],
-    ];
+   */
 
-    /**
+   protected $listen = [
+      'App\Events\SomeEvent' => [
+         'App\Listeners\EventListener',
+      ],
+   ];
+
+   protected $subscribe = [
+      'App\Listeners\MessageEventListener'
+   ];
+
+   /**
      * Register any other events for your application.
      *
      * @param  \Illuminate\Contracts\Events\Dispatcher  $events
      * @return void
-     */
-    public function boot(DispatcherContract $events)
-    {
-        parent::boot($events);
+   */
 
-        //
-    }
+   public function boot(DispatcherContract $events)
+   {
+      parent::boot($events);
+
+      //
+   }
 }

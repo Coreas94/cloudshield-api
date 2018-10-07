@@ -152,6 +152,7 @@ return [
         Jenssegers\Mongodb\MongodbServiceProvider::class,
         Zizaco\Entrust\EntrustServiceProvider::class,
         Cviebrock\LaravelElasticsearch\ServiceProvider::class,
+        Codemash\Socket\SocketServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -209,7 +210,8 @@ return [
         'JWTAuth' => 'Tymon\JWTAuth\Facades\JWTAuth',
         'SSH' => Collective\Remote\RemoteFacade::class,
         'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
-        'Elasticsearch' => Cviebrock\LaravelElasticsearch\Facade::class
+        'Elasticsearch' => Cviebrock\LaravelElasticsearch\Facade::class,
+        'Socket' => Codemash\Socket\Facades\Socket::class
 
     ],
 
