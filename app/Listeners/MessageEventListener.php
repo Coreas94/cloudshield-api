@@ -5,44 +5,67 @@ namespace App\Listeners;
 use Codemash\Socket\Events\MessageReceived;
 use Codemash\Socket\Events\ClientConnected;
 use Codemash\Socket\Events\ClientDisconnected;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
+use JWTAuth;
+use Illuminate\Support\Facades\DB;
 
 class MessageEventListener {
+
+   /*public function __construct(Request $request){
+      $this->request = $request;
+   }*/
 
    public function onMessageReceived(MessageReceived $event)
    {
       \Log::info("llega al socket2");
-     $message = $event->message;
-     //\Log::info(print_r($message->data, true));
+      $message = $event->message;
+      //\Log::info(print_r($message->data, true));
 
-      // If the incomming command is 'sendMessageToOthers', forward the message to the others.
+      //If the incomming command is 'sendMessageToOthers', forward the message to the others.
       if ($message->command === 'sendMessageToOthers') {
-         // To get the client sending this message, use the $event->from property.
-         // To get a list of all connected clients, use the $event->clients pointer.
+         //To get the client sending this message, use the $event->from property.
+         //To get a list of all connected clients, use the $event->clients pointer.
          $others = $event->onlyMe();
          \Log::info($others);
 
          foreach ($others as $client) {
-            // The $message->data property holds the actual message
+            //The $message->data property holds the actual message
             $client->send('newMessage', $message->data);
          }
-
       }elseif ($message->command === 'installIps') {
 
-         $data_success = Session::get('temp_data_succ');
-         $data_error = Session::get('temp_data_err');
+         $token = $message->data;
 
-         $array_response = array('data_success' => $data_success, 'data_error' => $data_error);
+         $json2 = json_decode(json_encode($token), true);
+
+         Log::info(print_r($json2, true));
+         $userLog = JWTAuth::toUser($token->scalar);
+         \Log::info($userLog);
+         $api_token = $userLog['api_token'];
+         $company_id = $userLog['company_id'];
+         $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+         $company_data2 = json_decode(json_encode($company_data), true);
+
+         $name_company = $company_data2[0]['name'];
+
+         $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+         $json_response = json_decode(file_get_contents($path), true);
+
 
          $others = $event->onlyMe();
-         foreach ($others as $client) {
-            $client->send('newMessage', $array_response);
+         #\Log::info($others);
+         foreach ($others as $client){
+            $client->send('installIps', $json_response);
          }
       }
    }
 
    public function onConnected(ClientConnected $event)
    {
-     // Not used in this example.
+      //Not used in this example.
       \Log::info("Llega al socket");
 
       $others = $event->allOtherClients();
@@ -50,7 +73,7 @@ class MessageEventListener {
 
    public function onDisconnected(ClientDisconnected $event)
    {
-     // Not used in this example.
+      // Not used in this example.
    }
 
    /**
@@ -74,6 +97,5 @@ class MessageEventListener {
          'Codemash\Socket\Events\ClientDisconnected',
          'App\Listeners\MessageEventListener@onDisconnected'
       );
-
    }
 }

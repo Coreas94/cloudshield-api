@@ -317,7 +317,11 @@ class CheckpointController extends Controller
 
    public function assignIpObject(Request $request){
 
-      Log::info($request);
+      $arreglo_data = [];
+      $error_data = [];
+
+      //EVALUAR ARCHIVO JSON
+      
 
       $validateCmd = new ValidateCommandController;
 
@@ -340,12 +344,25 @@ class CheckpointController extends Controller
          $ip_initial = $value['ip_initial'];
          $ip_last = $value['ip_last'];
 
-         Log::info($total_ips);
-         Log::info($flag);
-
          $validateAdddyo = $validateCmd->validateAssignIpObject($object_name, $ip_initial, $ip_last, $total_ips, $flag);
+
+         array_push($arreglo_data, $validateAdddyo);
+
          $flag++;
       }
+
+      $userLog = JWTAuth::toUser($request['token']);
+      Log::info($userLog);
+      $api_token = $userLog['api_token'];
+      $company_id = $userLog['company_id'];
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+
+
+      $json = json_encode($arreglo_data);
+      \Storage::put($name_company.'/'.$api_token.'.json', $json);
 
       sleep(2);
 
@@ -1660,7 +1677,6 @@ class CheckpointController extends Controller
 
                //Mando a eliminar las ips de los checkpoint
                $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $ip_initial, $ip_last);
-
 
                sleep(2);
 

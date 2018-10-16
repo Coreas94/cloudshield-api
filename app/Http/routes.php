@@ -17,7 +17,7 @@ Route::get('/', function () {
 
 Route::get('prueba', 'Controller@prueba2');
 
-Route::group(['middleware' => ['api'], 'prefix' => 'api/v2'], function(){
+Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
    Route::group(['middleware' => ['jwt-auth']], function(){
 

@@ -22,15 +22,14 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use phpseclib\Net\SFTP;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Http\Request;
 
 class Controller extends BaseController
 {
    use AuthorizesRequests, AuthorizesResources, DispatchesJobs, ValidatesRequests;
 
-   public function prueba2(){
-
-      $data = Session::get('data_tmp');
-      Log::info($data);
+   public function prueba2(Request $request){
+      \Storage::makeDirectory('holis', 777);
 
       /*$object_name = 'ObjetoParaBorrar';
       $ip_initial = '198.198.198.1';
@@ -42,13 +41,18 @@ class Controller extends BaseController
 
       Session::put('data_tmp2', $array_data);
 
-
       \Artisan::call('checkpoint:resendData');*/
-      /*$new_object_name = 'ObjetoParaBorrar';
-      $ip_initial = '198.198.198.5';
-      $ip_last = '198.198.198.1';
+      $new_object_name = 'Objeto4Prueba';
+      // $ip_initial = '198.198.198.5';
+      // $ip_last = '198.198.198.5';
+      $ip_initial = '208.208.208.208';
+      $ip_last = '208.208.208.208';
 
-      $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a count -o ".$new_object_name;
+      #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a ranges -o ".$new_object_name;
+      $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+
       //$ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
 
       Log::info($ssh_command2);
@@ -57,7 +61,7 @@ class Controller extends BaseController
 		\SSH::into('checkpoint')->run($ssh_command2, function($line){
 			Log::info($line.PHP_EOL);
 			//$evaluate = $line.PHP_EOL;
-		});*/
+		});
    }
 
    public function test(){

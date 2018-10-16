@@ -33,7 +33,6 @@ class ValidateCommandController extends Controller{
    private $output = "";
 
    public function __construct(){
-
   	}
 
    public function validateCreateObject($new_object_name){
@@ -53,7 +52,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-      while ( (stripos($evaluate, "try again")) !== false || ($flag > 2) ) {
+      while ((stripos($evaluate, "try again")) !== false || ($flag > 2)) {
          $flag++;
          Log::info("1 existe try again 112");
          \SSH::into('checkpoint')->run($ssh_command, function($line){
@@ -76,7 +75,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-      while ( (stripos($evaluate, "try again")) !== false || ($flag > 2) ) {
+      while ((stripos($evaluate, "try again")) !== false || ($flag > 2)) {
          $flag++;
          Log::info("1 existe try again 113");
          \SSH::into('checkpoint')->run($ssh_command2, function($line2){
@@ -99,7 +98,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-      while ( (stripos($evaluate, "try again")) !== false || ($flag > 2) ) {
+      while ((stripos($evaluate, "try again")) !== false || ($flag > 2)) {
          $flag++;
          Log::info("1 existe try again 116");
          \SSH::into('checkpoint')->run($ssh_command3, function($line3){
@@ -122,7 +121,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-      while ( (stripos($evaluate, "try again")) !== false || ($flag > 2) ) {
+      while ((stripos($evaluate, "try again")) !== false || ($flag > 2)) {
          $flag++;
          Log::info("1 existe try again 117");
          \SSH::into('checkpoint')->run($ssh_command4, function($line4){
@@ -161,7 +160,9 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) || ($flag > 2)) {
+      #while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
+		while ( (stripos($evaluate, "completed successfully") !== true ) || ($flag > 2)) {
+
          $flag++;
 			Log::info("1 existe try again 112");
 			\SSH::into('checkpoint')->run($ssh_command, function($line){
@@ -188,7 +189,8 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) || ($flag > 2) ) {
+		//while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
+      while ( (stripos($evaluate, "completed successfully") !== true ) || ($flag > 2)) {
          $flag++;
 			Log::info("1 existe try again 113");
 			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
@@ -215,7 +217,8 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) || ($flag > 2) ) {
+		//while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
+      while ( (stripos($evaluate, "completed successfully") !== true ) || ($flag > 2)) {
          $flag++;
 			Log::info("1 existe try again 116");
 			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
@@ -242,7 +245,8 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) || ($flag > 2) ) {
+		//while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
+      while ( (stripos($evaluate, "completed successfully") !== true ) || ($flag > 2)) {
          $flag++;
 			Log::info("1 existe try again 117");
 			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
@@ -261,15 +265,14 @@ class ValidateCommandController extends Controller{
 
       sleep(2);
 
-      Session::put('temp_data_err', $array_data_err);
-      Session::put('temp_data_succ', $array_data_succ);
+      $arreglo = array("success" => $array_data_succ, "error" => $array_data_err, "info" => $total_ips);
 
-      return "Datos ingresados";
+      return $arreglo;
    }
 
    public function resendDataTemp(){
 
-      $data = Session::get('data_tmp');
+      $data = Session::get('temp_data_err');
       Log::info($data);
       $evaluate = "";
 
@@ -287,7 +290,7 @@ class ValidateCommandController extends Controller{
 
                $evaluate = $this->output;
 
-               while ( (stripos($evaluate, "try again") !== false)) {
+               while ((stripos($evaluate, "try again") !== false)) {
                   Log::info("1 existe try again 112");
                   \SSH::into('checkpoint')->run($ssh_command, function($line){
                      Log::info($line.PHP_EOL);
@@ -308,7 +311,7 @@ class ValidateCommandController extends Controller{
 
                $evaluate = $this->output;
 
-               while ( (stripos($evaluate, "try again") !== false)) {
+               while ((stripos($evaluate, "try again") !== false)) {
                   Log::info("1 existe try again 112");
                   \SSH::into('checkpoint')->run($ssh_command, function($line){
                      Log::info($line.PHP_EOL);
@@ -333,8 +336,10 @@ class ValidateCommandController extends Controller{
       $ssh_command3 = 'tscpgw_api -g "172.16.3.116" -a deldyo -o '.$object_name;
       $ssh_command4 = 'tscpgw_api -g "172.16.3.117" -a deldyo -o '.$object_name;
       $flag = 0;
-      $temp_data = [];
-      $array_data = [];
+      $array_data_err = [];
+      $temp_data_err = [];
+      $array_data_succ = [];
+      $temp_data_succ = [];
 
       \SSH::into('checkpoint')->run($ssh_command, function($line){
          Log::info($line.PHP_EOL);
@@ -352,8 +357,8 @@ class ValidateCommandController extends Controller{
       }
 
       if($flag > 2){
-         $temp_data = array("server"=>"172.16.3.112", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
-         array_push($array_data, $temp_data);
+         $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
+         array_push($array_data_err, $temp_data_err);
       }
 
       sleep(2);
@@ -374,8 +379,8 @@ class ValidateCommandController extends Controller{
       }
 
       if($flag > 2){
-         $temp_data = array("server"=>"172.16.3.112", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
-         array_push($array_data, $temp_data);
+         $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
+         array_push($array_data_err, $temp_data_err);
       }
 
       sleep(2);
@@ -396,8 +401,8 @@ class ValidateCommandController extends Controller{
       }
 
       if($flag > 2){
-         $temp_data = array("server"=>"172.16.3.112", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
-         array_push($array_data, $temp_data);
+         $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
+         array_push($array_data_err, $temp_data_err);
       }
 
       sleep(2);
@@ -418,13 +423,13 @@ class ValidateCommandController extends Controller{
       }
 
       if($flag > 2){
-         $temp_data = array("server"=>"172.16.3.112", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
-         array_push($array_data, $temp_data);
+         $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$new_object_name, "type" => "deldyo", "class" => "object");
+         array_push($array_data_err, $temp_data_err);
       }
 
       sleep(2);
 
-      Session::put('data_tmp', $array_data);
+      Session::put('temp_data_err', $array_data_err);
 
       return "success";
    }
@@ -437,7 +442,10 @@ class ValidateCommandController extends Controller{
       $ssh_command4 = "tscpgw_api -g '172.16.3.117' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
 
       $flag = 0;
-      $array_data = [];
+      $array_data_err = [];
+      $temp_data_err = [];
+      $array_data_succ = [];
+      $temp_data_succ = [];
 
 		\SSH::into('checkpoint')->run($ssh_command, function($line){
 			Log::info($line.PHP_EOL);
@@ -446,7 +454,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( (stripos($evaluate, "try again") !== false) || ($flag > 2) ) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
          $flag++;
 			Log::info("1 existe try again 112");
 			\SSH::into('checkpoint')->run($ssh_command, function($line){
@@ -455,10 +463,13 @@ class ValidateCommandController extends Controller{
 			});
 		}
 
-      if($flag >= 2){
-         $temp_data = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
-         array_push($array_data, $temp_data);
-      }
+      if($flag > 2){
+         $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
+         array_push($array_data_err, $temp_data_err);
+      }/*else{
+         $temp_data_succ = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
+         array_push($array_data_succ, $temp_data_succ);
+      }*/
 
 		sleep(2);
 
@@ -470,7 +481,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( (stripos($evaluate, "try again") !== false) || ($flag > 2) ) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
          $flag++;
 			Log::info("1 existe try again 113");
 			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
@@ -480,9 +491,12 @@ class ValidateCommandController extends Controller{
 		}
 
       if($flag > 2){
-         $temp_data = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
-         array_push($array_data, $temp_data);
-      }
+         $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
+         array_push($array_data_err, $temp_data_err);
+      }/*else{
+         $temp_data_succ = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
+         array_push($array_data_succ, $temp_data_succ);
+      }*/
 
       sleep(2);
 
@@ -494,7 +508,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( (stripos($evaluate, "try again") !== false) || ($flag > 2) ) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
          $flag++;
 			Log::info("1 existe try again 116");
 			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
@@ -504,9 +518,12 @@ class ValidateCommandController extends Controller{
 		}
 
       if($flag > 2){
-         $temp_data = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
-         array_push($array_data, $temp_data);
-      }
+         $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
+         array_push($array_data_err, $temp_data_err);
+      }/*else{
+         $temp_data_succ = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
+         array_push($array_data_succ, $temp_data_succ);
+      }*/
 
       sleep(2);
 
@@ -518,7 +535,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( (stripos($evaluate, "try again") !== false) || ($flag > 2) ) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
          $flag++;
 			Log::info("1 existe try again 117");
 			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
@@ -528,13 +545,17 @@ class ValidateCommandController extends Controller{
 		}
 
       if($flag > 2){
-         $temp_data = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
-         array_push($array_data, $temp_data);
-      }
+         $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
+         array_push($array_data_err, $temp_data_err);
+      }/*else{
+         $temp_data_succ = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
+         array_push($array_data_succ, $temp_data_succ);
+      }*/
 
       sleep(2);
 
-      Session::put('data_tmp', $array_data);
+      Session::put('temp_data_err', $array_data_err);
+      //Session::put('temp_data_succ', $array_data_succ);
 
       return "Datos borrados";
    }
