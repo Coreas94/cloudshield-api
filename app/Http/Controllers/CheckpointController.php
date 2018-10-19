@@ -7,6 +7,7 @@ use App\Http\Requests;
 use phpseclib\Net\SFTP;
 use App\Jobs\senderEmailIp;
 use Mail;
+use File;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
 use Illuminate\Support\Facades\DB;
@@ -319,9 +320,30 @@ class CheckpointController extends Controller
 
       $arreglo_data = [];
       $error_data = [];
+      $data_exist = [];
+
+      $userLog = JWTAuth::toUser($request['token']);
+      Log::info($userLog);
+      $api_token = $userLog['api_token'];
+      $company_id = $userLog['company_id'];
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
 
       //EVALUAR ARCHIVO JSON
-      
+      $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+
+      if(File::exists($path)){
+         $data_exist = json_decode(file_get_contents($path), true);
+         Log::info($data_exist);
+      } else {
+         Log::info("NO EXISTE FILE");
+         $arreglo = array("success" => "", "error" => "", "info" => 0);
+
+         $json = json_encode($arreglo);
+         \Storage::put($name_company.'/'.$api_token.'.json', $json);
+      }
 
       $validateCmd = new ValidateCommandController;
 
@@ -350,16 +372,6 @@ class CheckpointController extends Controller
 
          $flag++;
       }
-
-      $userLog = JWTAuth::toUser($request['token']);
-      Log::info($userLog);
-      $api_token = $userLog['api_token'];
-      $company_id = $userLog['company_id'];
-      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
-      $company_data2 = json_decode(json_encode($company_data), true);
-
-      $name_company = $company_data2[0]['name'];
-
 
       $json = json_encode($arreglo_data);
       \Storage::put($name_company.'/'.$api_token.'.json', $json);

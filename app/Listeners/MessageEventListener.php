@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use JWTAuth;
+use File;
+
 use Illuminate\Support\Facades\DB;
 
 class MessageEventListener {
@@ -20,7 +22,7 @@ class MessageEventListener {
 
    public function onMessageReceived(MessageReceived $event)
    {
-      \Log::info("llega al socket2");
+      //\Log::info("llega al socket2");
       $message = $event->message;
       //\Log::info(print_r($message->data, true));
 
@@ -29,7 +31,7 @@ class MessageEventListener {
          //To get the client sending this message, use the $event->from property.
          //To get a list of all connected clients, use the $event->clients pointer.
          $others = $event->onlyMe();
-         \Log::info($others);
+         //\Log::info($others);
 
          foreach ($others as $client) {
             //The $message->data property holds the actual message
@@ -41,9 +43,9 @@ class MessageEventListener {
 
          $json2 = json_decode(json_encode($token), true);
 
-         Log::info(print_r($json2, true));
+         //Log::info(print_r($json2, true));
          $userLog = JWTAuth::toUser($token->scalar);
-         \Log::info($userLog);
+         //\Log::info($userLog);
          $api_token = $userLog['api_token'];
          $company_id = $userLog['company_id'];
          $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
@@ -52,8 +54,15 @@ class MessageEventListener {
          $name_company = $company_data2[0]['name'];
 
          $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
-         $json_response = json_decode(file_get_contents($path), true);
 
+         if(File::exists($path)){
+            $json_response = json_decode(file_get_contents($path), true);
+         }else{
+            $arreglo = array("success" => "", "error" => "", "info" => 0);
+
+            $json_response = json_encode($arreglo);
+            \Storage::put($name_company.'/'.$api_token.'.json', $json);
+         }
 
          $others = $event->onlyMe();
          #\Log::info($others);
@@ -66,7 +75,7 @@ class MessageEventListener {
    public function onConnected(ClientConnected $event)
    {
       //Not used in this example.
-      \Log::info("Llega al socket");
+      //\Log::info("Llega al socket");
 
       $others = $event->allOtherClients();
    }
