@@ -156,6 +156,7 @@ class ValidateCommandController extends Controller{
       $temp_data_err = [];
       $array_data_succ = [];
       $temp_data_succ = [];
+      $condition;
 
       $verification = 1;
 
@@ -166,8 +167,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-      while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
-
+      while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
          $flag++;
 			Log::info("1 existe try again 112");
 			\SSH::into('checkpoint')->run($ssh_command, function($line){
@@ -191,12 +191,16 @@ class ValidateCommandController extends Controller{
 
       sleep(1);
 
-      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, " ") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 > 2)) {
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
+         $flag2++;
+
          \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
             Log::info("verification while 112");
             Log::info($line.PHP_EOL);
             $verification = $line.PHP_EOL;
          });
+         Log::info($flag2);
 		}
 
       Log::info("flag 2 112");
@@ -226,7 +230,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
+		while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
          $flag++;
 			Log::info("1 existe try again 113");
 			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
@@ -251,13 +255,17 @@ class ValidateCommandController extends Controller{
 
       sleep(1);
 
-      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, " ") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 > 2)) {
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
+
          $flag2++;
+
          \SSH::into('checkpoint')->run($ssh_commVer113, function($line){
             Log::info("verification while 113");
             Log::info($line.PHP_EOL);
             $this->verification = $line.PHP_EOL;
          });
+         Log::info($flag2);
 		}
 
       Log::info("flag 2 113");
@@ -287,7 +295,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
+		while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
          $flag++;
 			Log::info("1 existe try again 116");
 			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
@@ -311,13 +319,16 @@ class ValidateCommandController extends Controller{
 
       sleep(1);
 
-      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, " ") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 > 2)) {
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
          $flag2++;
+
          \SSH::into('checkpoint')->run($ssh_commVer116, function($line){
             Log::info("verification while 116");
             Log::info($line.PHP_EOL);
             $this->verification = $line.PHP_EOL;
          });
+         Log::info($flag2);
 		}
 
       Log::info("flag 2 116");
@@ -347,7 +358,7 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag > 2)) {
+		while ( ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
          $flag++;
 			Log::info("1 existe try again 117");
 			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
@@ -372,13 +383,16 @@ class ValidateCommandController extends Controller{
 
       sleep(1);
 
-      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, " ") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 > 2)) {
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
          $flag2++;
+
          \SSH::into('checkpoint')->run($ssh_commVer117, function($line){
             Log::info("verification while 117");
             Log::info($line.PHP_EOL);
             $this->verification = $line.PHP_EOL;
          });
+         Log::info($flag2);
 		}
 
       Log::info("flag 2 117");
@@ -404,14 +418,39 @@ class ValidateCommandController extends Controller{
       return $arreglo;
    }
 
-   public function resendDataTemp(){
+   public function resendDataTemp(Request $request){
 
-      $data = Session::get('temp_data_err');
-      Log::info($data);
+      $userLog = JWTAuth::toUser($request['token']);
+      //Log::info($userLog);
+      $api_token = $userLog['api_token'];
+      $company_id = $userLog['company_id'];
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+
+      //EVALUAR ARCHIVO JSON
+      $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+      $data_exist = json_decode(file_get_contents($path), true);
+      $temp_error = [];
+
+      foreach ($data_exist as $value) {
+         foreach ($value as $key => $row) {
+            if($key == "error"){
+               array_push($temp_error, $row);
+            }
+         }
+      }
+
+      foreach ($temp_error[0] as $key => $value) {
+         Log::info($value['class']);
+      }
+      die();
+
       $evaluate = "";
 
-      if(!empty($data)){
-         foreach ($data as $key => $value) {
+      if(!empty($temp_error[0])){
+         foreach ($temp_error[0] as $key => $value) {
 
             if($value['class'] == "object"){
                $ssh_command = 'tscpgw_api -g '.$value['server'].' -a '.$value['type'].' -o '.$value['object_name'];

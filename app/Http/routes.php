@@ -15,7 +15,7 @@ Route::get('/', function () {
    return view('welcome');
 });
 
-Route::get('prueba', 'Controller@prueba2');
+Route::get('prueba', 'ValidateCommandController@resendDataTemp');
 
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 

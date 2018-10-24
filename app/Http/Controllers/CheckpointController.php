@@ -370,11 +370,22 @@ class CheckpointController extends Controller
 
          array_push($arreglo_data, $validateAdddyo);
 
+         if(!empty($data_exist)){
+            array_push($arreglo_data, $data_exist);
+         }
+
+         $json = json_encode($arreglo_data);
+         \Storage::put($name_company.'/'.$api_token.'.json', $json);
+
          $flag++;
       }
 
+      /*if(!empty($data_exist)){
+         array_push($arreglo_data, $data_exist);
+      }
+
       $json = json_encode($arreglo_data);
-      \Storage::put($name_company.'/'.$api_token.'.json', $json);
+      \Storage::put($name_company.'/'.$api_token.'.json', $json);*/
 
       sleep(2);
 

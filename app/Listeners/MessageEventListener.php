@@ -44,10 +44,11 @@ class MessageEventListener {
          $json2 = json_decode(json_encode($token), true);
 
          //Log::info(print_r($json2, true));
-         $userLog = JWTAuth::toUser($token->scalar);
+         //$userLog = JWTAuth::toUser($token->scalar);
+         //$userLog = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly8xNzIuMTYuMjAuODUvY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDAzMjU3NDEsImV4cCI6MTU0MDM1ODE0MSwibmJmIjoxNTQwMzI1NzQxLCJqdGkiOiJUM0NLNHNCZ2NWZmRaelFOIn0.Cb_lb3zwdEbiVCqZQwmRGmVmpS5oe57q3PkV6-ndZOA";
          //\Log::info($userLog);
-         $api_token = $userLog['api_token'];
-         $company_id = $userLog['company_id'];
+         $api_token = $json2['api_token'];
+         $company_id = $json2['company_id'];
          $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
          $company_data2 = json_decode(json_encode($company_data), true);
 
@@ -61,7 +62,7 @@ class MessageEventListener {
             $arreglo = array("success" => "", "error" => "", "info" => 0);
 
             $json_response = json_encode($arreglo);
-            \Storage::put($name_company.'/'.$api_token.'.json', $json);
+            \Storage::put($name_company.'/'.$api_token.'.json', $json_response);
          }
 
          $others = $event->onlyMe();
