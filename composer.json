@@ -16,7 +16,8 @@
         "zizaco/entrust": "5.2.x-dev",
         "symfony/process": "^2.8.44",
         "cviebrock/laravel-elasticsearch": "^2.0",
-        "codemash/laravel-socket": "^1.0"
+        "codemash/laravel-socket": "^1.0",
+        "laravelcollective/bus": "^5.2.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

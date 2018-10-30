@@ -23,6 +23,8 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use phpseclib\Net\SFTP;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Bus\DispatchesCommands;
+use Artisan;
 
 class Controller extends BaseController
 {
@@ -44,13 +46,13 @@ class Controller extends BaseController
       $new_object_name = 'Objeto4Prueba';
       // $ip_initial = '198.198.198.5';
       // $ip_last = '198.198.198.5';
-      $ip_initial = '87.87.87.87';
-      $ip_last = '87.87.87.87';
+      $ip_initial = '95.95.95.95';
+      $ip_last = '95.95.95.95';
 
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a count -o ".$new_object_name;
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a ranges -o ".$new_object_name;
-      $ssh_command2 = "tscpgw_api -g '172.16.3.117' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command2 = "tscpgw_api -g '172.16.3.116' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
 
       //$ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
 
@@ -65,29 +67,11 @@ class Controller extends BaseController
 
    public function test(){
 
-      $hosts = [
-         'host' => '172.16.3.151',
-         'port' => '9200',
-         'scheme' => 'http',
-         'user' => '',
-         'pass' => ''
-      ];
+      $data_token = array('token' => '');
+      $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly8xNzIuMTYuMjAuODUvY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDA5MDQzMTMsImV4cCI6MTU0MDkzNjcxMywibmJmIjoxNTQwOTA0MzEzLCJqdGkiOiJ2aXdRYjRQZnBoc3VrcjdPIn0.QnIhRqBzE76qgn4K_McCylBsgCkXastL1GQqPBVSwAU";
 
-      $client_config = [
-         'hosts' => [
-            'https://172.16.3.151:9200'
-         ],
-         'retries' => 0
-      ];
-
-      $client = ClientBuilder::fromConfig($client_config);
-      //$result = json_decode($client, true);
-      // $client = ClientBuilder::create() //Instantiate a new ClientBuilder
-      //    ->setHosts($hosts) //Set the hosts
-      //    ->build(); //Build the client object
-
-      //$return = \Elasticsearch::connection('elastic')->index($data);
-      Log::info(print_r($client, true));
-      print_r($client, true);
+      //$this->dispatchFrom('App\Commands\resendDataCheckpoint', $data_token);
+      //  Artisan::call('checkpoint:resendData');
+      Artisan::call('checkpoint:resendData', ['token' => $token]);
    }
 }

@@ -56,6 +56,7 @@ return array(
     'Cviebrock\\LaravelElasticsearch\\' => array($vendorDir . '/cviebrock/laravel-elasticsearch/src'),
     'Cron\\' => array($vendorDir . '/mtdowling/cron-expression/src/Cron'),
     'Collective\\Remote\\' => array($vendorDir . '/laravelcollective/remote/src'),
+    'Collective\\Bus\\' => array($vendorDir . '/laravelcollective/bus/src'),
     'Codemash\\Socket\\' => array($vendorDir . '/codemash/laravel-socket/src'),
     'ClassPreloader\\' => array($vendorDir . '/classpreloader/classpreloader/src'),
     'App\\' => array($baseDir . '/app'),

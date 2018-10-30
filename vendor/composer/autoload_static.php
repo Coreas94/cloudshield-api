@@ -128,6 +128,7 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
             'Cviebrock\\LaravelElasticsearch\\' => 31,
             'Cron\\' => 5,
             'Collective\\Remote\\' => 18,
+            'Collective\\Bus\\' => 15,
             'Codemash\\Socket\\' => 16,
             'ClassPreloader\\' => 15,
         ),
@@ -339,6 +340,10 @@ class ComposerStaticInit5403c14f6b843492e1f92eb42c1c341f
         'Collective\\Remote\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravelcollective/remote/src',
+        ),
+        'Collective\\Bus\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/laravelcollective/bus/src',
         ),
         'Codemash\\Socket\\' => 
         array (

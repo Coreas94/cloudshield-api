@@ -128,7 +128,7 @@ return [
          */
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,
-        Illuminate\Bus\BusServiceProvider::class,
+        //Illuminate\Bus\BusServiceProvider::class,
         Illuminate\Cache\CacheServiceProvider::class,
         Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
         Illuminate\Cookie\CookieServiceProvider::class,
@@ -153,6 +153,7 @@ return [
         Zizaco\Entrust\EntrustServiceProvider::class,
         Cviebrock\LaravelElasticsearch\ServiceProvider::class,
         Codemash\Socket\SocketServiceProvider::class,
+        Collective\Bus\BusServiceProvider::class,
 
         /*
          * Application Service Providers...

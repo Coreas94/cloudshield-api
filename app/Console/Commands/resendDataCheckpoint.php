@@ -15,7 +15,7 @@ class resendDataCheckpoint extends Command
    *
    * @var string
    */
-   protected $signature = 'checkpoint:resendData';
+   protected $signature = 'checkpoint:resendData {token}';
 
    /**
    * The console command description.
@@ -32,6 +32,7 @@ class resendDataCheckpoint extends Command
    public function __construct()
    {
      parent::__construct();
+      #$this->token = $token;
    }
 
    /**
@@ -41,7 +42,8 @@ class resendDataCheckpoint extends Command
    */
    public function handle(ValidateCommandController $validate){
       Log::info("LLega al resend");
+      $token = $this->argument('token');
 
-      $validate->resendDataTemp();
+      $validate->resendDataTemp($token);
    }
 }

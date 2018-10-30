@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 
+use Artisan;
 use JWTAuth;
 use App\Company;
 use App\FwCompanyServer;
@@ -422,9 +423,9 @@ class ValidateCommandController extends Controller{
       return $arreglo;
    }
 
-   public function resendDataTemp(Request $request){
+   public function resendDataTemp($token){
 
-      $userLog = JWTAuth::toUser($request['token']);
+      $userLog = JWTAuth::toUser($token);
       //Log::info($userLog);
       $api_token = $userLog['api_token'];
       $company_id = $userLog['company_id'];
@@ -444,18 +445,14 @@ class ValidateCommandController extends Controller{
 
       foreach ($data_exist as $value) {
          foreach ($value as $key => $row) {
-            Log::info($key);
-            //Log::info($row);
             if($key == "error" && !empty($row)){
-               Log::info("es error y no vacio");
-               Log::info($row);
                array_push($temp_error, $row);
             }
          }
       }
 
       $evaluate = "";
-      //Log::info($temp_error[0]);
+
       if(!empty($temp_error[0])){
          foreach ($temp_error[0] as $key => $value) {
 
@@ -509,7 +506,7 @@ class ValidateCommandController extends Controller{
                $evaluate = $this->output;
 
                while ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) {
-                  //if($flag >= 2) break;
+                  if($flag >= 3) break;
                   $flag++;
                   Log::info("1 existe try again 117");
                   \SSH::into('checkpoint')->run($ssh_command, function($line4){
@@ -527,7 +524,7 @@ class ValidateCommandController extends Controller{
                $ssh_commVer = "tscpgw_api -g '".$value['server']."' -a search -o ".$value['object_name']." -r '".$value['ip_initial']." ".$value['ip_last']."'";
 
                \SSH::into('checkpoint')->run($ssh_commVer, function($line){
-               	Log::info("verification 117");
+               	Log::info("verification server 117");
                   Log::info($line.PHP_EOL);
                   $this->verification = $line.PHP_EOL;
                });
@@ -535,7 +532,7 @@ class ValidateCommandController extends Controller{
                sleep(1);
 
                while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) ) {
-                  //if($flag2 >= 2) break;
+                  if($flag2 >= 3) break;
                   $flag2++;
 
                   \SSH::into('checkpoint')->run($ssh_commVer, function($line){
@@ -553,12 +550,19 @@ class ValidateCommandController extends Controller{
                   \Storage::put($name_company.'/'.$api_token.'.json', $json_response);
                }else{
                   Log::info("la verifiacion no es 1");
+                  Log::info("No se han podido quitar los errores");
+                  return "No se han podido quitar los errores";
                }
             }
          }
 
       }else{
-         Log::info("No hay nada en session");
+         Log::info("No hay nada en error");
+         $arreglo = array("success" => "", "error" => "", "info" => 0);
+
+         $json_response = json_encode($arreglo);
+         \Storage::put($name_company.'/'.$api_token.'.json', $json_response);
+         return "No hay errores";
       }
    }
 

@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
+use Artisan;
 
 use JWTAuth;
 use App\Company;
@@ -371,7 +372,13 @@ class CheckpointController extends Controller
          array_push($arreglo_data, $validateAdddyo);
 
          if(!empty($data_exist)){
-            array_push($arreglo_data, $data_exist);
+            foreach ($data_exist as $value) {
+               Log::info("VALUE DE DATA EXIST");
+               Log::info($value);
+               // if($value['info'] != 0){
+               //    array_push($arreglo_data, $data_exist);
+               // }
+            }
          }
 
          $json = json_encode($arreglo_data);
@@ -395,6 +402,8 @@ class CheckpointController extends Controller
  		$addr_obj->object_id = $object_id;
  		$addr_obj->type_address_id = $type_address_id;
  		$addr_obj->save();
+
+      Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
 
  		if($addr_obj){
 			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
