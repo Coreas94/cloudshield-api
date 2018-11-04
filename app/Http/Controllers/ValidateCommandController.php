@@ -671,7 +671,9 @@ class ValidateCommandController extends Controller{
       return "success";
    }
 
-   public function validateRemoveIpObject($object_name, $ip_initial, $ip_last){
+   public function validateRemoveIpObject($object_name, $ip_initial, $ip_last, $total_ips, $current_ips){
+      Log::info($object_name.' '.$ip_initial.' '.$ip_last.' '.$total_ips.' '.$current_ips);
+      //die();
 
       $ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
       $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
@@ -684,6 +686,9 @@ class ValidateCommandController extends Controller{
       $array_data_succ = [];
       $temp_data_succ = [];
 
+      $flag2 = 0;
+      $condition;
+
 		\SSH::into('checkpoint')->run($ssh_command, function($line){
 			Log::info($line.PHP_EOL);
 			$evaluate = $line.PHP_EOL;
@@ -691,7 +696,8 @@ class ValidateCommandController extends Controller{
 
       $evaluate = $this->output;
 
-		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag >= 2)) {
+         if($flag >= 2) break;
          $flag++;
 			Log::info("1 existe try again 112");
 			\SSH::into('checkpoint')->run($ssh_command, function($line){
@@ -700,101 +706,222 @@ class ValidateCommandController extends Controller{
 			});
 		}
 
-      if($flag > 2){
+      Log::info("flag 112");
+      Log::info($flag);
+      Log::info($evaluate);
+
+      sleep(3);
+      $ssh_commVer112 = "tscpgw_api -g '172.16.3.112' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+
+      \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
+         Log::info("verification 112");
+      	Log::info($line.PHP_EOL);
+      	$this->verification = $line.PHP_EOL;
+      });
+
+      sleep(1);
+
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "1") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
+         $flag2++;
+
+         \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
+            Log::info("verification while 112");
+            Log::info($line.PHP_EOL);
+            $verification = $line.PHP_EOL;
+         });
+         Log::info($flag2);
+      }
+
+      if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
-      }/*else{
+      }else{
          $temp_data_succ = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
-      }*/
+      }
 
 		sleep(2);
 
+      /****************************************************/
+
       $flag = 0;
-		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
-			Log::info($line2.PHP_EOL);
-			$evaluate = $line2.PHP_EOL;
+      $flag2 = 0;
+
+      \SSH::into('checkpoint')->run($ssh_command2, function($line){
+			Log::info($line.PHP_EOL);
+			$evaluate = $line.PHP_EOL;
 		});
 
       $evaluate = $this->output;
 
-		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag >= 2)) {
+         if($flag >= 2) break;
          $flag++;
 			Log::info("1 existe try again 113");
-			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
-				Log::info($line2.PHP_EOL);
-				$evaluate = $line2.PHP_EOL;
+			\SSH::into('checkpoint')->run($ssh_command2, function($line){
+				Log::info($line.PHP_EOL);
+				$evaluate = $line.PHP_EOL;
 			});
 		}
 
-      if($flag > 2){
+      Log::info("flag 113");
+      Log::info($flag);
+      Log::info($evaluate);
+
+      sleep(3);
+      $ssh_commVer113 = "tscpgw_api -g '172.16.3.113' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+
+      \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
+         Log::info("verification 112");
+      	Log::info($line.PHP_EOL);
+      	$this->verification = $line.PHP_EOL;
+      });
+
+      sleep(1);
+
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "1") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
+         $flag2++;
+
+         \SSH::into('checkpoint')->run($ssh_commVer113, function($line){
+            Log::info("verification while 113");
+            Log::info($line.PHP_EOL);
+            $verification = $line.PHP_EOL;
+         });
+         Log::info($flag2);
+      }
+
+      if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
-      }/*else{
+      }else{
          $temp_data_succ = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
-      }*/
+      }
 
       sleep(2);
 
+      /***********************************************************/
       $flag = 0;
-		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
-			Log::info($line3.PHP_EOL);
-			$evaluate = $line3.PHP_EOL;
+      $flag2 = 0;
+
+      \SSH::into('checkpoint')->run($ssh_command3, function($line){
+			Log::info($line.PHP_EOL);
+			$evaluate = $line.PHP_EOL;
 		});
 
       $evaluate = $this->output;
 
-		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag >= 2)) {
+         if($flag >= 2) break;
          $flag++;
 			Log::info("1 existe try again 116");
-			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
-				Log::info($line3.PHP_EOL);
-				$evaluate = $line3.PHP_EOL;
+			\SSH::into('checkpoint')->run($ssh_command3, function($line){
+				Log::info($line.PHP_EOL);
+				$evaluate = $line.PHP_EOL;
 			});
 		}
 
-      if($flag > 2){
+      Log::info("flag 116");
+      Log::info($flag);
+      Log::info($evaluate);
+
+      sleep(3);
+      $ssh_commVer116 = "tscpgw_api -g '172.16.3.116' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+
+      \SSH::into('checkpoint')->run($ssh_commVer116, function($line){
+         Log::info("verification 116");
+      	Log::info($line.PHP_EOL);
+      	$this->verification = $line.PHP_EOL;
+      });
+
+      sleep(1);
+
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "1") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
+         $flag2++;
+
+         \SSH::into('checkpoint')->run($ssh_commVer116, function($line){
+            Log::info("verification while 116");
+            Log::info($line.PHP_EOL);
+            $verification = $line.PHP_EOL;
+         });
+         Log::info($flag2);
+      }
+
+      if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
-      }/*else{
+      }else{
          $temp_data_succ = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
-      }*/
+      }
 
       sleep(2);
 
+      /*******************************************************/
+
       $flag = 0;
-		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
-			Log::info($line4.PHP_EOL);
-			$evaluate = $line4.PHP_EOL;
+      $flag2 = 0;
+
+      \SSH::into('checkpoint')->run($ssh_command4, function($line){
+			Log::info($line.PHP_EOL);
+			$evaluate = $line.PHP_EOL;
 		});
 
       $evaluate = $this->output;
 
-		while ((stripos($evaluate, "try again") !== false) || ($flag > 2)) {
+		while ((stripos($evaluate, "try again") !== false) || ($flag >= 2)) {
+         if($flag >= 2) break;
          $flag++;
 			Log::info("1 existe try again 117");
-			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
-				Log::info($line4.PHP_EOL);
-				$evaluate = $line4.PHP_EOL;
+			\SSH::into('checkpoint')->run($ssh_command4, function($line){
+				Log::info($line.PHP_EOL);
+				$evaluate = $line.PHP_EOL;
 			});
 		}
 
-      if($flag > 2){
+      Log::info("flag 117");
+      Log::info($flag);
+      Log::info($evaluate);
+
+      sleep(3);
+      $ssh_commVer117 = "tscpgw_api -g '172.16.3.117' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+
+      \SSH::into('checkpoint')->run($ssh_commVer117, function($line){
+         Log::info("verification 117");
+      	Log::info($line.PHP_EOL);
+      	$this->verification = $line.PHP_EOL;
+      });
+
+      sleep(1);
+
+      while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "1") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
+         if($flag2 >= 2) break;
+         $flag2++;
+
+         \SSH::into('checkpoint')->run($ssh_commVer117, function($line){
+            Log::info("verification while 117");
+            Log::info($line.PHP_EOL);
+            $verification = $line.PHP_EOL;
+         });
+         Log::info($flag2);
+      }
+
+      if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
-      }/*else{
+      }else{
          $temp_data_succ = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
-      }*/
+      }
 
       sleep(2);
 
-      Session::put('temp_data_err', $array_data_err);
-      //Session::put('temp_data_succ', $array_data_succ);
+      $arreglo = array("success" => $array_data_succ, "error" => $array_data_err, "info" => $total_ips);
 
-      return "Datos borrados";
+      return $arreglo;
    }
 
 }

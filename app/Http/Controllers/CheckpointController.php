@@ -1082,7 +1082,7 @@ class CheckpointController extends Controller
 
  			$evaluate = "";
  			$server_ch = 1; //Es el id del checkpoint
- 			$new_object_name = $request['object_name'];
+ 			$new_object_name = $request['name_object'];
  			//$tag = $request['tag'];
  			$comment = "Prueba code";
  			$company_id = $request['company_id'];
@@ -1090,6 +1090,9 @@ class CheckpointController extends Controller
  			$company_data = DB::table('fw_companies')->where('id', $company_id)->get();
  			$company_data2 = json_decode(json_encode($company_data), true);
  			$tag = $company_data2[0]['tag'];
+
+         $userLog = JWTAuth::toUser($request['token']);
+         $api_token = $userLog['api_token'];
 
          $curl = curl_init();
 
@@ -1180,15 +1183,46 @@ class CheckpointController extends Controller
 
 						if($publish == 'success'){
 
-							$ip_initial = $request['ip_initial'];
-							$ip_last = $request['ip_last'];
+							//$ip_initial = $request['ip_initial'];
+							//$ip_last = $request['ip_last'];
 
 							//Ingreso el rango de ip
 							$object_id = $object_new->id;
 							$type_address_id = 7;//Pertenece a rango de ip para checkpoint
 
                      //Mando a crear las ips a los checkpoints
-                     $validateAddrip = $validateCmd->validateAssignIpObject($new_object_name, $ip_initial, $ip_last);
+                     #$validateAddrip = $validateCmd->validateAssignIpObject($new_object_name, $ip_initial, $ip_last);
+
+                     $total_ips = count($request['ips']);
+                     $flag = 1;
+                     $name_company = $company_data2[0]['name'];
+                     $arreglo_data = [];
+                     $error_data = [];
+                     $data_exist = [];
+
+                     foreach ($request['ips'] as $value) {
+                        $ip_initial = $value['ip_initial'];
+                        $ip_last = $value['ip_last'];
+
+                        $validateAddrip = $validateCmd->validateAssignIpObject($new_object_name, $ip_initial, $ip_last, $total_ips, $flag);
+
+                        array_push($arreglo_data, $validateAddrip);
+
+                        if(!empty($data_exist)){
+                           foreach ($data_exist as $value) {
+                              Log::info("VALUE DE DATA EXIST");
+                              Log::info($value);
+                              // if($value['info'] != 0){
+                              //    array_push($arreglo_data, $data_exist);
+                              // }
+                           }
+                        }
+
+                        $json = json_encode($arreglo_data);
+                        \Storage::put($name_company.'/'.$api_token.'.json', $json);
+
+                        $flag++;
+                     }
 
                      sleep(2);
 
@@ -1679,6 +1713,17 @@ class CheckpointController extends Controller
       $evaluate = "";
       $validateCmd = new ValidateCommandController;
 
+      $userLog = JWTAuth::toUser($request['token']);
+      $api_token = $userLog['api_token'];
+      $company_id = $userLog['company_id'];
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+      $arreglo_data = [];
+      $error_data = [];
+      $data_exist = [];
+
       $object_id = $request['object_id'];
       $address_id = $request['address_id'];
       $ip_initial = $request['ip_init'];
@@ -1688,11 +1733,19 @@ class CheckpointController extends Controller
 
       $evaluate;
 
+      //EVALUAR ARCHIVO JSON
+      $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+
       if(Session::has('sid_session'))
-        $sid = Session::get('sid_session');
+         $sid = Session::get('sid_session');
       else $sid = $this->getLastSession();
 
       if($sid){
+
+         if(File::exists($path)){
+            $data_exist = json_decode(file_get_contents($path), true);
+            Log::info($data_exist);
+         }
 
          $object = DB::table('fw_objects')->where('id', $object_id)->get();
          $object = json_decode(json_encode($object), true);
@@ -1707,8 +1760,26 @@ class CheckpointController extends Controller
 
                Log::info("rango igual");
 
+               $total_ips = count($request['ips']);
+               $flag = 1;
+
                //Mando a eliminar las ips de los checkpoint
-               $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $ip_initial, $ip_last);
+               $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $ip_initial, $ip_last, $total_ips, $flag);
+
+               array_push($arreglo_data, $validateDelrip);
+
+               if(!empty($data_exist)){
+                  foreach ($data_exist as $value) {
+                     Log::info("VALUE DE DATA EXIST");
+                     Log::info($value);
+                     // if($value['info'] != 0){
+                     //    array_push($arreglo_data, $data_exist);
+                     // }
+                  }
+               }
+
+               $json = json_encode($arreglo_data);
+               \Storage::put($name_company.'/'.$api_token.'.json', $json);
 
                sleep(2);
 
@@ -1716,6 +1787,8 @@ class CheckpointController extends Controller
 
                if($publish == "success"){
                   $delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
+
+                  Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
 
                   //$delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
                   if($delete_add){
@@ -1764,8 +1837,26 @@ class CheckpointController extends Controller
                $new_range_one = $ip_initial_range.' '.$second_new_ip;
                $new_range_two = $third_new_ip.' '.$ip_last_range;
 
+               $total_ips = count($request['ips']);
+               $flag = 1;
+
                //Ejecuto el comando para eliminar el rango actual de los checkpoint
-               $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $ip_initial, $ip_last);
+               $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $ip_initial, $ip_last, $total_ips, $flag);
+
+               array_push($arreglo_data, $validateAdddyo);
+
+               if(!empty($data_exist)){
+                  foreach ($data_exist as $value) {
+                     Log::info("VALUE DE DATA EXIST");
+                     Log::info($value);
+                     // if($value['info'] != 0){
+                     //    array_push($arreglo_data, $data_exist);
+                     // }
+                  }
+               }
+
+               $json = json_encode($arreglo_data);
+               \Storage::put($name_company.'/'.$api_token.'.json', $json);
 
                sleep(2);
 
@@ -1782,15 +1873,37 @@ class CheckpointController extends Controller
                      $delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
                      if($delete_add){
+
+                        $total_ips = count($request['ips']);
+                        $flag = 1;
+
                         //Mando a guardar el primer rango de ips a los checkpoint
-                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $ip_initial_range, $second_new_ip);
+                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $ip_initial_range, $second_new_ip, $total_ips, $flag);
 
                         sleep(2);
+
+                        array_push($arreglo_data, $validateAddrip);
 
                         //Mando a guardar el segundo rango de ips al checkpoint
-                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $third_new_ip, $ip_last_range);
+                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $third_new_ip, $ip_last_range, $total_ips, $flag);
 
                         sleep(2);
+
+                        array_push($arreglo_data, $validateAddrip);
+
+                        if(!empty($data_exist)){
+                           foreach ($data_exist as $value) {
+                              Log::info("VALUE DE DATA EXIST");
+                              Log::info($value);
+                              // if($value['info'] != 0){
+                              //    array_push($arreglo_data, $data_exist);
+                              // }
+                           }
+                           array_push($arreglo_data, $data_exist);
+                        }
+
+                        $json = json_encode($arreglo_data);
+                        \Storage::put($name_company.'/'.$api_token.'.json', $json);
 
                         $publish2 = $this->publishChanges($sid);
 
@@ -1902,8 +2015,27 @@ class CheckpointController extends Controller
             if($add_initial == $add_last){
                Log::info("es una sola IP");
 
+               // $total_ips = count($request['ips']);
+               $total_ips = 1;
+               $flag = 1;
+
                //Mando a eliminar el rango de ips al checkpoint
-               $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $add_initial, $add_last);
+               $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $add_initial, $add_last, $total_ips, $flag);
+
+               array_push($arreglo_data, $validateAdddyo);
+
+               if(!empty($data_exist)){
+                  foreach ($data_exist as $value) {
+                     Log::info("VALUE DE DATA EXIST");
+                     Log::info($value);
+                     // if($value['info'] != 0){
+                     //    array_push($arreglo_data, $data_exist);
+                     // }
+                  }
+               }
+
+               $json = json_encode($arreglo_data);
+               \Storage::put($name_company.'/'.$api_token.'.json', $json);
 
                sleep(2);
 
@@ -1954,8 +2086,26 @@ class CheckpointController extends Controller
                   $range_one = $add_initial.' '.$second_ip;
                   $range_two = $third_ip.' '.$add_last;
 
+                  $total_ips = 1;
+                  $flag = 1;
+
                   //Mando a eliminar el rango de ips al checkpoint
-                  $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $add_initial, $add_last);
+                  $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $add_initial, $add_last, $total_ips, $flag);
+
+                  array_push($arreglo_data, $validateAdddyo);
+
+                  if(!empty($data_exist)){
+                     foreach ($data_exist as $value) {
+                        Log::info("VALUE DE DATA EXIST");
+                        Log::info($value);
+                        // if($value['info'] != 0){
+                        //    array_push($arreglo_data, $data_exist);
+                        // }
+                     }
+                  }
+
+                  $json = json_encode($arreglo_data);
+                  \Storage::put($name_company.'/'.$api_token.'.json', $json);
 
                   sleep(2);
 
@@ -1968,16 +2118,36 @@ class CheckpointController extends Controller
 
                      if($delete_add){
 
+                        $total_ips = 1;
+                        $flag = 1;
+
                         //Mando a guardar el nuevo rango a los checkpoints
-                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $add_initial, $second_ip);
+                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $add_initial, $second_ip, $total_ips, $flag);
 
                         sleep(2);
+
+                        array_push($arreglo_data, $validateAddrip);
                         /************************************************************************/
 
-                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $third_ip, $add_last);
+                        $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $third_ip, $add_last, $total_ips, $flag);
 
                         sleep(2);
-                        $flag = 0;
+
+                        array_push($arreglo_data, $validateAddrip);
+
+                        if(!empty($data_exist)){
+                           foreach ($data_exist as $value) {
+                              Log::info("VALUE DE DATA EXIST");
+                              Log::info($value);
+                              // if($value['info'] != 0){
+                              //    array_push($arreglo_data, $data_exist);
+                              // }
+                           }
+                           array_push($arreglo_data, $data_exist);
+                        }
+
+                        $json = json_encode($arreglo_data);
+                        \Storage::put($name_company.'/'.$api_token.'.json', $json);
 
                         $publish2 = $this->publishChanges($sid);
 
@@ -2293,7 +2463,7 @@ class CheckpointController extends Controller
 
  		if($ip_object){
 
- 			Log::info($old_range);
+ 			Log::info($old_range);https://sansalvador.bt7festival.com/
  			Log::info($new_range);
 
          //Mando a eliminar los rangos a los checkpoint

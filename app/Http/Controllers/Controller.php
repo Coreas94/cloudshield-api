@@ -68,7 +68,7 @@ class Controller extends BaseController
    public function test(){
 
       $data_token = array('token' => '');
-      $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly8xNzIuMTYuMjAuODUvY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDA5MDQzMTMsImV4cCI6MTU0MDkzNjcxMywibmJmIjoxNTQwOTA0MzEzLCJqdGkiOiJ2aXdRYjRQZnBoc3VrcjdPIn0.QnIhRqBzE76qgn4K_McCylBsgCkXastL1GQqPBVSwAU";
+      $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly8xNzIuMTYuMjAuODUvY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDEzNDE5OTUsImV4cCI6MTU0MTM3NDM5NSwibmJmIjoxNTQxMzQxOTk1LCJqdGkiOiJwZTRkdFBmZ0w1ZjJ6cUFxIn0.B5yzvaRT2zV987t76T--7Fu4yAEZ-s_hevIF7JjjHVw";
 
       //$this->dispatchFrom('App\Commands\resendDataCheckpoint', $data_token);
       //  Artisan::call('checkpoint:resendData');
