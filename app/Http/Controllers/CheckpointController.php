@@ -2875,6 +2875,8 @@ class CheckpointController extends Controller
    }
 
    public function evaluateChanges($info_changes){
+
+      $validateCmd = new ValidateCommandController;
  		$server_ch = 1;
  		$company_default = Company::findOrFail(1);
  		$evaluate;

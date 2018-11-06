@@ -442,7 +442,8 @@ class ValidateCommandController extends Controller{
 
       $condition;
       $verification = 1;
-
+      Log::info("el data exist es: ");
+      Log::info($data_exist);
       foreach ($data_exist as $value) {
          foreach ($value as $key => $row) {
             if($key == "error" && !empty($row)){

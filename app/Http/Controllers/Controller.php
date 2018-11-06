@@ -46,13 +46,13 @@ class Controller extends BaseController
       $new_object_name = 'Objeto4Prueba';
       // $ip_initial = '198.198.198.5';
       // $ip_last = '198.198.198.5';
-      $ip_initial = '95.95.95.95';
-      $ip_last = '95.95.95.95';
+      $ip_initial = '99.99.99.1';
+      $ip_last = '99.99.99.1';
 
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a count -o ".$new_object_name;
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a ranges -o ".$new_object_name;
-      $ssh_command2 = "tscpgw_api -g '172.16.3.116' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
 
       //$ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
 
@@ -68,7 +68,7 @@ class Controller extends BaseController
    public function test(){
 
       $data_token = array('token' => '');
-      $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly8xNzIuMTYuMjAuODUvY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDEzNDE5OTUsImV4cCI6MTU0MTM3NDM5NSwibmJmIjoxNTQxMzQxOTk1LCJqdGkiOiJwZTRkdFBmZ0w1ZjJ6cUFxIn0.B5yzvaRT2zV987t76T--7Fu4yAEZ-s_hevIF7JjjHVw";
+      $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly9jbG91ZHNoaWVsZC5yZWQ1Zy5jb20vY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDE0NDU0OTQsImV4cCI6MTU0MTQ3Nzg5NCwibmJmIjoxNTQxNDQ1NDk0LCJqdGkiOiI5aW5OdHEycjk3dzdrbkV2In0.lJOrXXUpiMg6sYDijupWG3hmCTi7jT_akDdnTLIrJkM";
 
       //$this->dispatchFrom('App\Commands\resendDataCheckpoint', $data_token);
       //  Artisan::call('checkpoint:resendData');
