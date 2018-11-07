@@ -43,11 +43,11 @@ class Controller extends BaseController
       Session::put('data_tmp2', $array_data);
 
       \Artisan::call('checkpoint:resendData');*/
-      $new_object_name = 'Objeto4Prueba';
+      $new_object_name = 'ObjetoTestProduction';
       // $ip_initial = '198.198.198.5';
       // $ip_last = '198.198.198.5';
-      $ip_initial = '99.99.99.1';
-      $ip_last = '99.99.99.1';
+      $ip_initial = '99.99.99.4';
+      $ip_last = '99.99.99.4';
 
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a count -o ".$new_object_name;
