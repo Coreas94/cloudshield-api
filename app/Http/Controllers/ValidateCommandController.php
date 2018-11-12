@@ -439,6 +439,8 @@ class ValidateCommandController extends Controller{
       $data_exist = json_decode(file_get_contents($path), true);
       //Log::info($data_exist);
       $temp_error = [];
+      $flag = 0;
+      $flag2 = 0;
 
       $condition;
       $verification = 1;
@@ -574,6 +576,7 @@ class ValidateCommandController extends Controller{
       $ssh_command3 = 'tscpgw_api -g "172.16.3.116" -a deldyo -o '.$object_name;
       $ssh_command4 = 'tscpgw_api -g "172.16.3.117" -a deldyo -o '.$object_name;
       $flag = 0;
+      $flag2 = 0;
       $array_data_err = [];
       $temp_data_err = [];
       $array_data_succ = [];

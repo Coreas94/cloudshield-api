@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use phpseclib\Net\SFTP;
 use App\Jobs\senderEmailIp;
+use App\Jobs\BackgroundTask;
 use Mail;
 use File;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -1234,6 +1235,8 @@ class CheckpointController extends Controller
 							$addr_obj->type_address_id = $type_address_id;
 							$addr_obj->save();
 
+                     Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
+
 							if($addr_obj){
                         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
 								'updated_at' => \Carbon\Carbon::now()]);
@@ -1843,7 +1846,7 @@ class CheckpointController extends Controller
                //Ejecuto el comando para eliminar el rango actual de los checkpoint
                $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $ip_initial, $ip_last, $total_ips, $flag);
 
-               array_push($arreglo_data, $validateAdddyo);
+               array_push($arreglo_data, $validateDelrip);
 
                if(!empty($data_exist)){
                   foreach ($data_exist as $value) {
