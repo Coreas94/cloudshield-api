@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Http\Controllers\CheckpointController;
 use App\Http\Controllers\ValidateCommandController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
@@ -15,7 +16,8 @@ class resendDataCheckpoint extends Command
    *
    * @var string
    */
-   protected $signature = 'checkpoint:resendData {token}';
+   protected $signature = 'checkpoint:resendData';
+   // protected $signature = 'checkpoint:resendData {token}';
 
    /**
    * The console command description.
@@ -42,8 +44,9 @@ class resendDataCheckpoint extends Command
    */
    public function handle(ValidateCommandController $validate){
       Log::info("LLega al resend");
-      $token = $this->argument('token');
+      //$token = $this->argument('token');
+      //$validate->resendDataTemp($token);
 
-      $validate->resendDataTemp($token);
+      $validate->getErrorData();
    }
 }

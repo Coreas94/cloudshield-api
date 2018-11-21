@@ -18,6 +18,7 @@ Route::get('/', function () {
 Route::get('prueba', 'ValidateCommandController@resendDataTemp');
 Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');
+Route::get('delete_errors', 'Controller@getErrorData');
 
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
@@ -59,6 +60,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/addNewList', 'CheckpointController@newListRules');
      		//Ruta para obtener cambios desde el checkpoint
      		Route::get('/get_changes', 'CheckpointController@getChanges');
+
+         Route::get('/get_errors', 'ValidateCommandController@evaluateErrors');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){

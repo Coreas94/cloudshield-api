@@ -25,31 +25,42 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Artisan;
+use App\HistoricalData;
 
 class Controller extends BaseController
 {
    use AuthorizesRequests, AuthorizesResources, DispatchesJobs, ValidatesRequests;
 
    public function prueba2(Request $request){
+
+      /*$log = new HistoricalData;
+      $log->server = "190.190.190.190";
+      $log->object_name = "insertObject";
+      $log->ip_initial = "150.150.150.150";
+      $log->ip_last = "150.150.150.150";
+      $log->type = "addrip";
+      $log->class ="ip";
+      $log->status = 0;
+      $log->save();*/
+
       //\Storage::makeDirectory('holis', 777);
       /*$object_name = 'ObjetoParaBorrar';
       $ip_initial = '198.198.198.1';
       $ip_last = '198.198.198.2';
       $array_data = [];
-
       $temp_data = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip");
       array_push($array_data, $temp_data);
 
       Session::put('data_tmp2', $array_data);
 
       \Artisan::call('checkpoint:resendData');*/
-      $new_object_name = 'Objeto12Noviembre';
+      $new_object_name = 'Object19Nov2';
       //$ip_initial = '198.198.198.5';
       //$ip_last = '198.198.198.5';
-      $ip_initial = '50.50.50.3	';
-      $ip_last = '50.50.50.3';
+      $ip_initial = '82.82.82.2';
+      $ip_last = '82.82.82.2';
 
-      //$ssh_command2 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      // $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a count -o ".$new_object_name;
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a ranges -o ".$new_object_name;
       $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
@@ -71,7 +82,16 @@ class Controller extends BaseController
       $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly9jbG91ZHNoaWVsZC5yZWQ1Zy5jb20vY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDE0NDU0OTQsImV4cCI6MTU0MTQ3Nzg5NCwibmJmIjoxNTQxNDQ1NDk0LCJqdGkiOiI5aW5OdHEycjk3dzdrbkV2In0.lJOrXXUpiMg6sYDijupWG3hmCTi7jT_akDdnTLIrJkM";
 
       //$this->dispatchFrom('App\Commands\resendDataCheckpoint', $data_token);
-      //Artisan::call('checkpoint:resendData');
-      Artisan::call('checkpoint:resendData', ['token' => $token]);
+      Artisan::call('checkpoint:resendData');
+      // Artisan::call('checkpoint:resendData', ['token' => $token]);
    }
+
+   public function getErrorData(){
+
+      $datos = HistoricalData::where('status', '=', 0)->delete();
+
+      Log::info($datos);
+   }
+
+
 }

@@ -404,7 +404,8 @@ class CheckpointController extends Controller
  		$addr_obj->type_address_id = $type_address_id;
  		$addr_obj->save();
 
-      Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
+      //Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
+      Artisan::call('checkpoint:resendData');
 
  		if($addr_obj){
 			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
@@ -1235,7 +1236,7 @@ class CheckpointController extends Controller
 							$addr_obj->type_address_id = $type_address_id;
 							$addr_obj->save();
 
-                     Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
+                     Artisan::call('checkpoint:resendData');
 
 							if($addr_obj){
                         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
@@ -1791,7 +1792,8 @@ class CheckpointController extends Controller
                if($publish == "success"){
                   $delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
-                  Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
+                  // Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
+                  Artisan::call('checkpoint:resendData');
 
                   //$delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
                   if($delete_add){

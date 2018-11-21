@@ -24,6 +24,7 @@ use App\FwAccessRule;
 use App\CheckPointRulesObjects;
 use App\ServicesCheckpoint;
 use App\Http\Controllers\EmailController;
+use App\HistoricalData;
 
 use IPTools\Range;
 use IPTools\Network;
@@ -212,9 +213,32 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 0 ){
          $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
+
       }else{
          $temp_data_succ = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
       }
 
       Log::info("112");
@@ -278,9 +302,32 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 0 ){
          $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.113";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
+
       }else{
          $temp_data_succ = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.113";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
       }
 
       Log::info("113");
@@ -342,9 +389,32 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 0 ){
          $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.116";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
+
       }else{
          $temp_data_succ = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.116";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
       }
 
       Log::info("116");
@@ -407,9 +477,31 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 0 ){
          $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.117";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
       }else{
          $temp_data_succ = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.117";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "addrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
       }
 
       sleep(2);
@@ -740,9 +832,32 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
+
       }else{
          $temp_data_succ = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
       }
 
 		sleep(2);
@@ -799,9 +914,33 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
+
       }else{
          $temp_data_succ = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
+
       }
 
       sleep(2);
@@ -857,9 +996,32 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
+
       }else{
          $temp_data_succ = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
       }
 
       sleep(2);
@@ -916,9 +1078,33 @@ class ValidateCommandController extends Controller{
       if($flag >= 2 || $this->verification == 1 ){
          $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 0;
+         $log->save();
+
       }else{
          $temp_data_succ = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
          array_push($array_data_succ, $temp_data_succ);
+
+         //Guardaré en mongo los logs ya sean buenos o malos
+         $log = new HistoricalData;
+         $log->server = "172.16.3.112";
+         $log->object_name = $object_name;
+         $log->ip_initial = $ip_initial;
+         $log->ip_last = $ip_last;
+         $log->type = "delrip";
+         $log->class ="ip";
+         $log->status = 1;
+         $log->save();
+
       }
 
       sleep(2);
@@ -927,5 +1113,136 @@ class ValidateCommandController extends Controller{
 
       return $arreglo;
    }
+
+
+   public function getErrorData(){
+
+      $temp_error = [];
+      $flag = 0;
+      $flag2 = 0;
+
+      $condition;
+      $verification = 1;
+
+      $datos = HistoricalData::where('status', '=', 0)->get();
+      $countData = count($datos);
+
+      if($countData > 0){
+         $data = json_decode($datos, true);
+         Log::info("aqui imprimo el HistoricalData");
+
+         foreach($data as $row){
+
+            if($row['class'] == 'ip'){
+
+               $ssh_command = "tscpgw_api -g '".$row['server']."' -a '".$row['type']."' -o ".$row['object_name']." -r '".$row['ip_initial']." ".$row['ip_last']."'";
+               Log::info($ssh_command);
+
+               $flag = 0;
+               $flag2 = 0;
+               \SSH::into('checkpoint')->run($ssh_command, function($line4){
+                  Log::info($line4.PHP_EOL);
+                  $evaluate = $line4.PHP_EOL;
+               });
+
+               $evaluate = $this->output;
+               sleep(2);
+
+               while ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) {
+                  if($flag >= 2) break;
+                  $flag++;
+                  Log::info("1 existe try again 117");
+                  \SSH::into('checkpoint')->run($ssh_command, function($line4){
+                     Log::info($line4.PHP_EOL);
+                     $evaluate = $line4.PHP_EOL;
+                  });
+               }
+
+               sleep(3);
+
+               Log::info("flag 117");
+               Log::info($flag);
+               Log::info($evaluate);
+
+               $ssh_commVer = "tscpgw_api -g '".$row['server']."' -a search -o ".$row['object_name']." -r '".$row['ip_initial']." ".$row['ip_last']."'";
+
+               \SSH::into('checkpoint')->run($ssh_commVer, function($line){
+                  Log::info("verification server 117");
+                  Log::info($line.PHP_EOL);
+                  $this->verification = $line.PHP_EOL;
+               });
+
+               sleep(1);
+
+               while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) ) {
+                  if($flag2 >= 3) break;
+                  $flag2++;
+
+                  \SSH::into('checkpoint')->run($ssh_commVer, function($line){
+                     Log::info("verification while 117");
+                     Log::info($line.PHP_EOL);
+                     $this->verification = $line.PHP_EOL;
+                  });
+                  Log::info($flag2);
+               }
+
+               if($this->verification == 1 ){
+                  //Se debe dejar
+                  $update = HistoricalData::where('_id', '=', $row['_id'])->update(['status' => 1]);
+               }else{
+                  Log::info("ES CERO Y NO ACTUALIZA");
+               }
+
+            }else{
+
+               /*$ssh_command = 'tscpgw_api -g '.$value['server'].' -a '.$value['type'].' -o '.$value['object_name'];
+               Log::info($ssh_command);
+
+               \SSH::into('checkpoint')->run($ssh_command, function($line){
+                  Log::info($line.PHP_EOL);
+                  $evaluate = $line.PHP_EOL;
+               });
+
+               $evaluate = $this->output;
+
+               while ((stripos($evaluate, "try again") !== false)) {
+                  Log::info("1 existe try again 112");
+                  \SSH::into('checkpoint')->run($ssh_command, function($line){
+                     Log::info($line.PHP_EOL);
+                     $evaluate = $line.PHP_EOL;
+                  });
+               }
+
+               sleep(2);*/
+
+            }
+         }
+      }else{
+         Log::info("No hay datos");
+      }
+   }
+
+   public function evaluateErrors(){
+
+      $datos = HistoricalData::where('status', '=', 0)->get();
+      $countData = count($datos);
+
+      if($countData > 0){
+
+         return response()->json([
+            'data' => $datos
+         ]);
+
+      }else{
+         return response()->json([
+            'data' => "No Data"
+         ]);
+      }
+
+   }
+
+
+
+
 
 }
