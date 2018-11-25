@@ -54,18 +54,18 @@ class Controller extends BaseController
       Session::put('data_tmp2', $array_data);
 
       \Artisan::call('checkpoint:resendData');*/
-      $new_object_name = 'Object19Nov2';
+      $new_object_name = 'CUST-RC987-BLACKLIST-OUTGOING';
       //$ip_initial = '198.198.198.5';
       //$ip_last = '198.198.198.5';
-      $ip_initial = '82.82.82.2';
-      $ip_last = '82.82.82.2';
+      $ip_initial = '170.162.1.1';
+      $ip_last = '170.162.1.1';
 
       // $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a count -o ".$new_object_name;
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a ranges -o ".$new_object_name;
-      $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      //$ssh_command2 = "tscpgw_api -g '172.16.3.112' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
 
-      //$ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
+      $ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
 
       Log::info($ssh_command2);
 		//$ssh_command3 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$new_object_name." -r ".$ip_initial." ".$ip_last;
@@ -89,6 +89,13 @@ class Controller extends BaseController
    public function getErrorData(){
 
       $datos = HistoricalData::where('status', '=', 0)->delete();
+
+      Log::info($datos);
+   }
+
+   public function changeErrorData(){
+
+      $datos = HistoricalData::where('status', '=', 0)->update(['status' => 1]);
 
       Log::info($datos);
    }

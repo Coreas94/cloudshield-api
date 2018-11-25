@@ -19,6 +19,7 @@ Route::get('prueba', 'ValidateCommandController@resendDataTemp');
 Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
+Route::get('change_errors', 'Controller@changeErrorData');
 
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 

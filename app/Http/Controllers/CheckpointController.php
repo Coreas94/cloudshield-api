@@ -1369,6 +1369,11 @@ class CheckpointController extends Controller
          }else{
             if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
                //Log::info("no agregar object");
+               $name = explode('-', $value['name']);
+               $complement_name = $name[2].' '.$name[3];
+
+               $value['short_name'] = 'MY CLOUDSHIELD '.$complement_name;
+               array_push($list_obj, $value);/****/
     			}elseif($value['editable'] == 1){
                $value['short_name'] = $value['name'];
     				array_push($list_obj, $value);
