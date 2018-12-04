@@ -191,6 +191,7 @@ class ValidateCommandController extends Controller{
 
          sleep(3);
          $ssh_commVer112 = "tscpgw_api -g '172.16.3.112' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         $exist_range =
 
          \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
             Log::info("verification 112");
@@ -1546,27 +1547,49 @@ class ValidateCommandController extends Controller{
       }
    }
 
-   public function existIpRange(){
+   public function existIpRange($object_name, $ip_initial, $ip_last, $server){
 
-      $ip = '110.110.1.1';
-      $object = "Object29Nov";
-      $test = [];
+      $ips = '71.71.71.5';
+      $object = "Object19Nov";
+      $array_object;
+      $array_ip = [];
 
-      $command = "tscpgw_api -g 172.16.3.117 -a ranges -o ".$object;
+      $command = "tscpgw_api -g 172.16.3.116 -a ranges -o ".$object;
 
       \SSH::into('checkpoint')->run($command, function($line2){
-         Log::info($line2.PHP_EOL);
          $this->prueba = $line2.PHP_EOL;
       });
 
-      return $this->prueba;
+      Log::info($this->prueba);
 
-      //Log::info($test);
+      $body = explode("\n", $this->prueba);
+      $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
+      $i = 0;
 
-      //Log::info($this->prueba);
-      // foreach($this->prueba as $row){
-      //    Log::info($row);
-      // }
+      foreach($body as $key => $row){
+         if($key > 1){
+            if($row != ""){
+               $var1 = preg_replace('/\s+/', '-', $row);
+               array_push($array_object['registros'], $var1);
+            }
+         }
+      }
+
+      foreach ($array_object['registros'] as $value) {
+
+         $range = Range::parse($value);
+         foreach($range as $ip) {
+            array_push($array_ip, (string)$ip);
+         }
+      }
+
+      if(in_array($ips, $array_ip)){
+         Log::info("Existe la IP: ".$ips);
+         return 1;
+      }else{
+         Log::info("No existe la ip: ".$ips);
+         return 0;
+      }
 
    }
 
