@@ -64,7 +64,7 @@ class AccessController extends Controller{
 	}
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
-		
+
 		$checkpoint2 = new CheckPointFunctionController;
 
 		$v = Validator::make($request->all(), [
@@ -94,6 +94,7 @@ class AccessController extends Controller{
 	    	$email = $request['email_company'];
 	    	$phone = $request['phone_company'];
 	    	$description = isset($request['description_company']) ? $request['description_company'] : "";
+			$token = $request['token'];
 
 	    	$words = explode(" ", $name);
 			$acronym = "";
@@ -138,7 +139,8 @@ class AccessController extends Controller{
 						$dataArray = array(
 							"name" => $name,
 							"tag" => $tag,
-							"company_id" => $company->id
+							"company_id" => $company->id,
+							"token" => $token
 						);
 
 						$data_user = array(

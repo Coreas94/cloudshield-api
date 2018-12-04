@@ -1400,6 +1400,7 @@ class CheckpointController extends Controller
 		Log::info("*************************************");
 
       $checkpoint2 = new CheckPointFunctionController;
+      $validateCmd = new ValidateCommandController;
 
 		if(Session::has('sid_session'))
 			$sid = Session::get('sid_session');
@@ -1416,6 +1417,13 @@ class CheckpointController extends Controller
   			$ip_last = '1.1.1.1';
 
   			$company_id = $data['company_id'];
+
+         $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+ 			$company_data2 = json_decode(json_encode($company_data), true);
+ 			$tag = $company_data2[0]['tag'];
+
+         $userLog = JWTAuth::toUser($data['token']);
+         $api_token = $userLog['api_token'];
 
          $curl = curl_init();
 
@@ -1458,15 +1466,20 @@ class CheckpointController extends Controller
 
   				if(isset($result['code'])){
   					Log::info($result['code']);
-  					return response()->json([
-  						'error' => [
-  							'message' => $result['message'],
-  							'status_code' => 20,
-  							'error' => "Existe error en checkpoint"
-  						]
-  					]);
+
+               if($result['code'] == "err_validation_failed"){
+ 						return response()->json([
+ 							'error' => [
+ 								'message' => $result['message'],
+ 								'status_code' => 20
+ 							]
+ 						]);
+ 					}
   					//if($result['code'] == "generic_err_object_not_found"){}
   				}else{
+
+               $create2 = $checkpoint2->createDynamicObject2($data);
+               sleep(2);
 
   					$uid = $result['uid'];
   					$object_type = 4; //Es object dynamic
@@ -1490,95 +1503,73 @@ class CheckpointController extends Controller
   							#Log::info("No se guardó en bd checkpoint");
   						}
 
-                  $curl = curl_init();
+                  //Se manda a crear el objeto a los checkpoints
+                  $validateAdddyo = $validateCmd->validateCreateObject($new_object_name);
 
-                  curl_setopt_array($curl, array(
-                     CURLOPT_URL => "http://localhost:3500/new_object",
-                     CURLOPT_RETURNTRANSFER => true,
-                     CURLOPT_ENCODING => "",
-                     CURLOPT_MAXREDIRS => 10,
-                     CURLOPT_TIMEOUT => 30,
-                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                     CURLOPT_SSL_VERIFYPEER => false,
-                     CURLOPT_SSL_VERIFYHOST => false,
-                     CURLOPT_CUSTOMREQUEST => "POST",
-                     CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$new_object_name\"\r\n}",
-                     CURLOPT_HTTPHEADER => array(
-                        "content-type: application/json",
-                     ),
-                  ));
+                  sleep(2);
 
-                  $response = curl_exec($curl);
-                  $err = curl_error($curl);
+                  Log::info("entra al else de node3500");
+                  $publish = $this->publishChanges($sid);
 
-                  curl_close($curl);
+  						if($publish == 'success'){
+ 							#Log::info("publish success");
+ 							$object_id = $object_new->id;
+ 							$type_address_id = 7;//Pertenece a rango de ip para checkpoint
+ 							#$ip_address = $ip_initial.'-'.$ip_last;
 
-                  if($err){
+                     $total_ips = 1;
+                     $flag = 1;
+                     $name_company = $company_data2[0]['name'];
+                     $arreglo_data = [];
+                     $error_data = [];
+                     $data_exist = [];
 
-                    return response()->json([
-                       'error' => [
-                          'message' => "El objeto no pudo ser creado",
-                          'status_code' => 20
-                       ]
-                    ]);
+                     $validateAddrip = $validateCmd->validateAssignIpObject($new_object_name, $ip_initial, $ip_last, $total_ips, $flag);
+                     sleep(2);
 
-                  }else{
-                     $publish = $this->publishChanges($sid);
-     						if($publish == 'success'){
-    							#Log::info("publish success");
-    							$object_id = $object_new->id;
-    							$type_address_id = 7;//Pertenece a rango de ip para checkpoint
-    							#$ip_address = $ip_initial.'-'.$ip_last;
+                     array_push($arreglo_data, $validateAddrip);
 
-                        $curl = curl_init();
-
-                        curl_setopt_array($curl, array(
-                        	CURLOPT_URL => "http://localhost:3500/new_object_ips",
-                        	CURLOPT_RETURNTRANSFER => true,
-                        	CURLOPT_ENCODING => "",
-                        	CURLOPT_MAXREDIRS => 10,
-                        	CURLOPT_TIMEOUT => 30,
-                        	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                        	CURLOPT_SSL_VERIFYPEER => false,
-                        	CURLOPT_SSL_VERIFYHOST => false,
-                        	CURLOPT_CUSTOMREQUEST => "POST",
-                        	CURLOPT_POSTFIELDS => "{\r\n  \"object_name\" : \"$new_object_name\", \"ip_init\" : \"$ip_initial\", \"ip_last\" : \"$ip_last\", \r\n}",
-                        	CURLOPT_HTTPHEADER => array(
-                        		"content-type: application/json",
-                        	),
-                        ));
-
-                        $response = curl_exec($curl);
-                        $err = curl_error($curl);
-
-                        curl_close($curl);
-
-                        if($err){
-                           return response()->json([
-      								'error' => [
-      									'message' => "El objeto se creó pero no las Ips",
-      									'status_code' => 20
-      								]
-      							]);
-                     	}else{
-                           #Log::info("ip agregada ch");
-       							$addr_obj = new AddressObject;
-       							$addr_obj->ip_initial = $ip_initial;
-       							$addr_obj->ip_last = $ip_last;
-       							$addr_obj->object_id = $object_id;
-       							$addr_obj->type_address_id = $type_address_id;
-       							$addr_obj->save();
-
-       							if($addr_obj){
-       								$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-       								'updated_at' => \Carbon\Carbon::now()]);
-
-       								if($bd_ips_check) return "success";
-       								else return "error";
-       							}else return "error";
+                     if(!empty($data_exist)){
+                        foreach ($data_exist as $value) {
+                           Log::info("VALUE DE DATA EXIST");
+                           Log::info($value);
+                           // if($value['info'] != 0){
+                           //    array_push($arreglo_data, $data_exist);
+                           // }
                         }
-     						}else return "error";
-                  }
+                     }
+
+                     $json = json_encode($arreglo_data);
+                     \Storage::put($name_company.'/'.$api_token.'.json', $json);
+
+                     sleep(2);
+
+                     Log::info("ip agregada ch");
+							$addr_obj = new AddressObject;
+							$addr_obj->ip_initial = $ip_initial;
+							$addr_obj->ip_last = $ip_last;
+							$addr_obj->object_id = $object_id;
+							$addr_obj->type_address_id = $type_address_id;
+							$addr_obj->save();
+
+                     Artisan::call('checkpoint:resendData');
+
+							if($addr_obj){
+                        $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $bd_obj_check, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
+								'updated_at' => \Carbon\Carbon::now()]);
+
+								if($bd_ips_check){
+                           $now = \Carbon\Carbon::now();
+                           Session::put('time_execution', $now);
+
+									return "success";
+								}else{
+									return "error";
+								}
+							}else{
+								return "error";
+							}
+  						}else return "error";
   					}else return "error";
   				}
   			}

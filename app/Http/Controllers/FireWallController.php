@@ -399,37 +399,43 @@ class FireWallController extends Controller{
 
 		$tag = $data['tag'];
 		$company_id = $data['company_id'];
+		$token = $data['token'];
 
 		$arrObject = array(
 			0 => array(
 				'object_name' => 'CUST-'.$tag.'-WHITELIST-INCOMING',
 				'server_id' => $server_id,
 				'company_id' => $company_id,
-				'tag' => $tag
+				'tag' => $tag,
+				'token' => $token
 			),
 			1 => array(
 				'object_name' => 'CUST-'.$tag.'-WHITELIST-OUTGOING',
 				'server_id' => $server_id,
 				'company_id' => $company_id,
-				'tag' => $tag
+				'tag' => $tag,
+				'token' => $token
 			),
 			2 => array(
 				'object_name' => 'CUST-'.$tag.'-BLACKLIST-INCOMING',
 				'server_id' => $server_id,
 				'company_id' => $company_id,
-				'tag' => $tag
+				'tag' => $tag,
+				'token' => $token
 			),
 			3 => array(
 				'object_name' => 'CUST-'.$tag.'-BLACKLIST-OUTGOING',
 				'server_id' => $server_id,
 				'company_id' => $company_id,
-				'tag' => $tag
+				'tag' => $tag,
+				'token' => $token
 			),
 			4 => array(
 				'object_name' => 'CUST-'.$tag.'-IP-ADDRESS',
 				'server_id' => $server_id,
 				'company_id' => $company_id,
-				'tag' => $tag
+				'tag' => $tag,
+				'token' => $token
 			)
 		);
 

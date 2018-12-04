@@ -272,14 +272,19 @@ class LayersController extends Controller
 	            $object_id_list = $value['id'];
 	         }
 
-	         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id_list, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-	         'updated_at' => \Carbon\Carbon::now()]);
+	         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id_list, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
 
 	         Log::info($bd_ips_check);
 
 	         if($bd_ips_check){
+					$total_ips = 1;
+					$flag = 1;
 
-	            $ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
+					//DEBO MANDAR A LA VERIFICACION CADA IP
+					$validateAdddyo = $validateCmd->validateAssignIpObject($name_object, $ip_initial, $ip_last, $total_ips, $flag);
+
+					/***************************************************/
+	            /*$ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
 	            $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
 					$ssh_command3 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
 					$ssh_command4 = "tscpgw_api -g '172.16.3.117' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
@@ -350,7 +355,7 @@ class LayersController extends Controller
 						});
 					}
 
-					sleep(2);
+					sleep(2);*/
 
 	            /*return response()->json([
 	               'success' => [
