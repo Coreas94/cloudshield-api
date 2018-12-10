@@ -35,7 +35,8 @@ class ValidateCommandController extends Controller{
    private $output = "";
    private $verification;
    private $verif_obj;
-   private $prueba = [];
+   private $range = [];
+   private $testtt = [];
 
    public function __construct(){
       $evaluate = "";
@@ -190,10 +191,10 @@ class ValidateCommandController extends Controller{
          Log::info($evaluate);
 
          sleep(3);
-         $ssh_commVer112 = "tscpgw_api -g '172.16.3.112' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
-         $exist_range =
+         //$ssh_commVer112 = "tscpgw_api -g '172.16.3.112' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.112');
 
-         \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
+         /*\SSH::into('checkpoint')->run($ssh_commVer112, function($line){
             Log::info("verification 112");
    			Log::info($line.PHP_EOL);
    			$this->verification = $line.PHP_EOL;
@@ -215,9 +216,10 @@ class ValidateCommandController extends Controller{
 
          Log::info("flag 2 112");
          Log::info($flag2);
-         Log::info($this->verification);
+         Log::info($this->verification);*/
 
-         if($flag >= 2 || $this->verification == 0 ){
+         //if($flag >= 2 || $this->verification == 0 ){
+         if($exist_range == 0){
             $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -288,9 +290,10 @@ class ValidateCommandController extends Controller{
          Log::info($flag);
          Log::info($evaluate);
 
-         $ssh_commVer113 = "tscpgw_api -g '172.16.3.113' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         //$ssh_commVer113 = "tscpgw_api -g '172.16.3.113' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.113');
 
-         \SSH::into('checkpoint')->run($ssh_commVer113, function($line){
+         /*\SSH::into('checkpoint')->run($ssh_commVer113, function($line){
             Log::info("verification 113");
    			Log::info($line.PHP_EOL);
    			$this->verification = $line.PHP_EOL;
@@ -315,7 +318,8 @@ class ValidateCommandController extends Controller{
          Log::info($flag2);
          Log::info($this->verification);
 
-         if($flag >= 2 || $this->verification == 0 ){
+         if($flag >= 2 || $this->verification == 0 ){*/
+         if($exist_range == 0){
             $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -385,9 +389,10 @@ class ValidateCommandController extends Controller{
          Log::info($evaluate);
 
          sleep(3);
-         $ssh_commVer116 = "tscpgw_api -g '172.16.3.116' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         //$ssh_commVer116 = "tscpgw_api -g '172.16.3.116' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.116');
 
-         \SSH::into('checkpoint')->run($ssh_commVer116, function($line){
+         /*\SSH::into('checkpoint')->run($ssh_commVer116, function($line){
             Log::info("verification 116");
    			Log::info($line.PHP_EOL);
    			$this->verification = $line.PHP_EOL;
@@ -411,7 +416,8 @@ class ValidateCommandController extends Controller{
          Log::info($flag2);
          Log::info($this->verification);
 
-         if($flag >= 2 || $this->verification == 0 ){
+         if($flag >= 2 || $this->verification == 0 ){*/
+         if($exist_range == 0){
             $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -483,9 +489,10 @@ class ValidateCommandController extends Controller{
          Log::info($flag);
          Log::info($evaluate);
 
-         $ssh_commVer117 = "tscpgw_api -g '172.16.3.117' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         //$ssh_commVer117 = "tscpgw_api -g '172.16.3.117' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+         $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.117');
 
-         \SSH::into('checkpoint')->run($ssh_commVer117, function($line){
+         /*\SSH::into('checkpoint')->run($ssh_commVer117, function($line){
             Log::info("verification 117");
    			Log::info($line.PHP_EOL);
    			$this->verification = $line.PHP_EOL;
@@ -509,7 +516,8 @@ class ValidateCommandController extends Controller{
          Log::info($flag2);
          Log::info($this->verification);
 
-         if($flag >= 2 || $this->verification == 0 ){
+         if($flag >= 2 || $this->verification == 0 ){*/
+         if($exist_range == 0){
             $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -847,9 +855,10 @@ class ValidateCommandController extends Controller{
       Log::info($evaluate);
 
       sleep(3);
-      $ssh_commVer112 = "tscpgw_api -g '172.16.3.112' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      //$ssh_commVer112 = "tscpgw_api -g '172.16.3.112' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.112');
 
-      \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
+      /*\SSH::into('checkpoint')->run($ssh_commVer112, function($line){
          Log::info("verification 112");
       	Log::info($line.PHP_EOL);
       	$this->verification = $line.PHP_EOL;
@@ -869,7 +878,8 @@ class ValidateCommandController extends Controller{
          Log::info($flag2);
       }
 
-      if($flag >= 2 || $this->verification == 1 ){
+      if($flag >= 2 || $this->verification == 1 ){*/
+      if($exist_range == 1){
          $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
 
@@ -929,9 +939,10 @@ class ValidateCommandController extends Controller{
       Log::info($evaluate);
 
       sleep(3);
-      $ssh_commVer113 = "tscpgw_api -g '172.16.3.113' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      //$ssh_commVer113 = "tscpgw_api -g '172.16.3.113' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.113');
 
-      \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
+      /*\SSH::into('checkpoint')->run($ssh_commVer112, function($line){
          Log::info("verification 112");
       	Log::info($line.PHP_EOL);
       	$this->verification = $line.PHP_EOL;
@@ -951,13 +962,14 @@ class ValidateCommandController extends Controller{
          Log::info($flag2);
       }
 
-      if($flag >= 2 || $this->verification == 1 ){
+      if($flag >= 2 || $this->verification == 1 ){*/
+      if($exist_range == 1){
          $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
 
          //Guardaré en mongo los logs ya sean buenos o malos
          $log = new HistoricalData;
-         $log->server = "172.16.3.112";
+         $log->server = "172.16.3.113";
          $log->object_name = $object_name;
          $log->ip_initial = $ip_initial;
          $log->ip_last = $ip_last;
@@ -972,7 +984,7 @@ class ValidateCommandController extends Controller{
 
          //Guardaré en mongo los logs ya sean buenos o malos
          $log = new HistoricalData;
-         $log->server = "172.16.3.112";
+         $log->server = "172.16.3.113";
          $log->object_name = $object_name;
          $log->ip_initial = $ip_initial;
          $log->ip_last = $ip_last;
@@ -1011,9 +1023,10 @@ class ValidateCommandController extends Controller{
       Log::info($evaluate);
 
       sleep(3);
-      $ssh_commVer116 = "tscpgw_api -g '172.16.3.116' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      //$ssh_commVer116 = "tscpgw_api -g '172.16.3.116' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.116');
 
-      \SSH::into('checkpoint')->run($ssh_commVer116, function($line){
+      /*\SSH::into('checkpoint')->run($ssh_commVer116, function($line){
          Log::info("verification 116");
       	Log::info($line.PHP_EOL);
       	$this->verification = $line.PHP_EOL;
@@ -1033,13 +1046,14 @@ class ValidateCommandController extends Controller{
          Log::info($flag2);
       }
 
-      if($flag >= 2 || $this->verification == 1 ){
+      if($flag >= 2 || $this->verification == 1 ){*/
+      if($exist_range == 1){
          $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
 
          //Guardaré en mongo los logs ya sean buenos o malos
          $log = new HistoricalData;
-         $log->server = "172.16.3.112";
+         $log->server = "172.16.3.116";
          $log->object_name = $object_name;
          $log->ip_initial = $ip_initial;
          $log->ip_last = $ip_last;
@@ -1054,7 +1068,7 @@ class ValidateCommandController extends Controller{
 
          //Guardaré en mongo los logs ya sean buenos o malos
          $log = new HistoricalData;
-         $log->server = "172.16.3.112";
+         $log->server = "172.16.3.116";
          $log->object_name = $object_name;
          $log->ip_initial = $ip_initial;
          $log->ip_last = $ip_last;
@@ -1093,9 +1107,10 @@ class ValidateCommandController extends Controller{
       Log::info($evaluate);
 
       sleep(3);
-      $ssh_commVer117 = "tscpgw_api -g '172.16.3.117' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      //$ssh_commVer117 = "tscpgw_api -g '172.16.3.117' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.117');
 
-      \SSH::into('checkpoint')->run($ssh_commVer117, function($line){
+      /*\SSH::into('checkpoint')->run($ssh_commVer117, function($line){
          Log::info("verification 117");
       	Log::info($line.PHP_EOL);
       	$this->verification = $line.PHP_EOL;
@@ -1115,13 +1130,14 @@ class ValidateCommandController extends Controller{
          Log::info($flag2);
       }
 
-      if($flag >= 2 || $this->verification == 1 ){
+      if($flag >= 2 || $this->verification == 1 ){*/
+      if($exist_range == 1){
          $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip");
          array_push($array_data_err, $temp_data_err);
 
          //Guardaré en mongo los logs ya sean buenos o malos
          $log = new HistoricalData;
-         $log->server = "172.16.3.112";
+         $log->server = "172.16.3.117";
          $log->object_name = $object_name;
          $log->ip_initial = $ip_initial;
          $log->ip_last = $ip_last;
@@ -1136,7 +1152,7 @@ class ValidateCommandController extends Controller{
 
          //Guardaré en mongo los logs ya sean buenos o malos
          $log = new HistoricalData;
-         $log->server = "172.16.3.112";
+         $log->server = "172.16.3.117";
          $log->object_name = $object_name;
          $log->ip_initial = $ip_initial;
          $log->ip_last = $ip_last;
@@ -1549,20 +1565,29 @@ class ValidateCommandController extends Controller{
 
    public function existIpRange($object_name, $ip_initial, $ip_last, $server){
 
-      $ips = '71.71.71.5';
-      $object = "Object19Nov";
       $array_object;
       $array_ip = [];
+      $flag = 0;
 
-      $command = "tscpgw_api -g 172.16.3.116 -a ranges -o ".$object;
+      $command = "tscpgw_api -g '".$server."' -a ranges -o ".$object_name;
 
       \SSH::into('checkpoint')->run($command, function($line2){
-         $this->prueba = $line2.PHP_EOL;
+         Log::info($line2.PHP_EOL);
+         $this->$range = $line2.PHP_EOL;
       });
 
-      Log::info($this->prueba);
+      while ( ($this->$range == "") || ($flag >= 3) ) {
+         if($flag >= 3) break;
+         $flag++;
+         \SSH::into('checkpoint')->run($command, function($line){
+            Log::info($line.PHP_EOL);
+            $this->$range = $line.PHP_EOL;
+         });
+      }
 
-      $body = explode("\n", $this->prueba);
+      Log::info($this->$range);
+
+      $body = explode("\n", $this->$range);
       $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
       $i = 0;
 
@@ -1575,7 +1600,68 @@ class ValidateCommandController extends Controller{
          }
       }
 
-      foreach ($array_object['registros'] as $value) {
+      foreach($array_object['registros'] as $value) {
+         $range = Range::parse($value);
+         foreach($range as $ip) {
+            array_push($array_ip, (string)$ip);
+         }
+      }
+
+      if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
+         Log::info("Existe la IP: ".$ip_initial);
+         return 1;
+      }else{
+         Log::info("No existe la ip: ".$ip_initial);
+         return 0;
+      }
+   }
+
+   public function evaluateRemoveIp(){
+
+      $object_name = 'Object29Nov';
+      $ip_initial = '38.38.1.11';
+      $ip_last = '38.38.1.11';
+      $server = '172.16.3.116';
+
+      $array_object;
+      $array_ip = [];
+      $flag = 0;
+
+      $command = "tscpgw_api -g '".$server."' -a ranges -o ".$object_name;
+      Log::info($command);
+
+      \SSH::into('checkpoint')->run($command, function($line2){
+         Log::info($line2.PHP_EOL);
+         $this->range = $line2.PHP_EOL;
+      });
+
+      while ( ($this->range == "") || ($flag >= 3) ) {
+         if($flag >= 3) break;
+         $flag++;
+         \SSH::into('checkpoint')->run($command, function($line){
+            Log::info($line.PHP_EOL);
+            $this->range = $line.PHP_EOL;
+         });
+      }
+
+      Log::info($this->range);
+
+      $body = explode("\n", $this->range);
+      $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
+      $i = 0;
+
+      foreach($body as $key => $row){
+         if($key > 1){
+            if($row != ""){
+               $var1 = preg_replace('/\s+/', '-', $row);
+               array_push($array_object['registros'], $var1);
+            }
+         }
+      }
+
+      foreach($array_object['registros'] as $value) {
+
+         Log::info($value);
 
          $range = Range::parse($value);
          foreach($range as $ip) {
@@ -1583,14 +1669,13 @@ class ValidateCommandController extends Controller{
          }
       }
 
-      if(in_array($ips, $array_ip)){
-         Log::info("Existe la IP: ".$ips);
-         return 1;
+      if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
+         Log::info("Existe la IP: ".$ip_initial);
+         #return 1;
       }else{
-         Log::info("No existe la ip: ".$ips);
-         return 0;
+         Log::info("No existe la ip: ".$ip_initial);
+         #return 0;
       }
-
    }
 
 }

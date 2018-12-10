@@ -47,6 +47,6 @@ class resendDataCheckpoint extends Command
       //$token = $this->argument('token');
       //$validate->resendDataTemp($token);
 
-      $validate->getErrorData();
+      //$validate->getErrorData();
    }
 }

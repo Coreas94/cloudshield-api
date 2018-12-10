@@ -19,7 +19,9 @@ Route::get('prueba', 'ValidateCommandController@resendDataTemp');
 Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
-Route::get('existip', 'ValidateCommandController@existIpRange');
+Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
+
+//Route::get('get_ips', 'RequestController@getAllRequest');
 //Route::get('change_errors', 'Controller@changeErrorData');
 Route::get('change_errors', 'ValidateCommandController@matchData');
 
@@ -65,6 +67,20 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
      		Route::get('/get_changes', 'CheckpointController@getChanges');
 
          Route::get('/get_errors', 'ValidateCommandController@evaluateErrors');
+
+         //RUTAS PARA SOLICITUDES DE IP*****************
+
+         //Rutas para solicitar IPs
+         Route::post('/request_ip', 'RequestController@saveRequestIp');
+
+         //Ruta para obtener las solicitudes hechas
+         Route::get('/get_request', 'RequestController@getAllRequest');
+
+         //Ruta para aceptar petición de ip
+         Route::post('/accept_request', 'RequestController@acceptRequest');
+
+         //Ruta para declinar petición
+         Route::post('/decline_request', 'RequestController@declineRequest');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){
