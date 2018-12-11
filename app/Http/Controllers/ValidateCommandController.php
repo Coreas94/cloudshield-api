@@ -1616,15 +1616,21 @@ class ValidateCommandController extends Controller{
       }
    }
 
+   function remove_element($array,$value) {
+      return array_diff($array, (is_array($value) ? $value : array($value)));
+   }
+
+
    public function evaluateRemoveIp(){
 
       $object_name = 'Object29Nov';
-      $ip_initial = '38.38.1.11';
-      $ip_last = '38.38.1.11';
-      $server = '172.16.3.116';
+      $ip_initial = '105.105.1.11';
+      $ip_last = '105.105.1.11';
+      $server = '172.16.3.113';
 
       $array_object;
       $array_ip = [];
+      $array_ip2 = [];
       $flag = 0;
 
       $command = "tscpgw_api -g '".$server."' -a ranges -o ".$object_name;
@@ -1663,11 +1669,36 @@ class ValidateCommandController extends Controller{
 
          Log::info($value);
 
-         $range = Range::parse($value);
-         foreach($range as $ip) {
-            array_push($array_ip, (string)$ip);
+         //Evaluar si es una sola ip o varias las que se eliminarán
+         if($ip_initial == $ip_last){
+            $exist = Range::parse($value)->contains(new IP($ip_initial));
+
+            if($exist){
+               Log::info("excludeeee");
+
+               $range = Range::parse($value);
+               foreach($range as $ip) {
+                  array_push($array_ip, (string)$ip);
+               }
+
+               $array_ip_exist = $this->remove_element($array_ip, $ip_initial);
+               Log::info($array_ip_exist);
+
+
+
+
+
+
+            }
+         }else{
+            $range = Range::parse($ip_initial.'-'.$ip_last);
+            foreach($range as $ip) {
+               array_push($array_ip, (string)$ip);
+            }
          }
       }
+
+
 
       if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
          Log::info("Existe la IP: ".$ip_initial);
@@ -1676,6 +1707,7 @@ class ValidateCommandController extends Controller{
          Log::info("No existe la ip: ".$ip_initial);
          #return 0;
       }
+
    }
 
 }

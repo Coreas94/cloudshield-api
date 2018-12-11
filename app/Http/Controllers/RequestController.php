@@ -165,5 +165,23 @@ class RequestController extends Controller{
 
    }
 
+   public function countRequest(Request $request){
+
+      $user = JWTAuth::toUser($request['token']);
+      $company_id = $user['company_id'];
+ 		$role_user = $user->roles->first()->name;
+
+      if($role_user == "superadmin"){
+         $count = RequestIp::where('request_ips.status', '=', 0)->count();
+      }else{
+         $count = RequestIp::where('request_ips.status', '=', 0)->where('request_ips.company_id', '=', $company_id)->count();
+      }
+
+      return response()->json([
+         'count' => $count
+      ]);
+
+   }
+
 
 }

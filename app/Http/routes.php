@@ -81,6 +81,9 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
          //Ruta para declinar petición
          Route::post('/decline_request', 'RequestController@declineRequest');
+
+         //Ruta para contador de solicitudes
+         Route::get('/count_request', 'RequestController@countRequest');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){
