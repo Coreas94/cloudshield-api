@@ -818,6 +818,12 @@ class ValidateCommandController extends Controller{
    public function validateRemoveIpObject($object_name, $ip_initial, $ip_last, $total_ips, $current_ips){
       Log::info($object_name.' '.$ip_initial.' '.$ip_last.' '.$total_ips.' '.$current_ips);
       //die();
+      $servers = array('172.16.3.112', '172.16.3.113', '172.16.3.116', '172.16.3.117');
+
+      //ME QUEDO AQUI PARA VERIFICAR LA RESPUESTA DEL CHECKPOINT Y ELIMINAR RANGOS
+      foreach($servers as $row){
+         $cmd_exists = $this->evaluateRemoveIp($object_name, $ip_initial, $ip_last, $row);
+      }
 
       $ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
       $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
@@ -1573,21 +1579,21 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($command, function($line2){
          Log::info($line2.PHP_EOL);
-         $this->$range = $line2.PHP_EOL;
+         $this->range = $line2.PHP_EOL;
       });
 
-      while ( ($this->$range == "") || ($flag >= 3) ) {
+      while ( ($this->range == "") || ($flag >= 3) ) {
          if($flag >= 3) break;
          $flag++;
          \SSH::into('checkpoint')->run($command, function($line){
             Log::info($line.PHP_EOL);
-            $this->$range = $line.PHP_EOL;
+            $this->range = $line.PHP_EOL;
          });
       }
 
-      Log::info($this->$range);
+      Log::info($this->range);
 
-      $body = explode("\n", $this->$range);
+      $body = explode("\n", $this->range);
       $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
       $i = 0;
 
@@ -1620,17 +1626,25 @@ class ValidateCommandController extends Controller{
       return array_diff($array, (is_array($value) ? $value : array($value)));
    }
 
+   /*function remove_element(&$array,$value) {
+      if(($key = array_search($value,$array)) !== false) {
+         unset($array[$key]);
+      }
+   }*/
+
 
    public function evaluateRemoveIp(){
 
       $object_name = 'Object29Nov';
-      $ip_initial = '105.105.1.11';
-      $ip_last = '105.105.1.11';
+      $ip_initial = '172.16.33.1';
+      $ip_last = '172.16.33.1';
       $server = '172.16.3.113';
 
       $array_object;
       $array_ip = [];
       $array_ip2 = [];
+      $array_ip3 = [];
+      $ips_save = [];
       $flag = 0;
 
       $command = "tscpgw_api -g '".$server."' -a ranges -o ".$object_name;
@@ -1650,7 +1664,7 @@ class ValidateCommandController extends Controller{
          });
       }
 
-      Log::info($this->range);
+      //Log::info($this->range);
 
       $body = explode("\n", $this->range);
       $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
@@ -1665,12 +1679,11 @@ class ValidateCommandController extends Controller{
          }
       }
 
-      foreach($array_object['registros'] as $value) {
+      //Evaluar si es una sola ip o varias las que se eliminarán
+      if($ip_initial == $ip_last){
 
-         Log::info($value);
+         foreach($array_object['registros'] as $value) {
 
-         //Evaluar si es una sola ip o varias las que se eliminarán
-         if($ip_initial == $ip_last){
             $exist = Range::parse($value)->contains(new IP($ip_initial));
 
             if($exist){
@@ -1682,31 +1695,53 @@ class ValidateCommandController extends Controller{
                }
 
                $array_ip_exist = $this->remove_element($array_ip, $ip_initial);
-               Log::info($array_ip_exist);
+               Log::info(count($array_ip_exist));
 
+               $count_array = count($array_ip_exist);
 
+               if($count_array > 0){
+
+               }else{
+                  Log::info("Se eliminó correctamente");
+               }
 
 
 
 
             }
-         }else{
-            $range = Range::parse($ip_initial.'-'.$ip_last);
-            foreach($range as $ip) {
-               array_push($array_ip, (string)$ip);
+         }
+      }else{
+
+         foreach($array_object['registros'] as $value) {
+
+            if( (Range::parse($value)->contains(new IP($ip_initial))) && (Range::parse($value)->contains(new IP($ip_last))) ){
+               $range = Range::parse($value);
+               foreach($range as $ip) {
+                  array_push($array_ip2, (string)$ip);
+               }
+
+               $range_delete = Range::parse($ip_initial.'-'.$ip_last);
+               foreach($range_delete as $ip) {
+                  array_push($array_ip3, (string)$ip);
+               }
+
+               foreach($array_ip2 as $row){
+                  if(!in_array($row, $array_ip3)){
+                     array_push($ips_save, $row);
+                  }
+               }
+               //Debo mandar a guardar cada ip restante
             }
          }
       }
 
-
-
-      if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
+      /*if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
          Log::info("Existe la IP: ".$ip_initial);
          #return 1;
       }else{
          Log::info("No existe la ip: ".$ip_initial);
          #return 0;
-      }
+      }*/
 
    }
 
