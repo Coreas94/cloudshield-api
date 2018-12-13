@@ -835,12 +835,14 @@ class ValidateCommandController extends Controller{
 
          if($cmd_exists['remove'] == 0){//Significa que el rango se eliminó y debo crear los otros
 
-            $addNewRange = $this->agreggateNewRange($row, $object_name, $ip_initial, $ip_last);
+            foreach($cmd_exists['new_range'] as $value){
+               $addNewRange = $this->agreggateNewRange($row, $object_name, $value, $value);
 
-            Log::info("addNewRange ".$row);
-            Log::info($addNewRange);
+               Log::info("addNewRange ".$row);
+               Log::info($addNewRange);
 
-            array_push($array_container, $addNewRange);
+               array_push($array_container, $addNewRange);
+            }
 
          }else{
             Log::info("El remove no es CERO y no se eliminó el rango");
@@ -907,7 +909,7 @@ class ValidateCommandController extends Controller{
                Log::info($flag);
                Log::info($evaluate);
 
-               $ssh_commVer = "tscpgw_api -g '".$row['server']."' -a search -o ".$row['object_name']." -r '".$row['ip_initial']." ".$row['ip_last']."'";
+               /*$ssh_commVer = "tscpgw_api -g '".$row['server']."' -a search -o ".$row['object_name']." -r '".$row['ip_initial']." ".$row['ip_last']."'";
                Log::info($ssh_commVer);
                \SSH::into('checkpoint')->run($ssh_commVer, function($line){
                   Log::info("verification server 117");
@@ -927,9 +929,11 @@ class ValidateCommandController extends Controller{
                      $this->verification = $line.PHP_EOL;
                   });
                   Log::info($flag2);
-               }
+               }*/
 
-               if($this->verification == 1 ){
+               $exist_range = $this->existIpRange($row['object_name'], $row['ip_initial'], $row['ip_last'], $row['server']);
+
+               if($exist_range == 1 ){
                   //Se debe dejar
                   $update = HistoricalData::where('_id', '=', $row['_id'])->update(['status' => 1]);
                }else{
@@ -1076,7 +1080,7 @@ class ValidateCommandController extends Controller{
                         Log::info($flag);
                         Log::info($evaluate);
 
-                        $ssh_commVer = "tscpgw_api -g '".$val['server']."' -a search -o ".$val['object_name']." -r '".$val['ip_initial']." ".$val['ip_last']."'";
+                        /*$ssh_commVer = "tscpgw_api -g '".$val['server']."' -a search -o ".$val['object_name']." -r '".$val['ip_initial']." ".$val['ip_last']."'";
 
                         \SSH::into('checkpoint')->run($ssh_commVer, function($line){
                            Log::info("verification server 117");
@@ -1096,9 +1100,10 @@ class ValidateCommandController extends Controller{
                               $this->verification = $line.PHP_EOL;
                            });
                            Log::info($flag2);
-                        }
+                        }*/
+                        $exist_range = $this->existIpRange($val['object_name'], $val['ip_initial'], $val['ip_last'], $val['server']);
 
-                        if($this->verification == 1 ){
+                        if($exist_range == 1 ){
                            //Se debe dejar
                            $update = HistoricalData::where('_id', '=', $val['_id'])->update(['status' => 1]);
                         }else{
@@ -1151,7 +1156,7 @@ class ValidateCommandController extends Controller{
                         Log::info($flag);
                         Log::info($evaluate);
 
-                        $ssh_commVer = "tscpgw_api -g '".$val['server']."' -a search -o ".$val['object_name']." -r '".$val['ip_initial']." ".$val['ip_last']."'";
+                        /*$ssh_commVer = "tscpgw_api -g '".$val['server']."' -a search -o ".$val['object_name']." -r '".$val['ip_initial']." ".$val['ip_last']."'";
 
                         \SSH::into('checkpoint')->run($ssh_commVer, function($line){
                            Log::info("verification server 117");
@@ -1171,9 +1176,11 @@ class ValidateCommandController extends Controller{
                               $this->verification = $line.PHP_EOL;
                            });
                            Log::info($flag2);
-                        }
+                        }*/
 
-                        if($this->verification == 1 ){
+                        $exist_range = $this->existIpRange($val['object_name'], $val['ip_initial'], $val['ip_last'], $val['server']);
+
+                        if($exist_range == 1 ){
                            //Se debe dejar
                            $update = HistoricalData::where('_id', '=', $val['_id'])->update(['status' => 1]);
                         }else{
@@ -1372,6 +1379,8 @@ class ValidateCommandController extends Controller{
                Log::info($value);
 
                $ips_part = explode("-", $value);
+               Log::info("ips parts");
+               Log::info($ips_part);
 
                $range = Range::parse($value);
                foreach($range as $ip) {
@@ -1379,7 +1388,10 @@ class ValidateCommandController extends Controller{
                }
 
                $array_ip_exist = $this->remove_element($array_ip, $ip_initial);
+               Log::info("array_ip_exist");
                Log::info($array_ip_exist);
+
+               //die();
 
                $count_array = count($array_ip_exist);
 
@@ -1425,6 +1437,8 @@ class ValidateCommandController extends Controller{
 
                   $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
                   $respuesta = array("new_range" => $array_ip_exist, "remove" => $removeRange);
+                  Log::info("La respuesta es: ");
+                  Log::info($respuesta);
                   return $respuesta;
 
 
