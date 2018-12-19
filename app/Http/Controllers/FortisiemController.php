@@ -83,6 +83,9 @@ class FortisiemController extends Controller
       $fecha_inicio = $dt->subHour(2);
       $fecha_inicio = $fecha_inicio->timestamp;
 
+      Log::info($fecha_inicio);
+      Log::info($fecha_fin);
+
       $process = new Process("python ".app_path()."/api_py/GetQueryResultsByOrg.py ".app_path()."/api_py/request.xml ".$fecha_inicio.' '. $fecha_fin);
       $process->run();
 

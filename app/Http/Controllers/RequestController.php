@@ -28,6 +28,7 @@ use App\HistoricalData;
 use App\RequestIp;
 use App\Jobs\senderEmailIp;
 use Mail;
+use App\Http\Controllers\CheckpointController;
 
 use IPTools\Range;
 use IPTools\Network;
@@ -158,11 +159,115 @@ class RequestController extends Controller{
    }
 
    public function acceptRequest(Request $request){
+      $checkpoint = new CheckpointController;
 
+      $user = JWTAuth::toUser($request['token']);
+      Log::info($user);
+
+      $company_id = $user['company_id'];
+      $request_user_id = $user['id'];
+      $object_id = $request['object_id'];
+      $type_request = $request['type_request'];
+      $user_name = $user['name'].' '.$user['lastname'];
+      $array_ip = [];
+
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+
+      $request_id = $request['id_request'];
+      $request_data = RequestIp::where('id', '=', $request_id)->get();
+      $request_data = $request_data->toArray();
+
+      foreach($request_data as $key => $row){
+         array_push($array_ip, $row['ip_initial'].'-'.$row['ip_last']);
+         $ips = array('ip_initial' => $row['ip_initial'], 'ip_last' => $row['ip_last']);
+         $data_send = array('token' => $request['token'], 'object_id' => $row['object_id'], 'ips' => array($ips));
+      }
+
+      $data = new Request($data_send);
+      $assign = $checkpoint->assignIpObject($data);
+
+      $assign_response = json_decode($assign->content(), true);
+
+      foreach ($assign_response as $key => $value) {
+         if($key == "success"){
+
+            $request_upd = RequestIp::find($request_id);
+            $request_upd->status = 1;
+            $request_upd->save();
+
+            $title = 'CloudShield - Alert Request';
+            $data = "Se informa que se aceptó la solicitud del usuario: ".$user_name." perteneciente a la empresa: ".$name_company;
+            $data2 = "Para agregar las siguientes IPs: ".implode(", ", $array_ip);
+
+            Mail::send('email.alert_request', ['title' => $title, 'data' => $data, "data2" => $data2], function ($message){
+               $message->subject('CloudShield - Alarma de solicitud');
+               $message->from('alerts@red4g.net', 'CloudShield');
+               $message->to('jcoreas@red4g.net');
+            });
+
+            return response()->json([
+    				'success' => [
+    					'message' => 'Request Success',
+    					'status_code' => 200
+    				]
+    			]);
+         }else{
+            return response()->json([
+    				'error' => [
+    					'message' => 'Request error',
+    					'status_code' => 20
+    				]
+    			]);
+         }
+      }
    }
 
    public function declineRequest(Request $request){
 
+      $user = JWTAuth::toUser($request['token']);
+      Log::info($user);
+
+      $company_id = $user['company_id'];
+      $request_user_id = $user['id'];
+      $user_name = $user['name'].' '.$user['lastname'];
+      $array_ip = [];
+
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+
+      $request_id = $request['id_request'];
+      $request_data = RequestIp::where('id', '=', $request_id)->get();
+      $request_data = $request_data->toArray();
+
+      foreach($request_data as $key => $row){
+         array_push($array_ip, $row['ip_initial'].'-'.$row['ip_last']);
+      }
+
+      $request_upd = RequestIp::find($request_id);
+      $request_upd->status = 2;
+      $request_upd->save();
+
+      $title = 'CloudShield - Alert Request';
+      $data = "Se informa que se rechazó la solicitud del usuario: ".$user_name." perteneciente a la empresa: ".$name_company;
+      $data2 = "Para agregar las siguientes IPs: ".implode(", ", $array_ip);
+
+      Mail::send('email.alert_request', ['title' => $title, 'data' => $data, "data2" => $data2], function ($message){
+         $message->subject('CloudShield - Alarma de solicitud');
+         $message->from('alerts@red4g.net', 'CloudShield');
+         $message->to('jcoreas@red4g.net');
+      });
+
+      return response()->json([
+         'success' => [
+            'message' => 'Solicitud rechazada',
+            'status_code' => 200
+         ]
+      ]);
    }
 
    public function countRequest(Request $request){

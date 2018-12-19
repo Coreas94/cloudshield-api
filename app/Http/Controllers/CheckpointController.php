@@ -319,6 +319,8 @@ class CheckpointController extends Controller
    }
 
    public function assignIpObject(Request $request){
+      Log::info("el request es");
+      Log::info($request);
 
       $arreglo_data = [];
       $error_data = [];

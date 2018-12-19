@@ -1306,6 +1306,9 @@ class ValidateCommandController extends Controller{
 
       if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
          Log::info("Existe la IP: ".$ip_initial);
+
+         $response = array("respuesta" => 1, "info" => "success");
+
          return 1;
       }else{
          Log::info("No existe la ip: ".$ip_initial);
@@ -1392,56 +1395,55 @@ class ValidateCommandController extends Controller{
                //die();
                $count_array = count($array_ip_exist);
 
-               if($count_array > 0){
-                  //ELIMINO EL RANGO COMPLETO
-                  $removeRange = $this->removeRange($server, $object_name, $ips_part[0], $ips_part[1]);
+               //if($count_array > 0){
+               //ELIMINO EL RANGO COMPLETO
+               $removeRange = $this->removeRange($server, $object_name, $ips_part[0], $ips_part[1]);
 
-                  Log::info("removeRange****");
-                  Log::info($removeRange);
+               Log::info("removeRange****");
+               Log::info($removeRange);
 
-                  if($removeRange == 1){//Significa que no se eliminó
-                     $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
-                     array_push($array_data_err, $temp_data_err);
+               if($removeRange == 1){//Significa que no se eliminó
+                  $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
+                  array_push($array_data_err, $temp_data_err);
 
-                     //Guardaré en mongo los logs ya sean buenos o malos
-                     $log = new HistoricalData;
-                     $log->server = $server;
-                     $log->object_name = $object_name;
-                     $log->ip_initial = $ip_initial;
-                     $log->ip_last = $ip_last;
-                     $log->type = "delrip";
-                     $log->class ="ip";
-                     $log->status = 0;
-                     $log->save();
+                  //Guardaré en mongo los logs ya sean buenos o malos
+                  $log = new HistoricalData;
+                  $log->server = $server;
+                  $log->object_name = $object_name;
+                  $log->ip_initial = $ip_initial;
+                  $log->ip_last = $ip_last;
+                  $log->type = "delrip";
+                  $log->class ="ip";
+                  $log->status = 0;
+                  $log->save();
 
-                  }else{//Si se eliminó
-                     $temp_data_succ = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => 1, "current_ips" => 1);
-                     array_push($array_data_succ, $temp_data_succ);
+               }else{//Si se eliminó
+                  $temp_data_succ = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => 1, "current_ips" => 1);
+                  array_push($array_data_succ, $temp_data_succ);
 
-                     //Guardaré en mongo los logs ya sean buenos o malos
-                     $log = new HistoricalData;
-                     $log->server = $server;
-                     $log->object_name = $object_name;
-                     $log->ip_initial = $ip_initial;
-                     $log->ip_last = $ip_last;
-                     $log->type = "delrip";
-                     $log->class ="ip";
-                     $log->status = 1;
-                     $log->save();
+                  //Guardaré en mongo los logs ya sean buenos o malos
+                  $log = new HistoricalData;
+                  $log->server = $server;
+                  $log->object_name = $object_name;
+                  $log->ip_initial = $ip_initial;
+                  $log->ip_last = $ip_last;
+                  $log->type = "delrip";
+                  $log->class ="ip";
+                  $log->status = 1;
+                  $log->save();
 
-                     //$addNewRange = $this->agreagateRangeNew();
-                  }
-
-                  $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
-                  $respuesta = array("new_range" => $array_ip_exist, "remove" => $removeRange);
-                  Log::info("La respuesta es: ");
-                  Log::info($respuesta);
-                  return $respuesta;
-
-
-               }else{
-                  Log::info("Se eliminó correctamente");
+                  //$addNewRange = $this->agreagateRangeNew();
                }
+
+               $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
+               $respuesta = array("new_range" => $array_ip_exist, "remove" => $removeRange);
+               Log::info("La respuesta es: ");
+               Log::info($respuesta);
+               return $respuesta;
+
+               /*}else{
+                  Log::info("Se eliminó correctamente");
+               }*/
             }
          }
       }else{//Significa que son varias ips a eliminar
@@ -1520,11 +1522,9 @@ class ValidateCommandController extends Controller{
                Log::info("La respuesta es: ");
                Log::info($respuesta);
                return $respuesta;
-
             }
          }
       }
-
    }
 
    public function removeRange($server, $object_name, $ip_initial, $ip_last){
