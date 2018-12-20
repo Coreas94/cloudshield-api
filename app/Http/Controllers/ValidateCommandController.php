@@ -219,7 +219,7 @@ class ValidateCommandController extends Controller{
          Log::info($this->verification);*/
 
          //if($flag >= 2 || $this->verification == 0 ){
-         if($exist_range == 0){
+         if($exist_range['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -232,6 +232,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 0;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
 
          }else{
@@ -247,6 +249,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 1;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
          }
 
@@ -319,7 +323,7 @@ class ValidateCommandController extends Controller{
          Log::info($this->verification);
 
          if($flag >= 2 || $this->verification == 0 ){*/
-         if($exist_range == 0){
+         if($exist_range['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -332,6 +336,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 0;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
 
          }else{
@@ -347,6 +353,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 1;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
          }
 
@@ -417,7 +425,7 @@ class ValidateCommandController extends Controller{
          Log::info($this->verification);
 
          if($flag >= 2 || $this->verification == 0 ){*/
-         if($exist_range == 0){
+         if($exist_range['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -430,6 +438,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 0;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
 
          }else{
@@ -445,6 +455,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 1;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
          }
 
@@ -517,7 +529,7 @@ class ValidateCommandController extends Controller{
          Log::info($this->verification);
 
          if($flag >= 2 || $this->verification == 0 ){*/
-         if($exist_range == 0){
+         if(['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -530,6 +542,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 0;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
          }else{
             $temp_data_succ = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
@@ -544,6 +558,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 1;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
          }
 
@@ -573,9 +589,10 @@ class ValidateCommandController extends Controller{
       $company_data2 = json_decode(json_encode($company_data), true);
 
       $name_company = $company_data2[0]['name'];
+      $token_company = $company_data2[0]['token_company'];
 
       //EVALUAR ARCHIVO JSON
-      $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+      $path = storage_path() ."/app/".$name_company."/".$token_company.".json";
       $data_exist = json_decode(file_get_contents($path), true);
       //Log::info($data_exist);
       $temp_error = [];
@@ -690,7 +707,7 @@ class ValidateCommandController extends Controller{
                   $arreglo = array("success" => "", "error" => "", "info" => 0);
 
                   $json_response = json_encode($arreglo);
-                  \Storage::put($name_company.'/'.$api_token.'.json', $json_response);
+                  \Storage::put($name_company.'/'.$token_company.'.json', $json_response);
                }else{
                   Log::info("la verifiacion no es 1");
                   Log::info("No se han podido quitar los errores");
@@ -704,7 +721,7 @@ class ValidateCommandController extends Controller{
          $arreglo = array("success" => "", "error" => "", "info" => 0);
 
          $json_response = json_encode($arreglo);
-         \Storage::put($name_company.'/'.$api_token.'.json', $json_response);
+         \Storage::put($name_company.'/'.$token_company.'.json', $json_response);
          return "No hay errores";
       }
    }
@@ -833,7 +850,7 @@ class ValidateCommandController extends Controller{
          Log::info("cmd exist ".$row);
          Log::info($cmd_exists);
 
-         if($cmd_exists['remove'] == 0){//Significa que el rango se eliminó y debo crear los otros
+         if($cmd_exists['remove']['response'] == 0){//Significa que el rango se eliminó y debo crear los otros
 
             $count = count($cmd_exists['new_range']);
 
@@ -938,7 +955,7 @@ class ValidateCommandController extends Controller{
 
                $exist_range = $this->existIpRange($row['object_name'], $row['ip_initial'], $row['ip_last'], $row['server']);
 
-               if($exist_range == 1 ){
+               if($exist_range['response'] == 1 ){
                   //Se debe dejar
                   $update = HistoricalData::where('_id', '=', $row['_id'])->update(['status' => 1]);
                }else{
@@ -1108,7 +1125,7 @@ class ValidateCommandController extends Controller{
                         }*/
                         $exist_range = $this->existIpRange($val['object_name'], $val['ip_initial'], $val['ip_last'], $val['server']);
 
-                        if($exist_range == 1 ){
+                        if($exist_range['response'] == 1 ){
                            //Se debe dejar
                            $update = HistoricalData::where('_id', '=', $val['_id'])->update(['status' => 1]);
                         }else{
@@ -1185,7 +1202,7 @@ class ValidateCommandController extends Controller{
 
                         $exist_range = $this->existIpRange($val['object_name'], $val['ip_initial'], $val['ip_last'], $val['server']);
 
-                        if($exist_range == 1 ){
+                        if($exist_range['response'] == 1 ){
                            //Se debe dejar
                            $update = HistoricalData::where('_id', '=', $val['_id'])->update(['status' => 1]);
                         }else{
@@ -1266,6 +1283,15 @@ class ValidateCommandController extends Controller{
       $array_ip = [];
       $flag = 0;
 
+      $object_data = DB::table('fw_objects')->where('name', '=', $object_name)->get();
+      $object_data2 = json_decode(json_encode($object_data), true);
+
+      $company_data = DB::table('fw_companies')->where('id', '=', $object_data2[0]['company_id'])->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+      $token_company = $company_data2[0]['token_company'];
+
       $command = "tscpgw_api -g '".$server."' -a ranges -o ".$object_name;
 
       \SSH::into('checkpoint')->run($command, function($line2){
@@ -1283,7 +1309,7 @@ class ValidateCommandController extends Controller{
       }
 
       Log::info($this->range);
-
+      //EVALUAR SI ES ARRAY---------
       $body = explode("\n", $this->range);
       $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
       $i = 0;
@@ -1299,7 +1325,7 @@ class ValidateCommandController extends Controller{
 
       foreach($array_object['registros'] as $value) {
          $range = Range::parse($value);
-         foreach($range as $ip) {
+         foreach($range as $ip){
             array_push($array_ip, (string)$ip);
          }
       }
@@ -1307,12 +1333,13 @@ class ValidateCommandController extends Controller{
       if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
          Log::info("Existe la IP: ".$ip_initial);
 
-         $response = array("respuesta" => 1, "info" => "success");
+         $response = array("response" => 1, "info" => "success", "token" => $token_company);
 
-         return 1;
+         return $response;
       }else{
          Log::info("No existe la ip: ".$ip_initial);
-         return 0;
+         $response = array("response" => 0, "info" => $this->range, "token" => $token_company);
+         return $response;
       }
    }
 
@@ -1402,7 +1429,7 @@ class ValidateCommandController extends Controller{
                Log::info("removeRange****");
                Log::info($removeRange);
 
-               if($removeRange == 1){//Significa que no se eliminó
+               if($removeRange['response'] == 1){//Significa que no se eliminó
                   $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
                   array_push($array_data_err, $temp_data_err);
 
@@ -1415,6 +1442,8 @@ class ValidateCommandController extends Controller{
                   $log->type = "delrip";
                   $log->class ="ip";
                   $log->status = 0;
+                  $log->info = $removeRange['info'];
+                  $log->token_company = $removeRange['token'];
                   $log->save();
 
                }else{//Si se eliminó
@@ -1430,9 +1459,9 @@ class ValidateCommandController extends Controller{
                   $log->type = "delrip";
                   $log->class ="ip";
                   $log->status = 1;
+                  $log->info = $removeRange['info'];
+                  $log->token_company = $removeRange['token'];
                   $log->save();
-
-                  //$addNewRange = $this->agreagateRangeNew();
                }
 
                $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
@@ -1486,7 +1515,7 @@ class ValidateCommandController extends Controller{
                Log::info("removeRange****");
                Log::info($removeRange);
 
-               if($removeRange == 1){//Significa que no se eliminó
+               if($removeRange['response'] == 1){//Significa que no se eliminó
                   $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
                   array_push($array_data_err, $temp_data_err);
 
@@ -1499,6 +1528,8 @@ class ValidateCommandController extends Controller{
                   $log->type = "delrip";
                   $log->class ="ip";
                   $log->status = 0;
+                  $log->info = $exist_range['info'];
+                  $log->token_company = $exist_range['token'];
                   $log->save();
 
                }else{//Si se eliminó
@@ -1514,6 +1545,8 @@ class ValidateCommandController extends Controller{
                   $log->type = "delrip";
                   $log->class ="ip";
                   $log->status = 1;
+                  $log->info = $exist_range['info'];
+                  $log->token_company = $exist_range['token'];
                   $log->save();
                }
 
@@ -1610,7 +1643,7 @@ class ValidateCommandController extends Controller{
 
          $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, $server);
 
-         if($exist_range == 0){
+         if($exist_range['response'] == 0){
             $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
 
@@ -1623,6 +1656,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 0;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
 
          }else{
@@ -1638,6 +1673,8 @@ class ValidateCommandController extends Controller{
             $log->type = "addrip";
             $log->class ="ip";
             $log->status = 1;
+            $log->info = $exist_range['info'];
+            $log->token_company = $exist_range['token'];
             $log->save();
          }
 

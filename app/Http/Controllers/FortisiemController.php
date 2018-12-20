@@ -83,9 +83,6 @@ class FortisiemController extends Controller
       $fecha_inicio = $dt->subHour(2);
       $fecha_inicio = $fecha_inicio->timestamp;
 
-      Log::info($fecha_inicio);
-      Log::info($fecha_fin);
-
       $process = new Process("python ".app_path()."/api_py/GetQueryResultsByOrg.py ".app_path()."/api_py/request.xml ".$fecha_inicio.' '. $fecha_fin);
       $process->run();
 
@@ -99,6 +96,8 @@ class FortisiemController extends Controller
 
       foreach ($result as $key => $value) {
          $array = json_decode($value, true);
+         // Log::info("ARRAAAAY");
+         // Log::info($array);
 
          $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
          $test = explode("[rule_name]=", $array['rawEventMsg']);
@@ -118,6 +117,7 @@ class FortisiemController extends Controller
          $log->event_type = $array['eventType'];
          $log->event_name = $array['eventName'];
          $log->src_ip = isset($array['srcIpAddr']) ? $array['srcIpAddr'] : 'undefined';
+         $log->severity_category = isset($array['eventSeverityCat']) ? $array['eventSeverityCat'] : 'undefined';
          $log->src_country = isset($array['srcGeoCountry']) ? $array['srcGeoCountry'] : 'undefined';
          $log->src_latitude = isset($array['srcGeoLatitude']) ? $array['srcGeoLatitude'] : 'undefined';
          $log->src_longitude = isset($array['srcGeoLongitude']) ? $array['srcGeoLongitude'] : 'undefined';
@@ -156,8 +156,7 @@ class FortisiemController extends Controller
 
       // $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->orderBy('receive_time', 'desc')->take(5000)->get();
       $logs = LogsData::orderBy('receive_time', 'desc')->take(5000)->get();
-
-      Log::info(count($logs));
+      //Log::info($logs);
 
       if(count($logs) > 0){
          return response()->json([

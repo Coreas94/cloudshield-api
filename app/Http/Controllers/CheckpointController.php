@@ -334,9 +334,10 @@ class CheckpointController extends Controller
       $company_data2 = json_decode(json_encode($company_data), true);
 
       $name_company = $company_data2[0]['name'];
+      $token_company = $company_data2[0]['token_company'];
 
       //EVALUAR ARCHIVO JSON
-      $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+      $path = storage_path() ."/app/".$name_company."/".$token_company.".json";
 
       if(File::exists($path)){
          $data_exist = json_decode(file_get_contents($path), true);
@@ -346,7 +347,7 @@ class CheckpointController extends Controller
          $arreglo = array("success" => "", "error" => "", "info" => 0);
 
          $json = json_encode($arreglo);
-         \Storage::put($name_company.'/'.$api_token.'.json', $json);
+         \Storage::put($name_company.'/'.$token_company.'.json', $json);
       }
 
       $validateCmd = new ValidateCommandController;
@@ -385,7 +386,7 @@ class CheckpointController extends Controller
          }
 
          $json = json_encode($arreglo_data);
-         \Storage::put($name_company.'/'.$api_token.'.json', $json);
+         \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
          $flag++;
       }
@@ -395,7 +396,7 @@ class CheckpointController extends Controller
       }
 
       $json = json_encode($arreglo_data);
-      \Storage::put($name_company.'/'.$api_token.'.json', $json);*/
+      \Storage::put($name_company.'/'.$token_company.'.json', $json);*/
 
       sleep(2);
 
@@ -1223,7 +1224,7 @@ class CheckpointController extends Controller
                         }
 
                         $json = json_encode($arreglo_data);
-                        \Storage::put($name_company.'/'.$api_token.'.json', $json);
+                        \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                         $flag++;
                      }
@@ -1542,7 +1543,7 @@ class CheckpointController extends Controller
                      }
 
                      $json = json_encode($arreglo_data);
-                     \Storage::put($name_company.'/'.$api_token.'.json', $json);
+                     \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                      sleep(2);
 
@@ -1722,6 +1723,7 @@ class CheckpointController extends Controller
       $company_data2 = json_decode(json_encode($company_data), true);
 
       $name_company = $company_data2[0]['name'];
+      $token_company = $company_data2[0]['token_company'];
       $arreglo_data = [];
       $error_data = [];
       $data_exist = [];
@@ -1736,7 +1738,7 @@ class CheckpointController extends Controller
       $evaluate;
 
       //EVALUAR ARCHIVO JSON
-      $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+      $path = storage_path() ."/app/".$name_company."/".$token_company.".json";
 
       if(Session::has('sid_session'))
          $sid = Session::get('sid_session');
@@ -1781,7 +1783,7 @@ class CheckpointController extends Controller
                }
 
                $json = json_encode($arreglo_data);
-               \Storage::put($name_company.'/'.$api_token.'.json', $json);
+               \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                sleep(2);
 
@@ -1859,7 +1861,7 @@ class CheckpointController extends Controller
                }
 
                $json = json_encode($arreglo_data);
-               \Storage::put($name_company.'/'.$api_token.'.json', $json);
+               \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                sleep(2);
 
@@ -1906,7 +1908,7 @@ class CheckpointController extends Controller
                         }
 
                         $json = json_encode($arreglo_data);
-                        \Storage::put($name_company.'/'.$api_token.'.json', $json);
+                        \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                         $publish2 = $this->publishChanges($sid);
 
@@ -2038,7 +2040,7 @@ class CheckpointController extends Controller
                }
 
                $json = json_encode($arreglo_data);
-               \Storage::put($name_company.'/'.$api_token.'.json', $json);
+               \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                sleep(2);
 
@@ -2108,7 +2110,7 @@ class CheckpointController extends Controller
                   }
 
                   $json = json_encode($arreglo_data);
-                  \Storage::put($name_company.'/'.$api_token.'.json', $json);
+                  \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                   sleep(2);
 
@@ -2150,7 +2152,7 @@ class CheckpointController extends Controller
                         }
 
                         $json = json_encode($arreglo_data);
-                        \Storage::put($name_company.'/'.$api_token.'.json', $json);
+                        \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                         $publish2 = $this->publishChanges($sid);
 

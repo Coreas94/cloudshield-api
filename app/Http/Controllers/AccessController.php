@@ -89,6 +89,17 @@ class AccessController extends Controller{
 			]);
     	}else{
 
+			$token_company = "";
+			$length = 10;
+			$codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			$codeAlphabet.= "abcdefghijklmnopqrstuvwxyz";
+			$codeAlphabet.= "0123456789";
+			$max = strlen($codeAlphabet); // edited
+
+			for ($i=0; $i < $length; $i++) {
+			  $token_company .= $codeAlphabet[random_int(0, $max-1)];
+			}
+
 	    	$name = $request['name_company'];
 	    	$address = $request['address_company'];
 	    	$email = $request['email_company'];
@@ -133,6 +144,7 @@ class AccessController extends Controller{
 					$company->account = $account;
 					$company->tag = $tag;
 					$company->country_id = $country_id;
+					$company->token_company = $token_company;
 					$company->save();
 
 					if($company->id){

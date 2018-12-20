@@ -119,11 +119,24 @@ class RequestController extends Controller{
             ->where('request_ips.status', '=', 0)
             ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
             ->get();
+
+         $request_all = RequestIp::join('fw_companies', 'request_ips.company_id', '=', 'fw_companies.id')
+            ->join('fw_objects', 'request_ips.object_id', '=', 'fw_objects.id')
+            ->join('users', 'request_ips.request_user_id', '=', 'users.id')
+            ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
+            ->get();
       }else{
          $request = RequestIp::join('fw_companies', 'request_ips.company_id', '=', 'fw_companies.id')
             ->join('fw_objects', 'request_ips.object_id', '=', 'fw_objects.id')
             ->join('users', 'request_ips.request_user_id', '=', 'users.id')
             ->where('request_ips.status', '=', 0)
+            ->where('request_ips.company_id', '=', $company_id)
+            ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
+            ->get();
+
+         $request_all = RequestIp::join('fw_companies', 'request_ips.company_id', '=', 'fw_companies.id')
+            ->join('fw_objects', 'request_ips.object_id', '=', 'fw_objects.id')
+            ->join('users', 'request_ips.request_user_id', '=', 'users.id')
             ->where('request_ips.company_id', '=', $company_id)
             ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
             ->get();
@@ -149,11 +162,13 @@ class RequestController extends Controller{
          $list_request = json_decode(json_encode($new_obj), true);
 
    		return response()->json([
-   			'data' => $list_request
+   			'data' => $list_request,
+            'data_all' => $request_all
    		]);
       }else{
          return response()->json([
-   			'data' => "No data"
+   			'data' => "No data",
+            'data_all' => "No data"
    		]);
       }
    }
@@ -285,7 +300,6 @@ class RequestController extends Controller{
       return response()->json([
          'count' => $count
       ]);
-
    }
 
 

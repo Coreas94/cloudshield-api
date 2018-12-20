@@ -53,6 +53,7 @@ class MessageEventListener {
          $company_data2 = json_decode(json_encode($company_data), true);
 
          $name_company = $company_data2[0]['name'];
+         $token_company = $company_data2[0]['token_company'];
 
          $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
 
@@ -62,7 +63,7 @@ class MessageEventListener {
             $arreglo = array("success" => "", "error" => "", "info" => 0);
 
             $json_response = json_encode($arreglo);
-            \Storage::put($name_company.'/'.$api_token.'.json', $json_response);
+            \Storage::put($name_company.'/'.$token_company.'.json', $json_response);
          }
 
          $others = $event->onlyMe();
