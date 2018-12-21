@@ -112,32 +112,32 @@ class FortisiemController extends Controller
             }
          }
 
-         $log = new LogsData;
-         $log->receive_time = $format_date;
-         $log->event_type = $array['eventType'];
-         $log->event_name = $array['eventName'];
-         $log->src_ip = isset($array['srcIpAddr']) ? $array['srcIpAddr'] : 'undefined';
-         $log->severity_category = isset($array['eventSeverityCat']) ? $array['eventSeverityCat'] : 'undefined';
-         $log->src_country = isset($array['srcGeoCountry']) ? $array['srcGeoCountry'] : 'undefined';
-         $log->src_latitude = isset($array['srcGeoLatitude']) ? $array['srcGeoLatitude'] : 'undefined';
-         $log->src_longitude = isset($array['srcGeoLongitude']) ? $array['srcGeoLongitude'] : 'undefined';
-         $log->dst_ip = isset($array['destIpAddr']) ? $array['destIpAddr'] : 'undefined';
-         $log->dst_country = isset($array['destGeoCountry']) ? $array['destGeoCountry'] : 'undefined';
-         $log->dst_latitude = isset($array['destGeoLatitude']) ? $array['destGeoLatitude'] : 'undefined';
-         $log->dst_longitude = isset($array['destGeoLongitude']) ? $array['destGeoLongitude'] : 'undefined';
-         $log->rule_name = $rule_name;
-         $log->event_log = $array['rawEventMsg'];
-         $log->relaying_ip = $array['relayDevIpAddr'];
-         $log->date_initial = $array['phRecvTime'];
-         $log->save();
-      }
+         if(isset($array['srcIpAddr']) && isset($array['destIpAddr'])){
 
-      /*$logs = LogsData::whereIn('dst_ip', $list)->orWhereIn('src_ip', $list)->orderBy('receive_time', 'desc')->take(10000)->get();
-      \Storage::put('user_test/file.json', $logs);*/
+            $log = new LogsData;
+            $log->receive_time = $format_date;
+            $log->event_type = $array['eventType'];
+            $log->event_name = $array['eventName'];
+            $log->src_ip = isset($array['srcIpAddr']) ? $array['srcIpAddr'] : 'undefined';
+            $log->severity_category = isset($array['eventSeverityCat']) ? $array['eventSeverityCat'] : 'undefined';
+            $log->src_country = isset($array['srcGeoCountry']) ? $array['srcGeoCountry'] : 'undefined';
+            $log->src_latitude = isset($array['srcGeoLatitude']) ? $array['srcGeoLatitude'] : 'undefined';
+            $log->src_longitude = isset($array['srcGeoLongitude']) ? $array['srcGeoLongitude'] : 'undefined';
+            $log->dst_ip = isset($array['destIpAddr']) ? $array['destIpAddr'] : 'undefined';
+            $log->dst_country = isset($array['destGeoCountry']) ? $array['destGeoCountry'] : 'undefined';
+            $log->dst_latitude = isset($array['destGeoLatitude']) ? $array['destGeoLatitude'] : 'undefined';
+            $log->dst_longitude = isset($array['destGeoLongitude']) ? $array['destGeoLongitude'] : 'undefined';
+            $log->rule_name = $rule_name;
+            $log->event_log = $array['rawEventMsg'];
+            $log->relaying_ip = $array['relayDevIpAddr'];
+            $log->date_initial = $array['phRecvTime'];
+            $log->save();
+         }
+      }
    }
 
    public function getDataLogs(Request $request){
-      Log::info("test");
+
       $userLog = JWTAuth::toUser($request['token']);
       $company_id = $userLog['company_id'];
 
@@ -147,7 +147,6 @@ class FortisiemController extends Controller
       // Log::info($ranges_ip);
       $new_array_ip = [];
       foreach($ranges_ip as $val){
-
          $range = Range::parse($val['ip_initial'].'-'.$val['ip_last']);
          foreach($range as $ip) {
          	array_push($new_array_ip, (string)$ip);
@@ -281,6 +280,34 @@ class FortisiemController extends Controller
             ]
          ]);
       }
+   }
+
+   public function countAttacksDay(Request $request){
+
+      $fecha = date('Y-m-j');
+      $date_init = $fecha.' 00:00:00';
+      $date_last = $fecha.' 23:59:59';
+
+      $logs = LogsData::whereBetween('receive_time', array($date_init, $date_last))->orderBy('receive_time', 'desc')->count();
+      Log::info("el count es:");
+      Log::info($logs);
+
+      if(count($logs) > 0){
+         return response()->json([
+            'success' => [
+               'data' => $logs,
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+            'error' => [
+               'message' => "No data",
+               'status_code' => 20
+            ]
+         ]);
+      }
+
    }
 
 }

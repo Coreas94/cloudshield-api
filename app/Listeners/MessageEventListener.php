@@ -55,7 +55,7 @@ class MessageEventListener {
          $name_company = $company_data2[0]['name'];
          $token_company = $company_data2[0]['token_company'];
 
-         $path = storage_path() ."/app/".$name_company."/".$api_token.".json";
+         $path = storage_path() ."/app/".$name_company."/".$token_company.".json";
 
          if(File::exists($path)){
             $json_response = json_decode(file_get_contents($path), true);

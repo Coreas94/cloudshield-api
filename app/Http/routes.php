@@ -16,13 +16,11 @@ Route::get('/', function () {
 });
 
 Route::get('prueba', 'ValidateCommandController@resendDataTemp');
-Route::get('test', 'Controller@test');
+Route::get('test', 'Controller@arreglo');
 Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
-//Route::get('get_ips', 'RequestController@getAllRequest');
-//Route::get('change_errors', 'Controller@changeErrorData');
 Route::get('change_errors', 'ValidateCommandController@matchData');
 
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
@@ -97,6 +95,9 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
          //Ruta para obtener logs mediante filtros
          Route::post('/filter_logs', 'FortisiemController@getDataFiltered');
+
+         //Ruta para obtener cantidad de registros del día
+         Route::get('/count_day', 'FortisiemController@countAttacksDay');
       });
 
       Route::group(['prefix' => 'access_control'], function(){
