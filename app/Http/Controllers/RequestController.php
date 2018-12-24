@@ -125,6 +125,7 @@ class RequestController extends Controller{
             ->join('users', 'request_ips.request_user_id', '=', 'users.id')
             ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
             ->get();
+
       }else{
          $request = RequestIp::join('fw_companies', 'request_ips.company_id', '=', 'fw_companies.id')
             ->join('fw_objects', 'request_ips.object_id', '=', 'fw_objects.id')
@@ -168,7 +169,7 @@ class RequestController extends Controller{
       }else{
          return response()->json([
    			'data' => "No data",
-            'data_all' => "No data"
+            'data_all' => $request_all
    		]);
       }
    }
