@@ -215,12 +215,9 @@ class FortisiemController extends Controller
       */
       switch ($filter_type) {
          case '0':
-
             $date = new \DateTime();
             $date->modify('-12 hours');
             $initial_date = $date->format('Y-m-d H:i:s');
-
-            Log::info($initial_date);
 
             break;
          case '1':
@@ -272,7 +269,6 @@ class FortisiemController extends Controller
             ]
          ]);
       }else{
-
          return response()->json([
             'error' => [
                'message' => "No data",

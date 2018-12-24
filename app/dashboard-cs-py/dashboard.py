@@ -11,6 +11,7 @@ import urllib2
 import json
 import sys
 
+clients = []
 class DashboardSocket(WebSocket):
     def writeLog(self, status):
         time = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
@@ -20,65 +21,66 @@ class DashboardSocket(WebSocket):
         file.close()
         
     def handleMessage(self):
-        arg = sys.argv
-        url = "http://{}/control4_api2/api/v2/fortisiem/get_logs?token={}".format(arg[1], self.data)
-        try:
-            contents = urllib2.urlopen(url).read()
-            parsed = json.loads(contents)
-            information = parsed['success']['data']
-            
-            Dates = []
-            Events = []
-            IPSource = []
-            Category = []
-            IPDestination = []
+        for client in clients:
+            if client == self:
+                arg = sys.argv
+                url = "http://{}/control4_api2/api/v2/fortisiem/get_logs?token={}".format(arg[1], self.data)
+                try:
+                    contents = urllib2.urlopen(url).read()
+                    parsed = json.loads(contents)
+                    information = parsed['success']['data']
+                    
+                    Dates = []
+                    Events = []
+                    IPSource = []
+                    Category = []
+                    IPDestination = []
 
-            for reg in information:
-                IPDestination.append(reg['dst_ip'])
-                IPSource.append(reg['src_ip'])
-                Dates.append(reg['receive_time'])
-                Events.append(reg['event_name'])
-                Category.append(reg['severity_category'])
+                    for reg in information:
+                        IPDestination.append(reg['dst_ip'])
+                        IPSource.append(reg['src_ip'])
+                        Dates.append(reg['receive_time'])
+                        Events.append(reg['event_name'])
+                        Category.append(reg['severity_category'])
 
-            sortBlobDestination     = self.eventSortAddresses(IPDestination)    # IP más atacada
-            sortBlobSource          = self.eventSortAddresses(IPSource)         # IP más atacante
-            sortBlobEvent           = self.eventSortAddresses(Events)           # Amenazas bloqueadas
-            attacksCount            = self.filterTodayAttacks(Dates)            # Ataques diarios
-            severityCount           = self.countCategories(Category)            # Severidad de ataques
-            localidadesEvents       = self.filtrarLocalidades(information)
+                    sortBlobDestination     = self.eventSortAddresses(IPDestination)    # IP más atacada
+                    sortBlobSource          = self.eventSortAddresses(IPSource)         # IP más atacante
+                    sortBlobEvent           = self.eventSortAddresses(Events)           # Amenazas bloqueadas
+                    attacksCount            = self.filterTodayAttacks(Dates)            # Ataques diarios
+                    severityCount           = self.countCategories(Category)            # Severidad de ataques
+                    localidadesEvents       = self.filtrarLocalidades(information)
 
-            response = json.dumps({
-                'atacada': sortBlobDestination[0],
-                'atacante': sortBlobSource[0],
-                'ataques_diarios': attacksCount,
-                'eventos': sortBlobEvent[0:5],
-                'categoria_ataques': severityCount,
-                'localidades_ataques': localidadesEvents
-            })
-            self.sendMessage(unicode(response))
-        except Exception:
-            response = json.dumps({
-                'atacada': {
-                    'count': 0,
-                    'event': '1.1.1.1'
-                },
-                'atacante': {
-                    'count': 0,
-                    'event': '1.1.1.1'
-                },
-                'ataques_diarios': 0,
-                'eventos': [],
-                'categoria_ataques': {
-                    'low': 0,
-                    'high': 0,
-                    'medium': 0,
-                    'critical': 0
-                },
-                'localidades_ataques': [],
-                'error_code': True
-            })
-            self.sendMessage(unicode(response))
-
+                    response = json.dumps({
+                        'atacada': sortBlobDestination[0],
+                        'atacante': sortBlobSource[0],
+                        'ataques_diarios': attacksCount,
+                        'eventos': sortBlobEvent[0:5],
+                        'categoria_ataques': severityCount,
+                        'localidades_ataques': localidadesEvents
+                    })
+                    self.sendMessage(unicode(response))
+                except Exception:
+                    response = json.dumps({
+                        'atacada': {
+                            'count': 0,
+                            'event': '1.1.1.1'
+                        },
+                        'atacante': {
+                            'count': 0,
+                            'event': '1.1.1.1'
+                        },
+                        'ataques_diarios': 0,
+                        'eventos': [],
+                        'categoria_ataques': {
+                            'low': 0,
+                            'high': 0,
+                            'medium': 0,
+                            'critical': 0
+                        },
+                        'localidades_ataques': [],
+                        'error_code': True
+                    })
+                    self.sendMessage(unicode(response))
     def countCategories(self, array):
         low = 0
         medium = 0
@@ -182,9 +184,11 @@ class DashboardSocket(WebSocket):
 
     def handleConnected(self):
         self.writeLog('conectado')
+        clients.append(self)
 
     def handleClose(self):
         self.writeLog('desconectado')
+        clients.remove(self)
 
 if "__main__" == __name__:
     if len(sys.argv) == 1:

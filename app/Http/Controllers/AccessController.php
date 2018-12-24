@@ -164,12 +164,13 @@ class AccessController extends Controller{
 							"company_id" => $company->id
 						);
 
+						//AQUI MANDO A CREAR LOS OBJETOS AL CHECKPOINT
 						$object = $firewall->createObjectsCh($dataArray, $checkpoint);
 						sleep(3);
 						Log::info($object);
 
 						if($object == "success"){
-							//Create section
+							//Create section FOR RULES
 							$section = $checkpoint->createSections($tag, $company->id);
 							sleep(2);
 							$section2 = $checkpoint2->createSections2($tag, $company->id);
