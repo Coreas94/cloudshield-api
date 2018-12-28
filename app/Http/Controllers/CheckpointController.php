@@ -1398,7 +1398,7 @@ class CheckpointController extends Controller
  		]);
   	}
 
-   public function addObjectCompany($data){//No se está usando
+   public function addObjectCompany($data){//SE USA PARA OBJETOS AL CREAR COMPANY
 		Log::info($data);
 		Log::info("*************************************");
 
@@ -1416,8 +1416,15 @@ class CheckpointController extends Controller
   			$tag = $data['tag'];
   			$comment = "Prueba code";
 
-  			$ip_initial = '1.1.1.1';
-  			$ip_last = '1.1.1.1';
+         if(isset($row['ips_assigned'])){
+            foreach($row['ips_assigned'] as $value){
+      			$ip_initial = $value['ip_initial'];
+      			$ip_last = $value['ip_last'];
+            }
+         }else{
+            $ip_initial = '1.1.1.1';
+     			$ip_last = '1.1.1.1';
+         }
 
   			$company_id = $data['company_id'];
 

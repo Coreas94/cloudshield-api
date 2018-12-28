@@ -106,6 +106,7 @@ class AccessController extends Controller{
 	    	$phone = $request['phone_company'];
 	    	$description = isset($request['description_company']) ? $request['description_company'] : "";
 			$token = $request['token'];
+			$ips_assigned = $request['assigned_ips'];
 
 	    	$words = explode(" ", $name);
 			$acronym = "";
@@ -165,7 +166,7 @@ class AccessController extends Controller{
 						);
 
 						//AQUI MANDO A CREAR LOS OBJETOS AL CHECKPOINT
-						$object = $firewall->createObjectsCh($dataArray, $checkpoint);
+						$object = $firewall->createObjectsCh($dataArray, $checkpoint, $ips_assigned);
 						sleep(3);
 						Log::info($object);
 

@@ -393,7 +393,7 @@ class FireWallController extends Controller{
 		}
 	}
 
-	public function createObjectsCh($data, CheckpointController $checkpoint){
+	public function createObjectsCh($data, CheckpointController $checkpoint, $ips_assigned){
 		$checkpoint2 = new CheckPointFunctionController;
 		$server_id = 1;
 
@@ -435,7 +435,8 @@ class FireWallController extends Controller{
 				'server_id' => $server_id,
 				'company_id' => $company_id,
 				'tag' => $tag,
-				'token' => $token
+				'token' => $token,
+				'ips_assigned' => $ips_assigned
 			)
 		);
 
