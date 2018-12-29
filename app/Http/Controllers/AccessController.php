@@ -108,12 +108,16 @@ class AccessController extends Controller{
 	    	$phone = $request['phone_company'];
 	    	$description = isset($request['description_company']) ? $request['description_company'] : "";
 			$token = $request['token'];
+<<<<<<< HEAD
 			$ips_assigned[] = $request['assigned_ips'];
 
 			foreach($ips_assigned as $value){
 				$ip_initial_mk = $value['ip_init'];
 				$ip_last_mk = $value['ip_last'];
 			}
+=======
+			$ips_assigned = $request['assigned_ips'];
+>>>>>>> 5b3b3090814d9798cd2c6800a6280d624c9d5ffc
 
 	    	$words = explode(" ", $name);
 			$acronym = "";

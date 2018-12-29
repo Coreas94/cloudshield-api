@@ -822,12 +822,21 @@ class CheckPointFunctionController extends Controller
 
          if(isset($row['ips_assigned'])){
             foreach($row['ips_assigned'] as $value){
+<<<<<<< HEAD
       			$ip_initial = $value['ip_init'];
       			$ip_last = $value['ip_last'];
             }
          }else{
             $ip_initial = '1.1.1.1';
      			$ip_last = '1.1.1.1';
+=======
+               $ip_initial = $value['ip_initial'];
+               $ip_last = $value['ip_last'];
+            }
+         }else{
+            $ip_initial = '1.1.1.1';
+            $ip_last = '1.1.1.1';
+>>>>>>> 5b3b3090814d9798cd2c6800a6280d624c9d5ffc
          }
 
   			$company_id = $data['company_id'];
