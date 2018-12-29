@@ -1398,7 +1398,7 @@ class CheckpointController extends Controller
  		]);
   	}
 
-   public function addObjectCompany($data){//No se está usando
+   public function addObjectCompany($data){//SE USA PARA GUARDAR OBJETOS NUEVA COMPANY
 		Log::info($data);
 		Log::info("*************************************");
 
@@ -1416,13 +1416,21 @@ class CheckpointController extends Controller
   			$tag = $data['tag'];
   			$comment = "Prueba code";
 
-  			$ip_initial = '1.1.1.1';
-  			$ip_last = '1.1.1.1';
+         if(isset($data['ips_assigned'])){
+            foreach($data['ips_assigned'] as $value){
+      			$ip_initial = $value['ip_init'];
+      			$ip_last = $value['ip_last'];
+            }
+         }else{
+            $ip_initial = '1.1.1.1';
+     			$ip_last = '1.1.1.1';
+         }
 
   			$company_id = $data['company_id'];
 
          $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
  			$company_data2 = json_decode(json_encode($company_data), true);
+         $token_company = $company_data2[0]['token_company'];
  			$tag = $company_data2[0]['tag'];
 
          $userLog = JWTAuth::toUser($data['token']);
@@ -2501,6 +2509,7 @@ class CheckpointController extends Controller
    public function removeObjectComplete($object){
 
  		$emailCtrl = new EmailController;
+      $validateCmd = new ValidateCommandController;
       $evaluate = "";
 
  		if(Session::has('sid_session'))
@@ -2559,6 +2568,7 @@ class CheckpointController extends Controller
 
    public function removeSectionComplete($section){
  		$emailCtrl = new EmailController;
+      $validateCmd = new ValidateCommandController;
 
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');

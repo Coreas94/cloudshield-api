@@ -16,7 +16,7 @@ Route::get('/', function () {
 });
 
 Route::get('prueba', 'ValidateCommandController@resendDataTemp');
-Route::get('test', 'Controller@arreglo');
+Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');

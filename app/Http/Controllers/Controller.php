@@ -79,12 +79,32 @@ class Controller extends BaseController
 
    public function test(){
 
-      $data_token = array('token' => '');
-      $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6Ly9jbG91ZHNoaWVsZC5yZWQ1Zy5jb20vY29udHJvbDRfYXBpMi9hcGkvdjIvYXV0aC9hcGlfbG9naW4iLCJpYXQiOjE1NDE0NDU0OTQsImV4cCI6MTU0MTQ3Nzg5NCwibmJmIjoxNTQxNDQ1NDk0LCJqdGkiOiI5aW5OdHEycjk3dzdrbkV2In0.lJOrXXUpiMg6sYDijupWG3hmCTi7jT_akDdnTLIrJkM";
+      $curl = curl_init();
 
-      //$this->dispatchFrom('App\Commands\resendDataCheckpoint', $data_token);
-      Artisan::call('checkpoint:resendData');
-      // Artisan::call('checkpoint:resendData', ['token' => $token]);
+      curl_setopt_array($curl, array(
+        CURLOPT_URL => "http://172.16.20.85/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_HTTPHEADER => array(
+          "cache-control: no-cache"
+        ),
+      ));
+
+      $response = curl_exec($curl);
+      $err = curl_error($curl);
+
+      curl_close($curl);
+
+      if ($err) {
+        Log::info("cURL Error #:" . $err);
+      } else {
+         $result = json_decode($response, true);
+         Log::info($result['token']);
+      }
    }
 
    public function getErrorData(){

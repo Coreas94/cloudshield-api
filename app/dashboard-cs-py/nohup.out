@@ -2,3 +2,7 @@ Traceback (most recent call last):
   File "dashboard.py", line 7, in <module>
     from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 ImportError: No module named SimpleWebSocketServer
+Traceback (most recent call last):
+  File "dashboard.py", line 7, in <module>
+    from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
+ImportError: No module named SimpleWebSocketServer

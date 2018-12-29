@@ -666,7 +666,7 @@ class ValidateCommandController extends Controller{
                $evaluate = $this->output;
 
                while ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) {
-                  if($flag >= 3) break;
+                  if($flag >= 2) break;
                   $flag++;
                   Log::info("1 existe try again 117");
                   \SSH::into('checkpoint')->run($ssh_command, function($line4){
@@ -692,7 +692,7 @@ class ValidateCommandController extends Controller{
                sleep(1);
 
                while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) ) {
-                  if($flag2 >= 3) break;
+                  if($flag2 >= 2) break;
                   $flag2++;
 
                   \SSH::into('checkpoint')->run($ssh_commVer, function($line){
@@ -1299,8 +1299,8 @@ class ValidateCommandController extends Controller{
          $this->range = $line2.PHP_EOL;
       });
 
-      while ( ($this->range == "") || ($flag >= 3) ) {
-         if($flag >= 3) break;
+      while ( ($this->range == "") || ($flag >= 2) ) {
+         if($flag >= 2) break;
          $flag++;
          \SSH::into('checkpoint')->run($command, function($line){
             Log::info($line.PHP_EOL);
@@ -1309,36 +1309,44 @@ class ValidateCommandController extends Controller{
       }
 
       Log::info($this->range);
-      //EVALUAR SI ES ARRAY---------
-      $body = explode("\n", $this->range);
-      $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
-      $i = 0;
 
-      foreach($body as $key => $row){
-         if($key > 1){
-            if($row != ""){
-               $var1 = preg_replace('/\s+/', '-', $row);
-               array_push($array_object['registros'], $var1);
+      if(!empty($this->range)){
+         Log::info("esto es arraaaay");
+         //EVALUAR SI ES ARRAY---------
+         $body = explode("\n", $this->range);
+         $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
+         $i = 0;
+
+         foreach($body as $key => $row){
+            if($key > 1){
+               if($row != ""){
+                  $var1 = preg_replace('/\s+/', '-', $row);
+                  array_push($array_object['registros'], $var1);
+               }
             }
          }
-      }
 
-      foreach($array_object['registros'] as $value) {
-         $range = Range::parse($value);
-         foreach($range as $ip){
-            array_push($array_ip, (string)$ip);
+         foreach($array_object['registros'] as $value) {
+            $range = Range::parse($value);
+            foreach($range as $ip){
+               array_push($array_ip, (string)$ip);
+            }
          }
-      }
 
-      if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
-         Log::info("Existe la IP: ".$ip_initial);
+         if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
+            Log::info("Existe la IP: ".$ip_initial);
 
-         $response = array("response" => 1, "info" => "success", "token" => $token_company);
+            $response = array("response" => 1, "info" => "success", "token" => $token_company);
 
-         return $response;
+            return $response;
+         }else{
+            Log::info("No existe la ip: ".$ip_initial);
+            $response = array("response" => 0, "info" => $this->range, "token" => $token_company);
+            return $response;
+         }
       }else{
-         Log::info("No existe la ip: ".$ip_initial);
-         $response = array("response" => 0, "info" => $this->range, "token" => $token_company);
+         Log::info("VIENE VACIO EL ARRAY RANGE");
+         $response = array("response" => 0, "info" => "No devuelve valor", "token" => $token_company);
          return $response;
       }
    }
@@ -1373,8 +1381,8 @@ class ValidateCommandController extends Controller{
          $this->range = $line2.PHP_EOL;
       });
 
-      while ( ($this->range == "") || ($flag >= 3) ) {
-         if($flag >= 3) break;
+      while ( ($this->range == "") || ($flag >= 2) ) {
+         if($flag >= 2) break;
          $flag++;
          \SSH::into('checkpoint')->run($command, function($line){
             Log::info($line.PHP_EOL);
@@ -1528,8 +1536,8 @@ class ValidateCommandController extends Controller{
                   $log->type = "delrip";
                   $log->class ="ip";
                   $log->status = 0;
-                  $log->info = $exist_range['info'];
-                  $log->token_company = $exist_range['token'];
+                  $log->info = $removeRange['info'];
+                  $log->token_company = $removeRange['token'];
                   $log->save();
 
                }else{//Si se eliminó
@@ -1545,8 +1553,8 @@ class ValidateCommandController extends Controller{
                   $log->type = "delrip";
                   $log->class ="ip";
                   $log->status = 1;
-                  $log->info = $exist_range['info'];
-                  $log->token_company = $exist_range['token'];
+                  $log->info = $removeRange['info'];
+                  $log->token_company = $removeRange['token'];
                   $log->save();
                }
 

@@ -64,6 +64,8 @@ class AccessController extends Controller{
 	}
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
+		Log::info($request);
+		// die();
 
 		$checkpoint2 = new CheckPointFunctionController;
 
@@ -74,7 +76,7 @@ class AccessController extends Controller{
 			"phone_company" => "required|numeric",
 
 			"name_new_user" => "required",
-			"username_new_user" => "required",
+			"new_username" => "required",
 			"email_new_user" => "required|email",
 			"phone_new_user" => "required|numeric",
 			"password_new_user" => "required|min:4",
@@ -106,6 +108,12 @@ class AccessController extends Controller{
 	    	$phone = $request['phone_company'];
 	    	$description = isset($request['description_company']) ? $request['description_company'] : "";
 			$token = $request['token'];
+			$ips_assigned[] = $request['assigned_ips'];
+
+			foreach($ips_assigned as $value){
+				$ip_initial_mk = $value['ip_init'];
+				$ip_last_mk = $value['ip_last'];
+			}
 
 	    	$words = explode(" ", $name);
 			$acronym = "";
@@ -115,9 +123,11 @@ class AccessController extends Controller{
 			}
 
 			$random = rand(100, 999);
+			$random2 = rand(0,99);
 	    	$account = '000'.$random;
 	    	$tag = $acronym.''.$random;
-			$country_id = $request['country_id'];
+			$tag_mk = $tag.''.$random2;
+			$country_id = $request['country_company'];
 
 			/*Mandaré a guardar el tag cuando se crea la compañía*/
 			try{
@@ -157,7 +167,7 @@ class AccessController extends Controller{
 
 						$data_user = array(
 							"name" => $request['name_new_user'],
-							"username" => $request['username_new_user'],
+							"username" => $request['new_username'],
 							"email" => $request['email_new_user'],
 							"password" => $request['password_new_user'],
 							"phone" => $request['phone_new_user'],
@@ -165,7 +175,7 @@ class AccessController extends Controller{
 						);
 
 						//AQUI MANDO A CREAR LOS OBJETOS AL CHECKPOINT
-						$object = $firewall->createObjectsCh($dataArray, $checkpoint);
+						$object = $firewall->createObjectsCh($dataArray, $checkpoint, $ips_assigned);
 						sleep(3);
 						Log::info($object);
 
@@ -255,13 +265,101 @@ class AccessController extends Controller{
 
 									if($user == "success"){
 										//Log::info("Se instalaron los cambios");
-										return response()->json([
-											'success' => [
-												'tag_company' => $tag,
-												'message' => 'Compañía, objetos y usuario creados exitosamente',
-												'status_code' => 200
-											]
-										]);
+										if(isset($ips_assigned)){
+							            foreach($ips_assigned as $value){
+							      			$ip_initial_mk = $value['ip_init'];
+							      			$ip_last_mk = $value['ip_last'];
+							            }
+							         }else{
+							            $ip_initial_mk = '1.1.1.1';
+							     			$ip_last_mk = '1.1.1.1';
+							         }
+
+										//Obtengo el token del mitrotik
+										$curl = curl_init();
+
+										curl_setopt_array($curl, array(
+								        	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
+								        	CURLOPT_RETURNTRANSFER => true,
+								        	CURLOPT_ENCODING => "",
+								        	CURLOPT_MAXREDIRS => 10,
+								        	CURLOPT_TIMEOUT => 30,
+								        	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+											CURLOPT_SSL_VERIFYPEER => false,
+											CURLOPT_SSL_VERIFYHOST => false,
+								        	CURLOPT_CUSTOMREQUEST => "POST",
+								        	CURLOPT_HTTPHEADER => array(
+								          	"cache-control: no-cache"
+								        	),
+								      ));
+
+								      $response = curl_exec($curl);
+								      $err = curl_error($curl);
+
+								      curl_close($curl);
+
+								      if ($err) {
+								        Log::info("cURL Error #:" . $err);
+										  $response_mk = 0;
+								      } else {
+								         $result = json_decode($response, true);
+								         Log::info($result['token']);
+
+											//AQUI MANDO A CREAR USER AL MIKROTIK
+											$curl = curl_init();
+
+											curl_setopt_array($curl, array(
+											  	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/User?token=".$result['token'],
+											  	CURLOPT_RETURNTRANSFER => true,
+											  	CURLOPT_ENCODING => "",
+											  	CURLOPT_MAXREDIRS => 10,
+											  	CURLOPT_TIMEOUT => 30,
+											  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+											  	CURLOPT_CUSTOMREQUEST => "POST",
+											  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$company->id."&group_id=1",
+											  	CURLOPT_HTTPHEADER => array(
+											    	"cache-control: no-cache",
+											    	"content-type: application/x-www-form-urlencoded"
+											  	),
+											));
+
+											$response = curl_exec($curl);
+											$err = curl_error($curl);
+
+											curl_close($curl);
+
+											if ($err) {
+											  	Log::info("cURL Error #:" . $err);
+												$response_mk = 0;
+											} else {
+											  	$resultmk = json_decode($response, true);
+												if(isset($resultmk['code']) && $resultmk['code'] == 200){
+													Log::info($resultmk);
+													$response_mk = 1;
+												}else{
+													Log::info($resultmk);
+													$response_mk = 0;
+												}
+											}
+								      }
+
+										if($response_mk == 1){
+											return response()->json([
+												'success' => [
+													'tag_company' => $tag,
+													'message' => 'Compañía, objetos y usuario creados exitosamente',
+													'status_code' => 200
+												]
+											]);
+										}else{
+											return response()->json([
+												'success' => [
+													'tag_company' => $tag,
+													'message' => 'Compañía, objetos y usuario creados exitosamente menos en Mikrotik',
+													'status_code' => 200
+												]
+											]);
+										}
 									}else{
 										return response()->json([
 											'success' => [
@@ -270,14 +368,6 @@ class AccessController extends Controller{
 											]
 										]);
 									}
-									/*}else{
-										return response()->json([
-											'error' => [
-												'message' => 'Datos ingresados correctamente, pero no fueron instalados en checkpoint',
-												'status_code' => 20
-											]
-										]);
-									}*/
 								}else{
 									return response()->json([
 										'success' => [

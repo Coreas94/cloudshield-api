@@ -155,21 +155,36 @@ class RequestController extends Controller{
          }
  		}
 
- 		$new_obj = json_decode(json_encode($list_obj), true);
+      $list_obj2 = [];
+ 		$name3 = [];
+ 		foreach ($request_all as  $value) {
+         if (strpos($value['object_name'], 'IP-ADDRESS') !== false ) {
+            $name = explode('-', $value['object_name']);
+            $complement_name = $name[2].' '.$name[3];
+
+            $value['short_name'] = 'MY CLOUDSHIELD '.$complement_name;
+            array_push($list_obj2, $value);
+         }
+ 		}
+
+      $new_obj = json_decode(json_encode($list_obj), true);
+ 		$new_obj_all = json_decode(json_encode($list_obj2), true);
+
       $count_request = count($request);
 
       if($count_request > 0){
 
          $list_request = json_decode(json_encode($new_obj), true);
-
+         $list_request_all = json_decode(json_encode($new_obj_all), true);
+         Log::info($list_request);
    		return response()->json([
    			'data' => $list_request,
-            'data_all' => $request_all
+            'data_all' => $list_request_all
    		]);
       }else{
          return response()->json([
    			'data' => "No data",
-            'data_all' => $request_all
+            'data_all' => $new_obj_all
    		]);
       }
    }
