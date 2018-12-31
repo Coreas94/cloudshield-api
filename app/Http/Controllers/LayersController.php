@@ -61,7 +61,7 @@ class LayersController extends Controller
 	public function addIpList(Request $request, CheckpointController $checkpoint){
 
 		Log::info($request);
-
+		$validateCmd = new ValidateCommandController;
       #$ip_initial = $request['ip_initial'];
       #$ip_last = $ip_initial;
       $comment = $request['comment'];
