@@ -1419,7 +1419,8 @@ class CheckpointController extends Controller
          if(isset($data['ips_assigned'])){
             foreach($data['ips_assigned'] as $value){
       			$ip_initial = $value['ip_init'];
-      			$ip_last = $value['ip_last'];
+      			// $ip_last = $value['ip_last'];
+               $ip_last = $ip_initial;
             }
          }else{
             $ip_initial = '1.1.1.1';

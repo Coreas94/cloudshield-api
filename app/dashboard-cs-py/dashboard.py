@@ -19,17 +19,17 @@ class DashboardSocket(WebSocket):
         file = open('logger.log', 'a')
         file.write(log)
         file.close()
-        
+
     def handleMessage(self):
         for client in clients:
             if client == self:
                 arg = sys.argv
-                url = "http://{}/control4_api2/api/v2/fortisiem/get_logs?token={}".format(arg[1], self.data)
+                url = "http://{}/cloudshield_api/api/v2/fortisiem/get_logs?token={}".format(arg[1], self.data)
                 try:
                     contents = urllib2.urlopen(url).read()
                     parsed = json.loads(contents)
                     information = parsed['success']['data']
-                    
+
                     Dates = []
                     Events = []
                     IPSource = []
@@ -97,7 +97,7 @@ class DashboardSocket(WebSocket):
             'medium': medium,
             'critical': critical
         }
-    
+
     def filtrarLocalidades(self, array):
         blacklist = []
         localidades = []
@@ -158,7 +158,7 @@ class DashboardSocket(WebSocket):
     def groupEventAddress(self, array):
         blacklist = []
         for ip in array:
-            if self.isEventArray(blacklist, ip) == False: 
+            if self.isEventArray(blacklist, ip) == False:
                 if ip != 'no-exist' and ip != 'undefined': blacklist.append(ip)
         IPCounter = []
         for b in blacklist:
@@ -167,14 +167,14 @@ class DashboardSocket(WebSocket):
                 'count': self.eventCount(array, b)
             })
         return IPCounter
-        
+
     def eventCount(self, array, ip):
         length = 0
         for i in array:
             if i == ip: length += 1
         return length
-        
-    def isEventArray(self, array, ip): 
+
+    def isEventArray(self, array, ip):
         flag = False
         for addr in array:
             if addr == ip:

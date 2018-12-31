@@ -82,16 +82,18 @@ class Controller extends BaseController
       $curl = curl_init();
 
       curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://172.16.20.85/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "POST",
-        CURLOPT_HTTPHEADER => array(
-          "cache-control: no-cache"
-        ),
+         CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
+         CURLOPT_RETURNTRANSFER => true,
+         CURLOPT_ENCODING => "",
+         CURLOPT_MAXREDIRS => 10,
+         CURLOPT_TIMEOUT => 30,
+         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+         CURLOPT_SSL_VERIFYPEER => false,
+         CURLOPT_SSL_VERIFYHOST => false,
+         CURLOPT_CUSTOMREQUEST => "POST",
+         CURLOPT_HTTPHEADER => array(
+            "cache-control: no-cache"
+         ),
       ));
 
       $response = curl_exec($curl);
@@ -100,9 +102,11 @@ class Controller extends BaseController
       curl_close($curl);
 
       if ($err) {
-        Log::info("cURL Error #:" . $err);
+       Log::info("cURL Error #:" . $err);
+       $response_mk = 0;
       } else {
          $result = json_decode($response, true);
+         Log::info($result);
          Log::info($result['token']);
       }
    }
