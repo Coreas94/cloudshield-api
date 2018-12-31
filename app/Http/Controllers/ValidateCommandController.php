@@ -891,7 +891,7 @@ class ValidateCommandController extends Controller{
 
       $datos = HistoricalData::where('status', '=', 0)->get();
       $countData = count($datos);
-
+      Log::info("EL TOTAL DATOS ES***** : ".$countData);
       if($countData > 0){
          $data = json_decode($datos, true);
          Log::info("aqui imprimo el HistoricalData");
