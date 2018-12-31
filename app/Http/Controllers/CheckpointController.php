@@ -1333,8 +1333,7 @@ class CheckpointController extends Controller
  		//AQUI HAY QUE DESCOMPONER LOS NOMBRES Y AGREGARLES 2 POSICIONES A LOS NUEVOS	|| $value['editable'] == 1
       $list_obj = [];
  		$name2 = [];
- 		foreach ($obj as  $value) {
-
+ 		foreach ($obj as $key => $value) {
          if($role_user == "superadmin"){
             /*if (strpos($value['name'], 'IP-ADDRESS') !== false ) {
                Log::info("existe");
@@ -1361,9 +1360,16 @@ class CheckpointController extends Controller
 
        				$value['short_name'] = 'MY CLOUDSHIELD '.$complement_name;
        				array_push($list_obj, $value);
+               }elseif (strpos($value['name'], 'checkpoint-block') !== false ) {
+                  unset($obj[$key]);
                }else{
                   $name = explode('-', $value['name']);
-       				$complement_name = $name[2].' '.$name[3];
+
+                  if(isset($name[3])){
+                     $complement_name = $name[2].' '.$name[3];
+                  }else{
+                     $complement_name = $name[0].' '.$name[1];
+                  }
 
        				$value['short_name'] = $complement_name;
        				array_push($list_obj, $value);
