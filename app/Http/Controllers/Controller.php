@@ -122,6 +122,21 @@ class Controller extends BaseController
 
       $datos = HistoricalData::where('status', '=', 0)->update(['status' => 1]);
 
+      //Guardaré en mongo los logs ya sean buenos o malos
+      $log = new HistoricalData;
+      $log->server = '172.16.3.112';
+      $log->object_name = 'objeto-test';
+      $log->ip_initial = '12.12.12.12';
+      $log->ip_last = '12.12.12.12';
+      $log->type = "delrip";
+      $log->class ="ip";
+      $log->status = 0;
+      $log->info = 'manual';
+      $log->token_company = 'ninguno';
+      $log->save();
+
+
+
       Log::info(count($datos));
    }
 
