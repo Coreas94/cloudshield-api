@@ -122,7 +122,7 @@ class Controller extends BaseController
 
       $datos = HistoricalData::where('status', '=', 0)->update(['status' => 1]);
 
-      Log::info($datos);
+      Log::info(count($datos));
    }
 
 }

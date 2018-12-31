@@ -21,7 +21,7 @@ Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
-Route::get('change_errors', 'ValidateCommandController@matchData');
+Route::get('change_errors', 'Controller@changeErrorData');
 
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
