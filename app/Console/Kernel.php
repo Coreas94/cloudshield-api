@@ -30,12 +30,8 @@ class Kernel extends ConsoleKernel
       //$schedule->command('inspire')
       //->hourly();
 
-      $schedule->command('fortisiem:getLogsFortisiem')->cron('*/5 * * * *');
+      // $schedule->command('fortisiem:getLogsFortisiem')->cron('*/5 * * * *');
 
-      //$schedule->command('checkpoint:installPolicies')->everyFiveMinutes();
-
-      $schedule->command('checkpoint:resendData')->everyFiveMinutes();
-
-
+      $schedule->command('checkpoint:resendData')->everyMinute();
    }
 }
