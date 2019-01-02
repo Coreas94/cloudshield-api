@@ -255,143 +255,75 @@ class LayersController extends Controller
 	         ]);
 	      }
 
-	      $list_sec = new LayerSecurity;
-	      $list_sec->name_object = $name_object;
-	      $list_sec->ip_initial = $ip_initial;
-	      $list_sec->ip_last = $ip_last;
-	      $list_sec->comment = $comment;
-	      $list_sec->server_id = $server_id;
-	      $list_sec->save();
+			//Verifico si no existe la ip a agregar
+			$exist_row = LayerSecurity::where('ip_initial', '=', $ip_initial)->count();
 
-	      if($list_sec){
+			if($exist_row == 0){
 
-	         $object_list = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$name_object.'"');
-	         $object_list = json_decode(json_encode($object_list), true);
+				$list_sec = new LayerSecurity;
+		      $list_sec->name_object = $name_object;
+		      $list_sec->ip_initial = $ip_initial;
+		      $list_sec->ip_last = $ip_last;
+		      $list_sec->comment = $comment;
+		      $list_sec->server_id = $server_id;
+		      $list_sec->save();
 
-	         Log::info($object_list);
+		      if($list_sec){
 
-	         foreach ($object_list as $value){
-	            $object_id_list = $value['id'];
-	         }
+		         $object_list = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$name_object.'"');
+		         $object_list = json_decode(json_encode($object_list), true);
 
-	         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id_list, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
+		         Log::info($object_list);
 
-	         Log::info($bd_ips_check);
+		         foreach ($object_list as $value){
+		            $object_id_list = $value['id'];
+		         }
 
-	         if($bd_ips_check){
-					$total_ips = 1;
-					$flag = 1;
+		         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id_list, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
 
-					//DEBO MANDAR A LA VERIFICACION CADA IP
-					$validateAdddyo = $validateCmd->validateAssignIpObject($name_object, $ip_initial, $ip_last, $total_ips, $flag);
+		         Log::info($bd_ips_check);
 
-					/***************************************************/
-	            /*$ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
-	            $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
-					$ssh_command3 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
-					$ssh_command4 = "tscpgw_api -g '172.16.3.117' -a addrip -o ".$name_object." -r '".$ip_initial." ".$ip_last."'";
+		         if($bd_ips_check){
+						$total_ips = 1;
+						$flag = 1;
 
-					\SSH::into('checkpoint')->run($ssh_command, function($line){
-						Log::info($line.PHP_EOL);
-						$evaluate = $line.PHP_EOL;
-					});
+						//DEBO MANDAR A LA VERIFICACION CADA IP
+						$validateAdddyo = $validateCmd->validateAssignIpObject($name_object, $ip_initial, $ip_last, $total_ips, $flag);
 
-					$evaluate = $this->output;
+						return response()->json([
+							'success' => [
+								'message' => "Datos ingresados correctamente",
+								'status_code' => 200
+							]
+						]);
 
-					while (stripos($evaluate, "try again") !== false) {
-						Log::info("1 existe try again 112");
-						\SSH::into('checkpoint')->run($ssh_command, function($line){
-							Log::info($line.PHP_EOL);
-							$evaluate = $line.PHP_EOL;
-						});
-					}
-
-					sleep(2);
-
-					\SSH::into('checkpoint')->run($ssh_command2, function($line2){
-						Log::info($line2.PHP_EOL);
-						$evaluate = $line2.PHP_EOL;
-					});
-
-					$evaluate = $this->output;
-
-					while (stripos($evaluate, "try again") !== false) {
-						Log::info("1 existe try again 113");
-						\SSH::into('checkpoint')->run($ssh_command2, function($line2){
-							Log::info($line2.PHP_EOL);
-							$evaluate = $line2.PHP_EOL;
-						});
-					}
-
-					sleep(2);
-
-					\SSH::into('checkpoint')->run($ssh_command3, function($line3){
-						Log::info($line3.PHP_EOL);
-						$evaluate = $line3.PHP_EOL;
-					});
-
-					$evaluate = $this->output;
-
-					while (stripos($evaluate, "try again") !== false) {
-						Log::info("1 existe try again 116");
-						\SSH::into('checkpoint')->run($ssh_command3, function($line3){
-							Log::info($line3.PHP_EOL);
-							$evaluate = $line3.PHP_EOL;
-						});
-					}
-
-					sleep(2);
-
-					\SSH::into('checkpoint')->run($ssh_command4, function($line4){
-						Log::info($line4.PHP_EOL);
-						$evaluate = $line4.PHP_EOL;
-					});
-
-					$evaluate = $this->output;
-
-					while (stripos($evaluate, "try again") !== false) {
-						Log::info("1 existe try again 117");
-						\SSH::into('checkpoint')->run($ssh_command4, function($line4){
-							Log::info($line4.PHP_EOL);
-							$evaluate = $line4.PHP_EOL;
-						});
-					}
-
-					sleep(2);*/
-
-	            /*return response()->json([
-	               'success' => [
-	                  'message' => "Datos ingresados correctamente",
-	                  'status_code' => 200
-	               ]
-	            ]);*/
-	         }else{
-					Log::info("No se guardó en el checkpoint, solo localmente!");
-	            /*return response()->json([
-	               'error' => [
-	                  'message' => "No se guardó en el checkpoint, solo localmente!",
-	                  'status_code' => 20
-	               ]
-	            ]);*/
-	         }
-	      }else{
-				Log::info("No se guardaron los datos");
-	         /*return response()->json([
-	            'error' => [
-	               'message' => "No se guardaron los datos",
-	               'status_code' => 20
-	            ]
-	         ]);*/
-	      }
+		         }else{
+						Log::info("No se guardó en el checkpoint, solo localmente!");
+		            return response()->json([
+		               'error' => [
+		                  'message' => "No se guardó en el checkpoint, solo localmente!",
+		                  'status_code' => 20
+		               ]
+		            ]);
+		         }
+		      }else{
+					Log::info("No se guardaron los datos");
+		         return response()->json([
+		            'error' => [
+		               'message' => "No se guardaron los datos",
+		               'status_code' => 20
+		            ]
+		         ]);
+		      }
+			}else{
+				return response()->json([
+					'error' => [
+						'message' => "¡La IP solicitada ya existe!",
+						'status_code' => 20
+					]
+				]);
+			}
 		}
-
-		return response()->json([
-			'success' => [
-				'message' => "Datos ingresados correctamente",
-				'status_code' => 200
-			]
-		]);
-
    }
 
    public function removeIpList(Request $request, CheckpointController $checkpoint){

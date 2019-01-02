@@ -194,31 +194,6 @@ class ValidateCommandController extends Controller{
          //$ssh_commVer112 = "tscpgw_api -g '172.16.3.112' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
          $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.112');
 
-         /*\SSH::into('checkpoint')->run($ssh_commVer112, function($line){
-            Log::info("verification 112");
-   			Log::info($line.PHP_EOL);
-   			$this->verification = $line.PHP_EOL;
-   		});
-
-         sleep(1);
-
-         while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
-            if($flag2 >= 2) break;
-            $flag2++;
-
-            \SSH::into('checkpoint')->run($ssh_commVer112, function($line){
-               Log::info("verification while 112");
-               Log::info($line.PHP_EOL);
-               $verification = $line.PHP_EOL;
-            });
-            Log::info($flag2);
-   		}
-
-         Log::info("flag 2 112");
-         Log::info($flag2);
-         Log::info($this->verification);*/
-
-         //if($flag >= 2 || $this->verification == 0 ){
          if($exist_range['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.112", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
@@ -297,32 +272,6 @@ class ValidateCommandController extends Controller{
          //$ssh_commVer113 = "tscpgw_api -g '172.16.3.113' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
          $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.113');
 
-         /*\SSH::into('checkpoint')->run($ssh_commVer113, function($line){
-            Log::info("verification 113");
-   			Log::info($line.PHP_EOL);
-   			$this->verification = $line.PHP_EOL;
-   		});
-
-         sleep(1);
-
-         while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
-            if($flag2 >= 2) break;
-
-            $flag2++;
-
-            \SSH::into('checkpoint')->run($ssh_commVer113, function($liremoveRangene){
-               Log::info("verification while 113");
-               Log::info($line.PHP_EOL);
-               $this->verification = $line.PHP_EOL;
-            });
-            Log::info($flag2);
-   		}
-
-         Log::info("flag 2 113");
-         Log::info($flag2);
-         Log::info($this->verification);
-
-         if($flag >= 2 || $this->verification == 0 ){*/
          if($exist_range['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.113", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
@@ -400,31 +349,6 @@ class ValidateCommandController extends Controller{
          //$ssh_commVer116 = "tscpgw_api -g '172.16.3.116' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
          $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.116');
 
-         /*\SSH::into('checkpoint')->run($ssh_commVer116, function($line){
-            Log::info("verification 116");
-   			Log::info($line.PHP_EOL);
-   			$this->verification = $line.PHP_EOL;
-   		});
-
-         sleep(1);
-
-         while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
-            if($flag2 >= 2) break;
-            $flag2++;
-
-            \SSH::into('checkpoint')->run($ssh_commVer116, function($line){
-               Log::info("verification while 116");
-               Log::info($line.PHP_EOL);
-               $this->verification = $line.PHP_EOL;
-            });
-            Log::info($flag2);
-   		}
-
-         Log::info("flag 2 116");
-         Log::info($flag2);
-         Log::info($this->verification);
-
-         if($flag >= 2 || $this->verification == 0 ){*/
          if($exist_range['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.116", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
@@ -504,31 +428,6 @@ class ValidateCommandController extends Controller{
          //$ssh_commVer117 = "tscpgw_api -g '172.16.3.117' -a search -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
          $exist_range = $this->existIpRange($object_name, $ip_initial, $ip_last, '172.16.3.117');
 
-         /*\SSH::into('checkpoint')->run($ssh_commVer117, function($line){
-            Log::info("verification 117");
-   			Log::info($line.PHP_EOL);
-   			$this->verification = $line.PHP_EOL;
-   		});
-
-         sleep(1);
-
-         while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) || ($flag2 >= 2)) {
-            if($flag2 >= 2) break;
-            $flag2++;
-
-            \SSH::into('checkpoint')->run($ssh_commVer117, function($line){
-               Log::info("verification while 117");
-               Log::info($line.PHP_EOL);
-               $this->verification = $line.PHP_EOL;
-            });
-            Log::info($flag2);
-   		}
-
-         Log::info("flag 2 117");
-         Log::info($flag2);
-         Log::info($this->verification);
-
-         if($flag >= 2 || $this->verification == 0 ){*/
          if(['response'] == 0){
             $temp_data_err = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip");
             array_push($array_data_err, $temp_data_err);
@@ -640,21 +539,6 @@ class ValidateCommandController extends Controller{
             }else{
                $ssh_command = "tscpgw_api -g '".$value['server']."' -a '".$value['type']."' -o ".$value['object_name']." -r '".$value['ip_initial']." ".$value['ip_last']."'";
                Log::info($ssh_command);
-
-               /*\SSH::into('checkpoint')->run($ssh_command, function($line){
-                  Log::info($line.PHP_EOL);
-                  $evaluate = $line.PHP_EOL;
-               });
-
-               $evaluate = $this->output;
-
-               while ((stripos($evaluate, "try again") !== false)) {
-                  Log::info("1 existe try again 112");
-                  \SSH::into('checkpoint')->run($ssh_command, function($line){
-                     Log::info($line.PHP_EOL);
-                     $evaluate = $line.PHP_EOL;
-                  });
-               }*/
 
                $flag = 0;
                $flag2 = 0;
@@ -879,7 +763,6 @@ class ValidateCommandController extends Controller{
       return $array_container;
    }
 
-
    public function getErrorData(){
 
       $temp_error = [];
@@ -931,28 +814,6 @@ class ValidateCommandController extends Controller{
                Log::info($flag);
                Log::info($evaluate);
 
-               /*$ssh_commVer = "tscpgw_api -g '".$row['server']."' -a search -o ".$row['object_name']." -r '".$row['ip_initial']." ".$row['ip_last']."'";
-               Log::info($ssh_commVer);
-               \SSH::into('checkpoint')->run($ssh_commVer, function($line){
-                  Log::info("verification server 117");
-                  Log::info($line.PHP_EOL);
-                  $this->verification = $line.PHP_EOL;
-               });
-
-               sleep(1);
-
-               while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) ) {
-                  if($flag2 >= 3) break;
-                  $flag2++;
-
-                  \SSH::into('checkpoint')->run($ssh_commVer, function($line){
-                     Log::info("verification while 117");
-                     Log::info($line.PHP_EOL);
-                     $this->verification = $line.PHP_EOL;
-                  });
-                  Log::info($flag2);
-               }*/
-
                $exist_range = $this->existIpRange($row['object_name'], $row['ip_initial'], $row['ip_last'], $row['server']);
 
                if($exist_range['response'] == 1 ){
@@ -962,26 +823,7 @@ class ValidateCommandController extends Controller{
                   Log::info("ES CERO Y NO ACTUALIZA");
                }
             }else{
-
-               /*$ssh_command = 'tscpgw_api -g '.$value['server'].' -a '.$value['type'].' -o '.$value['object_name'];
-               Log::info($ssh_command);
-
-               \SSH::into('checkpoint')->run($ssh_command, function($line){
-                  Log::info($line.PHP_EOL);
-                  $evaluate = $line.PHP_EOL;
-               });
-
-               $evaluate = $this->output;
-
-               while ((stripos($evaluate, "try again") !== false)) {
-                  Log::info("1 existe try again 112");
-                  \SSH::into('checkpoint')->run($ssh_command, function($line){
-                     Log::info($line.PHP_EOL);
-                     $evaluate = $line.PHP_EOL;
-                  });
-               }
-
-               sleep(2);*/
+               Log::info("No es ip");
             }
          }
       }else{
@@ -1102,27 +944,6 @@ class ValidateCommandController extends Controller{
                         Log::info($flag);
                         Log::info($evaluate);
 
-                        /*$ssh_commVer = "tscpgw_api -g '".$val['server']."' -a search -o ".$val['object_name']." -r '".$val['ip_initial']." ".$val['ip_last']."'";
-
-                        \SSH::into('checkpoint')->run($ssh_commVer, function($line){
-                           Log::info("verification server 117");
-                           Log::info($line.PHP_EOL);
-                           $this->verification = $line.PHP_EOL;
-                        });
-
-                        sleep(1);
-
-                        while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) ) {
-                           if($flag2 >= 3) break;
-                           $flag2++;
-
-                           \SSH::into('checkpoint')->run($ssh_commVer, function($line){
-                              Log::info("verification while 117");
-                              Log::info($line.PHP_EOL);
-                              $this->verification = $line.PHP_EOL;
-                           });
-                           Log::info($flag2);
-                        }*/
                         $exist_range = $this->existIpRange($val['object_name'], $val['ip_initial'], $val['ip_last'], $val['server']);
 
                         if($exist_range['response'] == 1 ){
@@ -1178,28 +999,6 @@ class ValidateCommandController extends Controller{
                         Log::info($flag);
                         Log::info($evaluate);
 
-                        /*$ssh_commVer = "tscpgw_api -g '".$val['server']."' -a search -o ".$val['object_name']." -r '".$val['ip_initial']." ".$val['ip_last']."'";
-
-                        \SSH::into('checkpoint')->run($ssh_commVer, function($line){
-                           Log::info("verification server 117");
-                           Log::info($line.PHP_EOL);
-                           $this->verification = $line.PHP_EOL;
-                        });
-
-                        sleep(1);
-
-                        while ((stripos($this->verification, "") !== false) || (stripos($this->verification, "0") !== false) || (stripos($this->verification, "try again") !== false) ) {
-                           if($flag2 >= 3) break;
-                           $flag2++;
-
-                           \SSH::into('checkpoint')->run($ssh_commVer, function($line){
-                              Log::info("verification while 117");
-                              Log::info($line.PHP_EOL);
-                              $this->verification = $line.PHP_EOL;
-                           });
-                           Log::info($flag2);
-                        }*/
-
                         $exist_range = $this->existIpRange($val['object_name'], $val['ip_initial'], $val['ip_last'], $val['server']);
 
                         if($exist_range['response'] == 1 ){
@@ -1219,7 +1018,6 @@ class ValidateCommandController extends Controller{
                }
             }
          }
-
       }else{
          return "No hay datos nuevos en mongo";
       }
@@ -1357,10 +1155,14 @@ class ValidateCommandController extends Controller{
 
    public function evaluateRemoveIp($object_name, $ip_initial, $ip_last, $server){
 
-      /*$object_name = 'Object29Nov';
-      $ip_initial = '105.105.1.10';
-      $ip_last = '105.105.1.10';
-      $server = '172.16.3.112';*/
+      $object_data = DB::table('fw_objects')->where('name', '=', $object_name)->get();
+      $object_data2 = json_decode(json_encode($object_data), true);
+
+      $company_data = DB::table('fw_companies')->where('id', '=', $object_data2[0]['company_id'])->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+      $token_company = $company_data2[0]['token_company'];
 
       $array_object;
       $array_ip = [];
@@ -1390,181 +1192,188 @@ class ValidateCommandController extends Controller{
          });
       }
 
-      $body = explode("\n", $this->range);
-      $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
-      $i = 0;
+      if(!empty($this->range)){
 
-      foreach($body as $key => $row){
-         if($key > 1){
-            if($row != ""){
-               $var1 = preg_replace('/\s+/', '-', $row);
-               array_push($array_object['registros'], $var1);
+         $body = explode("\n", $this->range);
+         $array_object = array("fecha" => $body[0], "cantidad" => $body[1], "registros" => []);
+         $i = 0;
+
+         foreach($body as $key => $row){
+            if($key > 1){
+               if($row != ""){
+                  $var1 = preg_replace('/\s+/', '-', $row);
+                  array_push($array_object['registros'], $var1);
+               }
             }
          }
-      }
 
-      //Evaluar si es una sola ip o varias las que se eliminarán
-      if($ip_initial == $ip_last){
+         //Evaluar si es una sola ip o varias las que se eliminarán
+         if($ip_initial == $ip_last){
 
-         foreach($array_object['registros'] as $value) {
+            foreach($array_object['registros'] as $value) {
 
-            $exist = Range::parse($value)->contains(new IP($ip_initial));
+               $exist = Range::parse($value)->contains(new IP($ip_initial));
 
-            if($exist){
-               Log::info("excludeeee");
-               Log::info($value);
+               if($exist){
+                  Log::info("excludeeee");
+                  Log::info($value);
 
-               $ips_part = explode("-", $value);
-               Log::info("ips parts");
-               Log::info($ips_part);
+                  $ips_part = explode("-", $value);
+                  Log::info("ips parts");
+                  Log::info($ips_part);
 
-               $range = Range::parse($value);
-               foreach($range as $ip) {
-                  array_push($array_ip, (string)$ip);
-               }
-
-               $array_ip_exist = $this->remove_element($array_ip, $ip_initial);
-               Log::info("array_ip_exist");
-               Log::info($array_ip_exist);
-
-               //die();
-               $count_array = count($array_ip_exist);
-
-               //if($count_array > 0){
-               //ELIMINO EL RANGO COMPLETO
-               $removeRange = $this->removeRange($server, $object_name, $ips_part[0], $ips_part[1]);
-
-               Log::info("removeRange****");
-               Log::info($removeRange);
-
-               if($removeRange['response'] == 1){//Significa que no se eliminó
-                  $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
-                  array_push($array_data_err, $temp_data_err);
-
-                  //Guardaré en mongo los logs ya sean buenos o malos
-                  $log = new HistoricalData;
-                  $log->server = $server;
-                  $log->object_name = $object_name;
-                  $log->ip_initial = $ip_initial;
-                  $log->ip_last = $ip_last;
-                  $log->type = "delrip";
-                  $log->class ="ip";
-                  $log->status = 0;
-                  $log->info = $removeRange['info'];
-                  $log->token_company = $removeRange['token'];
-                  $log->save();
-
-               }else{//Si se eliminó
-                  $temp_data_succ = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => 1, "current_ips" => 1);
-                  array_push($array_data_succ, $temp_data_succ);
-
-                  //Guardaré en mongo los logs ya sean buenos o malos
-                  $log = new HistoricalData;
-                  $log->server = $server;
-                  $log->object_name = $object_name;
-                  $log->ip_initial = $ip_initial;
-                  $log->ip_last = $ip_last;
-                  $log->type = "delrip";
-                  $log->class ="ip";
-                  $log->status = 1;
-                  $log->info = $removeRange['info'];
-                  $log->token_company = $removeRange['token'];
-                  $log->save();
-               }
-
-               $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
-               $respuesta = array("new_range" => $array_ip_exist, "remove" => $removeRange);
-               Log::info("La respuesta es: ");
-               Log::info($respuesta);
-               return $respuesta;
-
-               /*}else{
-                  Log::info("Se eliminó correctamente");
-               }*/
-            }
-         }
-      }else{//Significa que son varias ips a eliminar
-
-         foreach($array_object['registros'] as $value) {
-            //Buscar las ips del rango completo a eliminar*************
-            if( (Range::parse($value)->contains(new IP($ip_initial))) && (Range::parse($value)->contains(new IP($ip_last))) ){
-               $range = Range::parse($value);
-               foreach($range as $ip) {
-                  array_push($array_ip2, (string)$ip);
-               }
-
-               $ips_part = explode("-", $value);
-               Log::info("ips parts");
-               Log::info($ips_part);
-
-               Log::info("array 2");
-               Log::info($array_ip2);
-
-               $range_delete = Range::parse($ip_initial.'-'.$ip_last);
-               foreach($range_delete as $ip) {
-                  array_push($array_ip3, (string)$ip);
-               }
-
-               Log::info("array 3");
-               Log::info($array_ip3);
-
-               foreach($array_ip2 as $row){
-                  if(!in_array($row, $array_ip3)){
-                     array_push($ips_save, $row);
+                  $range = Range::parse($value);
+                  foreach($range as $ip) {
+                     array_push($array_ip, (string)$ip);
                   }
+
+                  $array_ip_exist = $this->remove_element($array_ip, $ip_initial);
+                  Log::info("array_ip_exist");
+                  Log::info($array_ip_exist);
+
+                  //die();
+                  $count_array = count($array_ip_exist);
+
+                  //if($count_array > 0){
+                  //ELIMINO EL RANGO COMPLETO
+                  $removeRange = $this->removeRange($server, $object_name, $ips_part[0], $ips_part[1]);
+
+                  Log::info("removeRange****");
+                  Log::info($removeRange);
+
+                  if($removeRange['response'] == 1){//Significa que no se eliminó
+                     $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
+                     array_push($array_data_err, $temp_data_err);
+
+                     //Guardaré en mongo los logs ya sean buenos o malos
+                     $log = new HistoricalData;
+                     $log->server = $server;
+                     $log->object_name = $object_name;
+                     $log->ip_initial = $ip_initial;
+                     $log->ip_last = $ip_last;
+                     $log->type = "delrip";
+                     $log->class ="ip";
+                     $log->status = 0;
+                     $log->info = $removeRange['info'];
+                     $log->token_company = $removeRange['token'];
+                     $log->save();
+
+                  }else{//Si se eliminó
+                     $temp_data_succ = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => 1, "current_ips" => 1);
+                     array_push($array_data_succ, $temp_data_succ);
+
+                     //Guardaré en mongo los logs ya sean buenos o malos
+                     $log = new HistoricalData;
+                     $log->server = $server;
+                     $log->object_name = $object_name;
+                     $log->ip_initial = $ip_initial;
+                     $log->ip_last = $ip_last;
+                     $log->type = "delrip";
+                     $log->class ="ip";
+                     $log->status = 1;
+                     $log->info = $removeRange['info'];
+                     $log->token_company = $removeRange['token'];
+                     $log->save();
+                  }
+
+                  $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
+                  $respuesta = array("new_range" => $array_ip_exist, "remove" => $removeRange);
+                  Log::info("La respuesta es: ");
+                  Log::info($respuesta);
+                  return $respuesta;
+
+                  /*}else{
+                     Log::info("Se eliminó correctamente");
+                  }*/
                }
-               //Debo mandar a guardar cada ip restante
+            }
+         }else{//Significa que son varias ips a eliminar
 
-               Log::info("ips save");
-               Log::info($ips_save);
+            foreach($array_object['registros'] as $value) {
+               //Buscar las ips del rango completo a eliminar*************
+               if( (Range::parse($value)->contains(new IP($ip_initial))) && (Range::parse($value)->contains(new IP($ip_last))) ){
+                  $range = Range::parse($value);
+                  foreach($range as $ip) {
+                     array_push($array_ip2, (string)$ip);
+                  }
 
-               $removeRange = $this->removeRange($server, $object_name, $ips_part[0], $ips_part[1]);
+                  $ips_part = explode("-", $value);
+                  Log::info("ips parts");
+                  Log::info($ips_part);
 
-               Log::info("removeRange****");
-               Log::info($removeRange);
+                  Log::info("array 2");
+                  Log::info($array_ip2);
 
-               if($removeRange['response'] == 1){//Significa que no se eliminó
-                  $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
-                  array_push($array_data_err, $temp_data_err);
+                  $range_delete = Range::parse($ip_initial.'-'.$ip_last);
+                  foreach($range_delete as $ip) {
+                     array_push($array_ip3, (string)$ip);
+                  }
 
-                  //Guardaré en mongo los logs ya sean buenos o malos
-                  $log = new HistoricalData;
-                  $log->server = $server;
-                  $log->object_name = $object_name;
-                  $log->ip_initial = $ip_initial;
-                  $log->ip_last = $ip_last;
-                  $log->type = "delrip";
-                  $log->class ="ip";
-                  $log->status = 0;
-                  $log->info = $removeRange['info'];
-                  $log->token_company = $removeRange['token'];
-                  $log->save();
+                  Log::info("array 3");
+                  Log::info($array_ip3);
 
-               }else{//Si se eliminó
-                  $temp_data_succ = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => 1, "current_ips" => 1);
-                  array_push($array_data_succ, $temp_data_succ);
+                  foreach($array_ip2 as $row){
+                     if(!in_array($row, $array_ip3)){
+                        array_push($ips_save, $row);
+                     }
+                  }
+                  //Debo mandar a guardar cada ip restante
 
-                  //Guardaré en mongo los logs ya sean buenos o malos
-                  $log = new HistoricalData;
-                  $log->server = $server;
-                  $log->object_name = $object_name;
-                  $log->ip_initial = $ip_initial;
-                  $log->ip_last = $ip_last;
-                  $log->type = "delrip";
-                  $log->class ="ip";
-                  $log->status = 1;
-                  $log->info = $removeRange['info'];
-                  $log->token_company = $removeRange['token'];
-                  $log->save();
+                  Log::info("ips save");
+                  Log::info($ips_save);
+
+                  $removeRange = $this->removeRange($server, $object_name, $ips_part[0], $ips_part[1]);
+
+                  Log::info("removeRange****");
+                  Log::info($removeRange);
+
+                  if($removeRange['response'] == 1){//Significa que no se eliminó
+                     $temp_data_err = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ips_part[0], "ip_last" => $ips_part[1], "type" => "delrip", "class" => "ip");
+                     array_push($array_data_err, $temp_data_err);
+
+                     //Guardaré en mongo los logs ya sean buenos o malos
+                     $log = new HistoricalData;
+                     $log->server = $server;
+                     $log->object_name = $object_name;
+                     $log->ip_initial = $ip_initial;
+                     $log->ip_last = $ip_last;
+                     $log->type = "delrip";
+                     $log->class ="ip";
+                     $log->status = 0;
+                     $log->info = $removeRange['info'];
+                     $log->token_company = $removeRange['token'];
+                     $log->save();
+
+                  }else{//Si se eliminó
+                     $temp_data_succ = array("server"=>$server, "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "delrip", "class" => "ip", "total_ips" => 1, "current_ips" => 1);
+                     array_push($array_data_succ, $temp_data_succ);
+
+                     //Guardaré en mongo los logs ya sean buenos o malos
+                     $log = new HistoricalData;
+                     $log->server = $server;
+                     $log->object_name = $object_name;
+                     $log->ip_initial = $ip_initial;
+                     $log->ip_last = $ip_last;
+                     $log->type = "delrip";
+                     $log->class ="ip";
+                     $log->status = 1;
+                     $log->info = $removeRange['info'];
+                     $log->token_company = $removeRange['token'];
+                     $log->save();
+                  }
+
+                  $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
+                  $respuesta = array("new_range" => $ips_save, "remove" => $removeRange);
+                  Log::info("La respuesta es: ");
+                  Log::info($respuesta);
+                  return $respuesta;
                }
-
-               $responseRange = array("success" => $array_data_succ, "error" => $array_data_err, "info" => 1);
-               $respuesta = array("new_range" => $ips_save, "remove" => $removeRange);
-               Log::info("La respuesta es: ");
-               Log::info($respuesta);
-               return $respuesta;
             }
          }
+      }else{
+         Log::info("VIENE VACIO EL ARRAY RANGE");
+         $response = array("response" => 0, "info" => "No devuelve valor", "token" => $token_company);
+         return $response;
       }
    }
 
@@ -1696,5 +1505,4 @@ class ValidateCommandController extends Controller{
       $respuesta = array("success" => $array_data_succ, "error" => $array_data_err);
       return $respuesta;
    }
-
 }

@@ -36,6 +36,7 @@ use IPTools\Range;
 use IPTools\Network;
 use IPTools\IP;
 use App\Http\Control;
+use Carbon\Carbon;
 
 class CheckpointController extends Controller
 {
@@ -308,12 +309,12 @@ class CheckpointController extends Controller
          if($test){
             unset($ips[$key]);
          }else{
-            "no existe la ip";
+            array_push($testarray, $value);
          }
       }
 
  		return response()->json([
- 			'data' => $ips,
+ 			'data' => $testarray,
  			'object_id' => $object_id
  		]);
    }
@@ -325,6 +326,7 @@ class CheckpointController extends Controller
       $arreglo_data = [];
       $error_data = [];
       $data_exist = [];
+      $current_time = Carbon::now()->toDateTimeString();
 
       $userLog = JWTAuth::toUser($request['token']);
       Log::info($userLog);
@@ -366,10 +368,20 @@ class CheckpointController extends Controller
 
       $total_ips = count($request['ips']);
       $flag = 1;
+      $dataSet = [];
 
       foreach ($request['ips'] as $value) {
          $ip_initial = $value['ip_initial'];
          $ip_last = $value['ip_last'];
+
+         $dataSet[] = [
+            'ip_initial'  => $ip_initial,
+            'ip_last'    => $ip_last,
+            'object_id'       => $object_id,
+            'type_address_id' => $type_address_id,
+            'created_at' => $current_time,
+            'updated_at' => $current_time,
+         ];
 
          $validateAdddyo = $validateCmd->validateAssignIpObject($object_name, $ip_initial, $ip_last, $total_ips, $flag);
 
@@ -399,20 +411,22 @@ class CheckpointController extends Controller
       \Storage::put($name_company.'/'.$token_company.'.json', $json);*/
 
       sleep(2);
+      Log::info("DATASET");
+      Log::info($dataSet);
+      $addr_obj = AddressObject::insert($dataSet);
 
-      $addr_obj = new AddressObject;
+      /*$addr_obj = new AddressObject;
  		$addr_obj->ip_initial = $ip_initial;
  		$addr_obj->ip_last = $ip_last;
  		$addr_obj->object_id = $object_id;
  		$addr_obj->type_address_id = $type_address_id;
- 		$addr_obj->save();
+ 		$addr_obj->save();*/
 
       //Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
       Artisan::call('checkpoint:resendData');
 
  		if($addr_obj){
-			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(),
-			'updated_at' => \Carbon\Carbon::now()]);
+			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
 
 			if($bd_ips_check){
   				return response()->json([
@@ -1327,8 +1341,6 @@ class CheckpointController extends Controller
  				->get();
  		}
 
-      //Log::info($obj);
-
  		//ESTO HAY QUE REMOVER PARA MOSTRAR TODOS LOS OBJETOS
  		//AQUI HAY QUE DESCOMPONER LOS NOMBRES Y AGREGARLES 2 POSICIONES A LOS NUEVOS	|| $value['editable'] == 1
       $list_obj = [];
@@ -1388,12 +1400,16 @@ class CheckpointController extends Controller
     				array_push($list_obj, $value);
             }else{
                $name = explode('-', $value['name']);
-    				$complement_name = $name[2].' '.$name[3];
+
+               if(isset($name[3])){
+                  $complement_name = $name[2].' '.$name[3];
+               }else{
+                  $complement_name = $name[0].' '.$name[1];
+               }
 
     				$value['short_name'] = $complement_name;
     				array_push($list_obj, $value);
             }
-
          }
  		}
 
@@ -2483,11 +2499,13 @@ class CheckpointController extends Controller
 
  		if($ip_object){
 
- 			Log::info($old_range);https://sansalvador.bt7festival.com/
+ 			Log::info($old_range);
  			Log::info($new_range);
+         $total_ips = 1;
+         $flag = 1;
 
          //Mando a eliminar los rangos a los checkpoint
-         $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $request['object_info']['ip_initial'], $request['object_info']['ip_last']);
+         $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $request['object_info']['ip_initial'], $request['object_info']['ip_last'], $total_ips, $flag);
 
          sleep(2);
 
@@ -2500,7 +2518,7 @@ class CheckpointController extends Controller
  			}
 
          //Mando a crear los rangos nuevamente
-         $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $new_ip_initial, $new_ip_last);
+         $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $new_ip_initial, $new_ip_last, $total_ips, $flag);
 
          sleep(2);
 
@@ -3382,9 +3400,6 @@ class CheckpointController extends Controller
  							]
  						]);
  					}else{
-
- 						/*$install = $this->installPolicy();
-                  Log::info($install);*/
 
  						$uid_rule = $result['uid'];
 
