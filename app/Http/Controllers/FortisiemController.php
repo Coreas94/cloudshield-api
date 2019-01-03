@@ -280,7 +280,7 @@ class FortisiemController extends Controller
 
    public function countAttacksDay(Request $request){
 
-      $fecha = date('Y-m-j');
+      $fecha = date('Y-m-d');
       $date_init = $fecha.' 00:00:00';
       $date_last = $fecha.' 23:59:59';
 

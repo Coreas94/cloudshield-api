@@ -1372,7 +1372,7 @@ class CheckpointController extends Controller
 
        				$value['short_name'] = 'MY CLOUDSHIELD '.$complement_name;
        				array_push($list_obj, $value);
-               }elseif (strpos($value['name'], 'checkpoint-block') !== false ) {
+               }elseif ( (strpos($value['name'], 'checkpoint-block') !== false) || (strpos($value['name'], 'soc-5g-block') !== false) ) {
                   unset($obj[$key]);
                }else{
                   $name = explode('-', $value['name']);

@@ -135,7 +135,8 @@
             "server" => "CHECKPOINT",
             "server_id" => 1,
             "objects" => array(
-               "checkpoint-block"
+               "checkpoint-block",
+               "soc-5g-block"
             )
          ),
          array(

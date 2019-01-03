@@ -63,7 +63,7 @@ def GetQueryResultByOrg(appServer, user, password, name, inXml, starttime, endti
 
 	outXML=[]
 	if content.decode("utf-8")=='100':
-		UrlFinal=Url+'events/'+queryId+'/0/800'
+		UrlFinal=Url+'events/'+queryId+'/0/500'
 		resp, content=h.request(UrlFinal)
 		if content!='':
 			outXML.append(content.decode("utf-8"))
@@ -80,7 +80,7 @@ def GetQueryResultByOrg(appServer, user, password, name, inXml, starttime, endti
 					num+=1
 			if num>0:
 				for i in range(num):
-					UrlFinal=Url+'events/'+queryId+'/0/800'
+					UrlFinal=Url+'events/'+queryId+'/0/500'
 					#'+str((i+1)*1000)+'
 					#print str(i*1000+1)+'/1000'
 					resp, content=h.request(UrlFinal)

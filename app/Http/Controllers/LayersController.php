@@ -27,6 +27,8 @@ use IPTools\IP;
 
 use App\Http\Requests;
 use App\Http\Controllers\CheckpointController;
+use File;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class LayersController extends Controller
 {
@@ -39,8 +41,15 @@ class LayersController extends Controller
 
 	public function getObjectByServers(Request $request){
 
-      $data = getObjectServers($request['token']);
-      return response()->json($data);
+      //$data = getObjectServers($request['token']);
+
+		$list = DB::table('objects_list_block')
+		    	->where('visible', '=', 1)
+		    	->get();
+
+		$list = json_decode(json_encode($list), true);
+
+      return response()->json($list);
 	}
 
 	public function getIpsList(Request $request){
@@ -58,9 +67,25 @@ class LayersController extends Controller
 		]);
 	}
 
+	public function getIpsListSoc(Request $request){
+
+		$list = DB::table('layers_security_list')
+				->join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')
+				->where('name_object', '=', 'soc-5g-block')
+				->select('layers_security_list.*', 'fw_servers.name AS name_server')
+		    	->get();
+
+		$list = json_decode(json_encode($list), true);
+
+		return response()->json([
+			'data' => $list
+		]);
+	}
+
 	public function addIpList(Request $request, CheckpointController $checkpoint){
 
 		Log::info($request);
+
 		$validateCmd = new ValidateCommandController;
       #$ip_initial = $request['ip_initial'];
       #$ip_last = $ip_initial;
@@ -68,6 +93,30 @@ class LayersController extends Controller
       $name_object = $request['object_name'];
       $server_id = $request['server_id'];
 		$evaluate = "";
+
+		$userLog = JWTAuth::toUser($request['token']);
+		$api_token = $userLog['api_token'];
+		$company_id = $userLog['company_id'];
+		$company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+		$company_data2 = json_decode(json_encode($company_data), true);
+
+		$name_company = $company_data2[0]['name'];
+		$token_company = $company_data2[0]['token_company'];
+		$arreglo_data = [];
+
+		//EVALUAR ARCHIVO JSON
+		$path = storage_path() ."/app/".$name_company."/".$token_company.".json";
+
+		if(File::exists($path)){
+		 	$data_exist = json_decode(file_get_contents($path), true);
+		 	Log::info($data_exist);
+		} else {
+		 	Log::info("NO EXISTE FILE");
+		 	$arreglo = array("success" => "", "error" => "", "info" => 0);
+
+		 	$json = json_encode($arreglo);
+		 	\Storage::put($name_company.'/'.$token_company.'.json', $json);
+		}
 
 		foreach($request['ips'] as $value){
 			$ip_initial = $value['inicial'];
@@ -290,13 +339,24 @@ class LayersController extends Controller
 						//DEBO MANDAR A LA VERIFICACION CADA IP
 						$validateAdddyo = $validateCmd->validateAssignIpObject($name_object, $ip_initial, $ip_last, $total_ips, $flag);
 
+						array_push($arreglo_data, $validateAdddyo);
+
+					 	if(!empty($data_exist)){
+					    	foreach ($data_exist as $value) {
+					       	Log::info("VALUE DE DATA EXIST");
+					       	Log::info($value);
+					    	}
+					 	}
+
+					 	$json = json_encode($arreglo_data);
+					 	\Storage::put($name_company.'/'.$token_company.'.json', $json);
+
 						return response()->json([
 							'success' => [
 								'message' => "Datos ingresados correctamente",
 								'status_code' => 200
 							]
 						]);
-
 		         }else{
 						Log::info("No se guardó en el checkpoint, solo localmente!");
 		            return response()->json([
@@ -333,7 +393,6 @@ class LayersController extends Controller
       $ip_last = $ip_initial;
       $id_list = $request['id'];
 		$evaluate = "";
-
 
 		$ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
 		$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
