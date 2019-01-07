@@ -388,17 +388,60 @@ class LayersController extends Controller
 
    public function removeIpList(Request $request, CheckpointController $checkpoint){
 
+		$validateCmd = new ValidateCommandController;
       $object_name = $request['name_object'];
       $ip_initial = $request['ip_initial'];
       $ip_last = $ip_initial;
       $id_list = $request['id'];
 		$evaluate = "";
 
+		$total_ips = 1;
+		$flag = 0;
+
+		/*$userLog = JWTAuth::toUser($request['token']);
+		$api_token = $userLog['api_token'];
+		$company_id = $userLog['company_id'];
+		$company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+		$company_data2 = json_decode(json_encode($company_data), true);
+
+		$name_company = $company_data2[0]['name'];
+		$token_company = $company_data2[0]['token_company'];
+		$arreglo_data = [];
+
+		//EVALUAR ARCHIVO JSON
+		$path = storage_path() ."/app/".$name_company."/".$token_company.".json";
+
+		if(File::exists($path)){
+		 	$data_exist = json_decode(file_get_contents($path), true);
+		 	Log::info($data_exist);
+		} else {
+		 	Log::info("NO EXISTE FILE");
+		 	$arreglo = array("success" => "", "error" => "", "info" => 0);
+
+		 	$json = json_encode($arreglo);
+		 	\Storage::put($name_company.'/'.$token_company.'.json', $json);
+		}
+
+		$validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $ip_initial, $ip_last, $total_ips, $flag);
+
+		array_push($arreglo_data, $validateDelrip);
+
+		if(!empty($data_exist)){
+			foreach ($data_exist as $value) {
+				Log::info("VALUE DE DATA EXIST");
+				Log::info($value);
+			}
+		}
+
+		$json = json_encode($arreglo_data);
+		\Storage::put($name_company.'/'.$token_company.'.json', $json);
+
+		sleep(2);*/
+
 		$ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
 		$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
 		$ssh_command3 = "tscpgw_api -g '172.16.3.116' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
 		$ssh_command4 = "tscpgw_api -g '172.16.3.117' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
-
 
 		\SSH::into('checkpoint')->run($ssh_command, function($line){
 			Log::info($line.PHP_EOL);
@@ -407,7 +450,8 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false) {
+		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
 			Log::info("1 existe try again 112");
 			\SSH::into('checkpoint')->run($ssh_command, function($line){
 				Log::info($line.PHP_EOL);
@@ -424,7 +468,8 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false) {
+		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
 			Log::info("1 existe try again 113");
 			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
 				Log::info($line2.PHP_EOL);
@@ -441,7 +486,8 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false) {
+		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
 			Log::info("1 existe try again 116");
 			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
 				Log::info($line3.PHP_EOL);
@@ -458,7 +504,8 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false) {
+		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
 			Log::info("1 existe try again 117");
 			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
 				Log::info($line4.PHP_EOL);

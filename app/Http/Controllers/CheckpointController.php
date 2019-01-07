@@ -1055,12 +1055,16 @@ class CheckpointController extends Controller
  			$i = 0;
 
  			foreach ($result_task['tasks'] as $key => $value) {
- 				foreach ($value['task-details'] as $key2 => $value2) {
- 					foreach($value2['changes'] as $row){
- 						$array_tasks[$i] = array_filter($row['operations']);
- 						$i++;
- 					}
- 				}
+            if(isset($value['task_details'])){
+               foreach ($value['task-details'] as $key2 => $value2) {
+    					foreach($value2['changes'] as $row){
+    						$array_tasks[$i] = array_filter($row['operations']);
+    						$i++;
+    					}
+    				}
+            }else{
+               return "error";
+            }
  			}
 
  			$i = 0;
