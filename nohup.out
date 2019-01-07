@@ -198,3 +198,5 @@ PHP Warning:  PHP Startup: Unable to load dynamic library '/usr/lib/php/20131226
 Running on localhost:8043
 Client connected
 Client disconnected
+Client connected
+Client disconnected

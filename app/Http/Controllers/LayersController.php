@@ -57,6 +57,7 @@ class LayersController extends Controller
 		//$list = LayerSecurity::join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')->get();
 		$list = DB::table('layers_security_list')
 		    	->join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')
+				->where('name_object', '=', 'checkpoint-block')
 		    	->select('layers_security_list.*', 'fw_servers.name AS name_server')
 		    	->get();
 
@@ -450,7 +451,7 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
 			if($flag >= 3) break;
 			Log::info("1 existe try again 112");
 			\SSH::into('checkpoint')->run($ssh_command, function($line){
@@ -461,6 +462,7 @@ class LayersController extends Controller
 
 		sleep(2);
 
+		$flag = 0;
 		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
 			Log::info($line2.PHP_EOL);
 			$evaluate = $line2.PHP_EOL;
@@ -468,7 +470,7 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
 			if($flag >= 3) break;
 			Log::info("1 existe try again 113");
 			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
@@ -479,6 +481,7 @@ class LayersController extends Controller
 
 		sleep(2);
 
+		$flag = 0;
 		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
 			Log::info($line3.PHP_EOL);
 			$evaluate = $line3.PHP_EOL;
@@ -486,7 +489,7 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
 			if($flag >= 3) break;
 			Log::info("1 existe try again 116");
 			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
@@ -497,6 +500,7 @@ class LayersController extends Controller
 
 		sleep(2);
 
+		$flag = 0;
 		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
 			Log::info($line4.PHP_EOL);
 			$evaluate = $line4.PHP_EOL;
@@ -504,7 +508,7 @@ class LayersController extends Controller
 
 		$evaluate = $this->output;
 
-		while (stripos($evaluate, "try again") !== false || ($flag >= 3)) {
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
 			if($flag >= 3) break;
 			Log::info("1 existe try again 117");
 			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
