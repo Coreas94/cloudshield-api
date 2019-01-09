@@ -16,7 +16,8 @@ class Kernel extends ConsoleKernel
      // Commands\Inspire::class,
      Commands\dataFortisiem::class,
      //Commands\installPolicy::class,
-     Commands\resendDataCheckpoint::class
+     Commands\resendDataCheckpoint::class,
+     Commands\AutomaticThreat::class
    ];
 
    /**
@@ -34,6 +35,9 @@ class Kernel extends ConsoleKernel
 
       $schedule->command('checkpoint:resendData')->everyFiveMinutes();
 
+      $schedule->command('fortisiem:automaticThreat')->cron('*/10 * * * *');
+
+      
 
    }
 }

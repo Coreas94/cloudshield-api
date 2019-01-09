@@ -1,0 +1,24 @@
+<DataRequest custId="0" dbId="14896751" end="0" entityVersion="1" id="14896751" issueCustId="3" type="Query">
+   <Name>Checkpoint_critical</Name>
+   <Description/>
+   <CustomerScope groupByEachCustomer="false">
+      <Include all="true"/>
+      <Exclude/>
+   </CustomerScope>
+   <SelectClause>
+      <AttrList>phRecvDate,srcIpAddr,srcGeoLatitude,srcGeoLongitude,srcGeoCountry,destIpAddr,destGeoLatitude,destGeoLongitude,destGeoCountry,eventName,attackInfo,attackName,eventSeverity,ipsSeverity,srcGeoOrg,rawEventMsg</AttrList>
+   </SelectClause>
+   <PatternClause window="0">
+      <SubPattern id="14896801" name="">
+         <SingleEvtConstr>parserName = "CheckpointParser"  AND  ipsConfidence = "Medium-High"  OR  ipsSeverity = "Critical"</SingleEvtConstr>
+      </SubPattern>
+   </PatternClause>
+   <userRoles>
+      <roles custId="0">1686450</roles>
+   </userRoles>
+   <SyncOrgs/>
+   <ReportInterval>
+      <Low>1546878434</Low>
+      <High>1546882033</High>
+   </ReportInterval>
+</DataRequest>

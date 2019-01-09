@@ -25,6 +25,7 @@ use IPTools\Range;
 use IPTools\Network;
 use IPTools\IP;
 use App\LogsData;
+use App\ThreatIps;
 
 use JWTAuth;
 
@@ -223,10 +224,13 @@ class FortisiemController extends Controller
          case '1':
             $nuevafecha = strtotime ('-1 day', strtotime($fecha));
             $initial_date = date ('Y-m-d H:i:s', $nuevafecha);
+
             break;
          case '2':
+            Log::info("entra al case 2");
             $nuevafecha = strtotime ('-3 day', strtotime($fecha));
             $initial_date = date ('Y-m-d H:i:s', $nuevafecha);
+
             break;
 
          case '3':
@@ -241,7 +245,6 @@ class FortisiemController extends Controller
 
             break;
          default:
-            die();
             break;
       }
 
@@ -258,7 +261,8 @@ class FortisiemController extends Controller
       }*/
 
       //$logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->whereBetween('receive_time', array($initial_date, $date_value))->orderBy('receive_time', 'desc')->take(8000)->get();
-      $logs = LogsData::whereBetween('receive_time', array($initial_date, $date_value))->orderBy('receive_time', 'desc')->get();
+
+      $logs = LogsData::whereBetween('receive_time', array($initial_date, $date_value))->orderBy('receive_time', 'desc')->take(5000)->get();
       Log::info(count($logs));
 
       if(count($logs) > 0){
@@ -303,7 +307,54 @@ class FortisiemController extends Controller
             ]
          ]);
       }
-
    }
+
+
+   public function runAutomaticLogs(){
+      $dt = \Carbon\Carbon::now();
+      $fecha_fin = $dt->timestamp;
+      $fecha_inicio = $dt->subMinutes(10);
+      $fecha_inicio = $fecha_inicio->timestamp;
+
+      $process = new Process("python ".app_path()."/api_py/getCheckpointData.py ".app_path()."/api_py/checkpoint_medium.xml ".$fecha_inicio.' '. $fecha_fin);
+      $process->run();
+
+      if(!$process->isSuccessful()){
+         Log::info("is error");
+         throw new ProcessFailedException($process);
+      }
+
+      $result = json_decode($process->getOutput(), true);
+      Log::info("trae: ". count($result));
+      Log::info($result);
+
+      $array2 = array_unique($result, SORT_REGULAR);
+
+      foreach ($array2 as $key => $value) {
+         $array = json_decode($value, true);
+
+         if(!empty($array) && isset($array['srcIpAddr']) && $array['srcIpAddr'] != "no-exist"){
+            // $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
+
+            $ip_exist = ThreatIps::where('ip', '=', $array['srcIpAddr'])->first();
+            if ($ip_exist === null) {
+               $ips = new ThreatIps;
+               $ips->ip = $array['srcIpAddr'];
+               $ips->object_name = 'soc-5g-block';
+               //$ips->receive_time = $format_date;
+               $ips->status = 0;
+               $ips->created_at = $dt;
+               $ips->updated_at = $dt;
+               $ips->save();
+            }
+
+         }else{
+            return "No records found";
+         }
+      }
+   }
+
+
+
 
 }

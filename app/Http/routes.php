@@ -98,6 +98,9 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
          //Ruta para obtener cantidad de registros del día
          Route::get('/count_day', 'FortisiemController@countAttacksDay');
+
+         //Ruta para obtener los registros de amenazas desde checkpoint
+         Route::get('/data_checkpoint', 'FortisiemController@runAutomaticLogs');
       });
 
       Route::group(['prefix' => 'access_control'], function(){

@@ -1968,6 +1968,9 @@ class CheckpointController extends Controller
                               ),
                            );
 
+                           Log::info("NUEVOS RANGOS A INGRESAR");
+                           Log::info($arr_addr);
+
                            //inserto en la base los nuevos rangos
                            $insert = DB::table('fw_address_objects')->insert($arr_addr);
 
@@ -2014,7 +2017,7 @@ class CheckpointController extends Controller
                }else{
 
                   if($publish == "success"){
-
+                     Log::info("ELIMINA EL RANGO Y NADA MAS");
                      //Elimino el rango de la bdd
                      $delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
@@ -2211,6 +2214,9 @@ class CheckpointController extends Controller
                                  'updated_at' => date('Y-m-d H:i:s'),
                               ),
                            );
+
+                           Log::info("NUEVOS RANGOS A INGRESAR");
+                           Log::info($arr_addr);
 
                            //inserto en la base los nuevos rangos
                            $insert = DB::table('fw_address_objects')->insert($arr_addr);
