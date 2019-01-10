@@ -121,7 +121,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_objects_server', 'LayersController@getObjectByServers');
          Route::post('/add_ip_list', 'LayersController@addIpList');
          Route::get('/get_ip_list', 'LayersController@getIpsList');
-         Route::get('get_ip_list_soc', 'LayersController@getIpsListSoc');
+         Route::get('get_ip_list_soc_block', 'LayersController@getIpsListSocBlock');
+         Route::get('get_ip_list_soc_allow', 'LayersController@getIpsListSocAllow');
          Route::post('/remove_ip_list', 'LayersController@removeIpList');
          Route::post('/edit_ip_list', 'LayersController@editIps');
       });

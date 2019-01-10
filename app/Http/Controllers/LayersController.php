@@ -68,11 +68,26 @@ class LayersController extends Controller
 		]);
 	}
 
-	public function getIpsListSoc(Request $request){
+	public function getIpsListSocBlock(Request $request){
 
 		$list = DB::table('layers_security_list')
 				->join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')
 				->where('name_object', '=', 'soc-5g-block')
+				->select('layers_security_list.*', 'fw_servers.name AS name_server')
+		    	->get();
+
+		$list = json_decode(json_encode($list), true);
+
+		return response()->json([
+			'data' => $list
+		]);
+	}
+
+	public function getIpsListSocAllow(Request $request){
+
+		$list = DB::table('layers_security_list')
+				->join('fw_servers', 'fw_servers.id', '=', 'layers_security_list.server_id')
+				->where('name_object', '=', 'soc-5g-allow')
 				->select('layers_security_list.*', 'fw_servers.name AS name_server')
 		    	->get();
 

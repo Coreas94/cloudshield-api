@@ -17,7 +17,8 @@ class Kernel extends ConsoleKernel
      Commands\dataFortisiem::class,
      //Commands\installPolicy::class,
      Commands\resendDataCheckpoint::class,
-     Commands\AutomaticThreat::class
+     Commands\AutomaticThreat::class,
+     Commands\AutomaticThreatSave::class,
    ];
 
    /**
@@ -37,7 +38,7 @@ class Kernel extends ConsoleKernel
 
       $schedule->command('fortisiem:automaticThreat')->cron('*/10 * * * *');
 
-      
+      $schedule->command('fortisiem:automaticThreatSave')->cron('*/12 * * * *');
 
    }
 }
