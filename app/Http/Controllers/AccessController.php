@@ -68,6 +68,7 @@ class AccessController extends Controller{
 		// die();
 
 		$checkpoint2 = new CheckPointFunctionController;
+		$network = new NetworkController;
 
 		$v = Validator::make($request->all(), [
    		"name_company" => "required",
@@ -176,7 +177,12 @@ class AccessController extends Controller{
 
 						//AQUI MANDO A CREAR LOS OBJETOS AL CHECKPOINT
 						$object = $firewall->createObjectsCh($dataArray, $checkpoint, $ips_assigned);
-						sleep(3);
+						sleep(2);
+
+						//AQUI MANDARÉ A CREAR LOS GROUPS
+						$group = $network->createGroup($dataArray);
+
+
 						Log::info($object);
 
 						if($object == "success"){

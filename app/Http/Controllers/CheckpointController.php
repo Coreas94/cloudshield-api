@@ -1499,7 +1499,7 @@ class CheckpointController extends Controller
 				]);
 			}else{
   				$result = json_decode($response, true);
-            Log::info("Resutlado obj 114");
+            Log::info("Resultado obj 114");
   				Log::info($result);
 
   				if(isset($result['code'])){
@@ -2135,7 +2135,7 @@ class CheckpointController extends Controller
                   //Mando a eliminar el rango de ips al checkpoint
                   $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $add_initial, $add_last, $total_ips, $flag);
 
-                  array_push($arreglo_data, $validateAdddyo);
+                  array_push($arreglo_data, $validateDelrip);
 
                   if(!empty($data_exist)){
                      foreach ($data_exist as $value) {
@@ -3563,7 +3563,6 @@ class CheckpointController extends Controller
          //return $array_tasks;
       }elseif(isset($resp['code'])){
          Log::info($resp['message']);
-
       }
       else{
          Log::info($resp['message']);

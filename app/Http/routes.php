@@ -21,6 +21,8 @@ Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
+Route::get('descarga', 'NetworkController@getDownload');
+
 Route::get('change_errors', 'Controller@changeErrorData');
 
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
@@ -82,6 +84,11 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
          //Ruta para contador de solicitudes
          Route::get('/count_request', 'RequestController@countRequest');
+
+         /**Ruta para crear grupos**/
+         Route::get('/create_group', 'NetworkController@createGroup');
+
+
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){

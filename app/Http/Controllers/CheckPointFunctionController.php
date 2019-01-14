@@ -975,4 +975,67 @@ class CheckPointFunctionController extends Controller
  		}
    }
 
+   public function createGroup($data){
+
+      if(Session::has('sid_session'))
+         $sid = Session::get('sid_session');
+      else $sid = $checkpoint->getLastSession();
+
+      if($sid){
+
+         $tag = $data['tag'];
+   		$company_id = $data['company_id'];
+         $group_name = $data['group_name'];
+         $server_id = 1;
+   		$token = $data['token'];
+
+         $curl = curl_init();
+
+         curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://172.16.3.114/web_api/add-group",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            //CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"$object_name\",\r\n  \"comments\" : \"$comment\",\r\n  \"color\" : \"$color\"\r\n}",
+            CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"$group_name\",\r\n  \"tags\" : [ \"$tag\"]\r\n}",
+            CURLOPT_HTTPHEADER => array(
+               "cache-control: no-cache",
+               "content-type: application/json",
+               "X-chkp-sid: ".$sid
+            ),
+         ));
+
+         $response = curl_exec($curl);
+         sleep(2);
+         $err = curl_error($curl);
+
+         curl_close($curl);
+
+         if($err){
+            return "error";
+         }else{
+
+            $result = json_decode($response, true);
+            Log::info("Resultado obj 114");
+            Log::info($result);
+
+            if(isset($result['code'])){
+               if($result['code'] == "err_validation_failed"){
+                  return "error";
+               }
+            }else{
+               return "success";
+            }
+         }
+      }else{
+         return "error";
+      }
+
+   }
+
 }
