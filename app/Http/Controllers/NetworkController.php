@@ -31,6 +31,10 @@ use IPTools\Range;
 use IPTools\Network;
 use IPTools\IP;
 
+use App\FwGroup;
+use App\FwRuleException;
+use App\FwLayerException;
+
 use JWTAuth;
 
 class NetworkController extends Controller{
@@ -145,49 +149,294 @@ class NetworkController extends Controller{
       }
    }
 
-   public function createNetwork(){
+   public function addThreatLayer(Request $request){
 
-   }
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   public function getDownload(Request $request) {
-      // prepare content
-      $company = Company::all();
-      $content = "Logs \n";
-      foreach ($company as $log) {
-         $content .= "ID: ".$log->id;
-         $content .= "\n";
-         $content .= "Name: ".$log->name;
-         $content .= "\n";
+      if(Session::has('sid_session')) {
+         $sid = Session::get('sid_session');
+      }else{
+         $sid = $checkpoint->getLastSession();
       }
 
-      // file name that will be used in the download
-      $fileName = "logs.txt";
+      if($sid){
+         Log::info($sid);
 
-      // use headers in order to generate the download
-      $headers = [
-         'Content-type' => 'text/plain',
-         'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
-         'Content-Length' => sizeof($content)
-      ];
+         $user = JWTAuth::toUser($request['token']);
 
-      // make a response, with the content, a 200 response code and the headers
-      return \Response::make($content, 200, $headers);
+         $company_id = $user['company_id'];
+         $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+         $company_data2 = json_decode(json_encode($company_data), true);
+
+         $tag = $company_data2[0]['tag'];
+         $name = "LAYER-CUST-".$tag;
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/add-threat-layer",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"$name\"}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			sleep(2);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+
+            $layer = new FwLayerException;
+            $layer->name = $name;
+            $layer->company_id = $company_id;
+            $layer->tag = $tag;
+            $layer->save();
+
+            if($layer){
+               return response()->json([
+               	'success' => [
+               		'message' => "Layer saved successfully",
+               		'status_code' => 200
+               	]
+               ]);
+            }else{
+               return response()->json([
+               	'error' => [
+               		'message' => "Layer not saved in DB",
+               		'status_code' => 20
+               	]
+               ]);
+            }
+         }
+      }else{
+         return response()->json([
+         	'error' => [
+         		'message' => "Session not exist",
+         		'status_code' => 20
+         	]
+         ]);
+      }
    }
+
+   public function newObjectNetwork(Request $request){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+      if(Session::has('sid_session')) {
+         $sid = Session::get('sid_session');
+      }else{
+         $sid = $checkpoint->getLastSession();
+      }
+
+      if($sid){
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/add-threat-rule",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-SD2300\", \r\n  \"rule-number\" : \"1\", \r\n \"position\" : \"top\", \r\n \"name\" : \"Rule Prueba3\", \r\n \"source\" : \"CUST-DS559-NET-GROUP-1-IPS-WHITELIST\", \r\n \"destination\" : \"CUST-DS559-NET-GROUP-1-IPS-ALLOW\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			sleep(2);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+
+            $publish = $checkpoint->publishChanges($sid);
+
+            if($publish == 'success'){
+               return "success";
+            }else{
+               return "success y publish error";
+            }
+         }
+      }else{
+         return "error";
+      }
+   }
+
+   public function addThreatRule(Request $request){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+ 		if(Session::has('sid_session')) $sid = Session::get('sid_session');
+ 		else $sid = $checkpoint->getLastSession();
+
+ 		if($sid){
+
+         $name = $request['name'];
+         $rule_position = "top";
+         $src = $request['source'];
+         $dst = $request['destination'];
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/add-threat-rule",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-SD2300\", \r\n  \"rule-number\" : \"1\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$src\", \r\n \"destination\" : \"$dst\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+
+            $publish = $checkpoint->publishChanges($sid);
+
+            if($publish == 'success'){
+
+               $rule = new FwRuleException;
+               $rule->name = $name;
+               $rule->uid = $uid;
+               $rule->company_id = $company_id;
+               $rule->tag = $tag;
+               $rule->layer_id = $layer_id;
+               $rule->save();
+
+               if($rule){
+                  return response()->json([
+                  	'error' => [
+                  		'message' => "Rule exception save successfully",
+                  		'status_code' => 200
+                  	]
+                  ]);
+               }else{
+                  return response()->json([
+                  	'error' => [
+                  		'message' => "Rule not save",
+                  		'status_code' => 20
+                  	]
+                  ]);
+               }
+
+            }else{
+               return response()->json([
+                  'error' => [
+                     'message' => "Error publish changes in checkpoint",
+                     'status_code' => 20
+                  ]
+               ]);
+            }
+         }
+      }else{
+         return response()->json([
+            'error' => [
+               'message' => "Error",
+               'status_code' => 20
+            ]
+         ]);
+      }
+   }
+
+   public function showRulesThreat(Request $request){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+ 		if(Session::has('sid_session')) $sid = Session::get('sid_session');
+ 		else $sid = $checkpoint->getLastSession();
+
+ 		if($sid){
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/show-threat-rule",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-SD2300\", \r\n  \"name\" : \"Rule Prueba3\" \r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			//sleep(3);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+            $publish = $checkpoint->publishChanges($sid);
+
+            if($publish == 'success'){
+               return "success";
+            }else{
+               return "success y publish error";
+            }
+         }
+      }else{
+         return "error";
+      }
+   }
+
+
 
 }

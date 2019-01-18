@@ -88,7 +88,12 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          /**Ruta para crear grupos**/
          Route::get('/create_group', 'NetworkController@createGroup');
 
+         /**Ruta para crear Threat Rule**/
+         Route::get('/new_threat_rule', 'NetworkController@addThreatRule');
 
+         Route::get('/new_layer', 'NetworkController@addThreatLayer');
+
+         Route::get('/show_rule', 'NetworkController@showRulesThreat');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){

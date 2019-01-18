@@ -113,7 +113,7 @@ class FortisiemController extends Controller
             }
          }
 
-         if(isset($array['srcIpAddr']) && isset($array['destIpAddr'])){
+         if( (isset($array['srcIpAddr']) && $array['srcIpAddr'] != "no-exist") && (isset($array['destIpAddr']) && $array['destIpAddr'] != "no-exist") ){
 
             $log = new LogsData;
             $log->receive_time = $format_date;

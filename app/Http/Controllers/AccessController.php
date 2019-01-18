@@ -182,7 +182,6 @@ class AccessController extends Controller{
 						//AQUI MANDARÉ A CREAR LOS GROUPS
 						$group = $network->createGroup($dataArray);
 
-
 						Log::info($object);
 
 						if($object == "success"){
