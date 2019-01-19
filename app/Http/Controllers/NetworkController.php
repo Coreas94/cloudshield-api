@@ -39,7 +39,7 @@ use JWTAuth;
 
 class NetworkController extends Controller{
 
-   public function createGroup(Request $request){
+   public function createGroup($token){
 
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
@@ -50,7 +50,7 @@ class NetworkController extends Controller{
 
       if($sid){
 
-         $user = JWTAuth::toUser($request['token']);
+         $user = JWTAuth::toUser($token);
 
          $company_id = $user['company_id'];
          $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
@@ -203,8 +203,20 @@ class NetworkController extends Controller{
 				return "error";
 			}else{
 
+            $result = json_decode($response, true);
+
+            if(isset($result['uid'])){
+               $uid = $result['uid'];
+            }else{
+               $uid = 'null';
+            }
+
+            $create2 = $checkpoint2->createThreatLayer($request['token']);
+            sleep(2);
+
             $layer = new FwLayerException;
             $layer->name = $name;
+            $layer->uid = $uid;
             $layer->company_id = $company_id;
             $layer->tag = $tag;
             $layer->save();
@@ -302,10 +314,19 @@ class NetworkController extends Controller{
 
  		if($sid){
 
+         $user = JWTAuth::toUser($request['token']);
+         $company_id = $user['company_id'];
+         $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+         $company_data2 = json_decode(json_encode($company_data), true);
+
+         $tag = $company_data2[0]['tag'];
+
          $name = $request['name'];
          $rule_position = "top";
          $src = $request['source'];
          $dst = $request['destination'];
+
+         $array = array("name" => $name, "rule_position" => $rule_position, "source" => $src, "destination" => $dst);
 
          $curl = curl_init();
 
@@ -319,7 +340,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-SD2300\", \r\n  \"rule-number\" : \"1\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$src\", \r\n \"destination\" : \"$dst\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-RM688\", \r\n  \"rule-number\" : \"1\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$src\", \r\n \"destination\" : \"$dst\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -337,16 +358,27 @@ class NetworkController extends Controller{
 				return "error";
 			}else{
 
+            $result = json_decode($response, true);
+
+            if(isset($result['uid'])){
+               $uid = $result['uid'];
+            }else{
+               $uid = 'null';
+            }
+
             $publish = $checkpoint->publishChanges($sid);
 
             if($publish == 'success'){
+
+               $create2 = $checkpoint2->createThreatRule($array);
+               sleep(2);
 
                $rule = new FwRuleException;
                $rule->name = $name;
                $rule->uid = $uid;
                $rule->company_id = $company_id;
                $rule->tag = $tag;
-               $rule->layer_id = $layer_id;
+               $rule->layer_id = 1;
                $rule->save();
 
                if($rule){
@@ -364,7 +396,6 @@ class NetworkController extends Controller{
                   	]
                   ]);
                }
-
             }else{
                return response()->json([
                   'error' => [
@@ -436,7 +467,5 @@ class NetworkController extends Controller{
          return "error";
       }
    }
-
-
 
 }

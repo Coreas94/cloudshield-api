@@ -180,7 +180,7 @@ class AccessController extends Controller{
 						sleep(2);
 
 						//AQUI MANDARÉ A CREAR LOS GROUPS
-						$group = $network->createGroup($dataArray);
+						$group = $network->createGroup($request['token']);
 
 						Log::info($object);
 
