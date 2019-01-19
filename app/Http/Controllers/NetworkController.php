@@ -383,7 +383,7 @@ class NetworkController extends Controller{
 
                if($rule){
                   return response()->json([
-                  	'error' => [
+                  	'success' => [
                   		'message' => "Rule exception save successfully",
                   		'status_code' => 200
                   	]
@@ -465,6 +465,66 @@ class NetworkController extends Controller{
          }
       }else{
          return "error";
+      }
+   }
+
+   public function getRulesException(Request $request){
+
+      $user = JWTAuth::toUser($request['token']);
+      $company_id = $user['company_id'];
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $tag = $company_data2[0]['tag'];
+
+
+      $rules = FwRuleException::where('company_id', '=', $company_id)->get();
+      $rules = json_decode(json_encode($rules), true);
+
+      if(count($rules) > 0){
+         return response()->json([
+            'success' => [
+               'data' => $rules,
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+            'error' => [
+               'data' => "No data",
+               'status_code' => 20
+            ]
+         ]);
+      }
+   }
+
+   public function getLayersException(Request $request){
+
+      $user = JWTAuth::toUser($request['token']);
+      $company_id = $user['company_id'];
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $tag = $company_data2[0]['tag'];
+
+
+      $layer = FwLayerException::where('company_id', '=', $company_id)->get();
+      $layer = json_decode(json_encode($layer), true);
+
+      if(count($layer) > 0){
+         return response()->json([
+            'success' => [
+               'data' => $layer,
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+            'error' => [
+               'data' => "No data",
+               'status_code' => 20
+            ]
+         ]);
       }
    }
 

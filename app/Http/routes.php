@@ -94,6 +94,10 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/new_layer', 'NetworkController@addThreatLayer');
 
          Route::get('/show_rule', 'NetworkController@showRulesThreat');
+
+         Route::get('/get_rules_exception', 'NetworkController@getRulesException');
+
+         Route::get('/get_layers_exception', 'NetworkController@getLayersException');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){
