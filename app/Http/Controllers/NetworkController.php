@@ -305,7 +305,7 @@ class NetworkController extends Controller{
    }
 
    public function addThreatRule(Request $request){
-
+      Log::info($request);
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
 
@@ -318,15 +318,20 @@ class NetworkController extends Controller{
          $company_id = $user['company_id'];
          $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
          $company_data2 = json_decode(json_encode($company_data), true);
-
          $tag = $company_data2[0]['tag'];
 
+         $layer_data = FwLayerException::where('company_id', '=', $company_id)->get();
+         $layer = json_decode(json_encode($layer_data), true);
+         $layer_name = $layer[0]['name'];
+         $layer_id = $layer[0]['id'];
+
          $name = $request['name'];
-         $rule_position = "top";
+         $rule_position = "bottom";
          $src = $request['source'];
          $dst = $request['destination'];
+         $action = "Inactive";
 
-         $array = array("name" => $name, "rule_position" => $rule_position, "source" => $src, "destination" => $dst);
+         $array = array("name" => $name, "rule_position" => $rule_position, "source" => $src, "destination" => $dst, "layer" => $layer_name);
 
          $curl = curl_init();
 
@@ -340,7 +345,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-RM688\", \r\n  \"rule-number\" : \"1\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$src\", \r\n \"destination\" : \"$dst\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"$layer_name\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$src\", \r\n \"destination\" : \"$dst\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -349,66 +354,90 @@ class NetworkController extends Controller{
 			));
 
 			$response = curl_exec($curl);
+         Log::info("respuesta 114");
 			Log::info(print_r($response, true));
 			$err = curl_error($curl);
 
 			curl_close($curl);
 
 			if($err){
-				return "error";
+            return response()->json([
+					'error' => [
+						'message' => $err,
+						'status_code' => 20
+					]
+				]);
 			}else{
 
             $result = json_decode($response, true);
 
-            if(isset($result['uid'])){
-               $uid = $result['uid'];
-            }else{
-               $uid = 'null';
-            }
-
-            $publish = $checkpoint->publishChanges($sid);
-
-            if($publish == 'success'){
-
-               $create2 = $checkpoint2->createThreatRule($array);
-               sleep(2);
-
-               $rule = new FwRuleException;
-               $rule->name = $name;
-               $rule->uid = $uid;
-               $rule->company_id = $company_id;
-               $rule->tag = $tag;
-               $rule->layer_id = 1;
-               $rule->save();
-
-               if($rule){
-                  return response()->json([
-                  	'success' => [
-                  		'message' => "Rule exception save successfully",
-                  		'status_code' => 200
-                  	]
-                  ]);
-               }else{
-                  return response()->json([
-                  	'error' => [
-                  		'message' => "Rule not save",
-                  		'status_code' => 20
-                  	]
-                  ]);
-               }
-            }else{
+            if(isset($result['code']) && $result['code'] == "generic_err_object_not_found"){
                return response()->json([
                   'error' => [
-                     'message' => "Error publish changes in checkpoint",
+                     'message' => $result['message'],
                      'status_code' => 20
                   ]
                ]);
+            }else{
+               if(isset($result['uid'])){
+                  $uid = $result['uid'];
+
+                  $publish = $checkpoint->publishChanges($sid);
+
+                  if($publish == 'success'){
+
+                     $create2 = $checkpoint2->createThreatRule($array);
+                     sleep(2);
+
+                     $rule = new FwRuleException;
+                     $rule->name = $name;
+                     $rule->uid = $uid;
+                     $rule->company_id = $company_id;
+                     $rule->tag = $tag;
+                     $rule->action = "Inactive";
+                     $rule->layer_id = $layer_id;
+                     $rule->save();
+
+                     if($rule){
+                        return response()->json([
+                        	'success' => [
+                        		'message' => "Rule exception save successfully",
+                        		'status_code' => 200
+                        	]
+                        ]);
+                     }else{
+                        return response()->json([
+                        	'error' => [
+                        		'message' => "Rule not save",
+                        		'status_code' => 20
+                        	]
+                        ]);
+                     }
+                  }else{
+                     return response()->json([
+                        'error' => [
+                           'message' => "Error publish changes in checkpoint",
+                           'status_code' => 20
+                        ]
+                     ]);
+                  }
+               }else{
+                  $uid = 'null';
+                  return response()->json([
+                     'error' => [
+                        'message' => "No se guardó",
+                        'status_code' => 20
+                     ]
+                  ]);
+               }
             }
+
+
          }
       }else{
          return response()->json([
             'error' => [
-               'message' => "Error",
+               'message' => "Error en la conexión con checkpoint",
                'status_code' => 20
             ]
          ]);
@@ -437,7 +466,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-SD2300\", \r\n  \"name\" : \"Rule Prueba3\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-RM688\", \r\n  \"name\" : \"Rule Prueba3\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -504,9 +533,7 @@ class NetworkController extends Controller{
       $company_id = $user['company_id'];
       $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
       $company_data2 = json_decode(json_encode($company_data), true);
-
       $tag = $company_data2[0]['tag'];
-
 
       $layer = FwLayerException::where('company_id', '=', $company_id)->get();
       $layer = json_decode(json_encode($layer), true);
@@ -522,6 +549,90 @@ class NetworkController extends Controller{
          return response()->json([
             'error' => [
                'data' => "No data",
+               'status_code' => 20
+            ]
+         ]);
+      }
+   }
+
+   public function removeThreatException(Request $request){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+ 		if(Session::has('sid_session')) $sid = Session::get('sid_session');
+ 		else $sid = $checkpoint->getLastSession();
+
+ 		if($sid){
+
+         $id_rule = $request['id'];
+         $name_rule = $request['name_rule'];
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/delete-threat-exception",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\" \r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			//sleep(3);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+            return response()->json([
+					'error' => [
+						'message' => $err,
+						'status_code' => 20
+					]
+				]);
+			}else{
+            $publish = $checkpoint->publishChanges($sid);
+
+            if($publish == 'success'){
+
+               $remove2 = $checkpoint2->removeThreatRule2($name_rule);
+               sleep(2);
+
+               $delete = FwRuleException::where('id', $id_rule)->delete();
+
+               if($delete){
+                  return response()->json([
+                     'success' => [
+                        'message' => 'Threat Exception Deleted',
+                        'status_code' => 200
+                     ]
+                  ]);
+               }
+            }else{
+               return response()->json([
+                  'success' => [
+                     'message' => 'Threat Exception Deleted',
+                     'status_code' => 200
+                  ]
+               ]);
+            }
+         }
+      }else{
+         return response()->json([
+            'error' => [
+               'data' => "Error connection with checkpoint",
                'status_code' => 20
             ]
          ]);

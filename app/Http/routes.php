@@ -98,6 +98,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_rules_exception', 'NetworkController@getRulesException');
 
          Route::get('/get_layers_exception', 'NetworkController@getLayersException');
+
+         Route::post('/delete_exception', 'NetworkController@removeThreatException');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){

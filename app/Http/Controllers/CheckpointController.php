@@ -1113,6 +1113,7 @@ class CheckpointController extends Controller
  			$company_data = DB::table('fw_companies')->where('id', $company_id)->get();
  			$company_data2 = json_decode(json_encode($company_data), true);
  			$tag = $company_data2[0]['tag'];
+         $token_company = $company_data2[0]['token_company'];
 
          $userLog = JWTAuth::toUser($request['token']);
          $api_token = $userLog['api_token'];
@@ -1158,9 +1159,19 @@ class CheckpointController extends Controller
  				if(isset($result['code'])){
  					Log::info($result['code']);
  					Log::info("entra al if de result code");
- 					if($result['code'] == "err_validation_failed"){
+
+               if($result['code'] == "err_validation_failed"){
+                  if(isset($result['errors'])){
+                     foreach($result['errors'] as $val){
+                        $msg_error = $val['message'];
+                     }
+                  }else{
+                     $msg_error = "Error desconocido";
+                  }
+
  						return response()->json([
  							'error' => [
+                        'msg_error' => $msg_error,
  								'message' => $result['message'],
  								'status_code' => 20
  							]
@@ -1376,7 +1387,7 @@ class CheckpointController extends Controller
 
        				$value['short_name'] = 'MY CLOUDSHIELD '.$complement_name;
        				array_push($list_obj, $value);
-               }elseif ( (strpos($value['name'], 'checkpoint-block') !== false) || (strpos($value['name'], 'soc-5g-block') !== false) ) {
+               }elseif ( (strpos($value['name'], 'checkpoint-block') !== false) || (strpos($value['name'], 'soc-5g-block') !== false) || (strpos($value['name'], 'soc-5g-allow') !== false) ) {
                   unset($obj[$key]);
                }else{
                   $name = explode('-', $value['name']);
