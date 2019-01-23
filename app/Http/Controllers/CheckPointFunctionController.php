@@ -1195,4 +1195,47 @@ class CheckPointFunctionController extends Controller
       }
    }
 
+   public function createObjectNetwork($type, $data){
+
+      if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
+ 		else $sid = $this->getLastSession();
+
+ 		if($sid){
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.118/web_api/".$type,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => $data,
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+            return "success";
+         }
+      }else{
+         return "error checkpoint";
+      }
+   }
+
 }

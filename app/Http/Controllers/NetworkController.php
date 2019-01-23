@@ -247,63 +247,6 @@ class NetworkController extends Controller{
       }
    }
 
-   public function newObjectNetwork(Request $request){
-
-      $checkpoint = new CheckpointController;
-      $checkpoint2 = new CheckPointFunctionController;
-
-      if(Session::has('sid_session')) {
-         $sid = Session::get('sid_session');
-      }else{
-         $sid = $checkpoint->getLastSession();
-      }
-
-      if($sid){
-
-         $curl = curl_init();
-
-			curl_setopt_array($curl, array(
-				CURLOPT_URL => "https://172.16.3.114/web_api/add-threat-rule",
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_ENCODING => "",
-				CURLOPT_MAXREDIRS => 10,
-				CURLOPT_TIMEOUT => 30,
-				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-				CURLOPT_SSL_VERIFYPEER => false,
-				CURLOPT_SSL_VERIFYHOST => false,
-				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-SD2300\", \r\n  \"rule-number\" : \"1\", \r\n \"position\" : \"top\", \r\n \"name\" : \"Rule Prueba3\", \r\n \"source\" : \"CUST-DS559-NET-GROUP-1-IPS-WHITELIST\", \r\n \"destination\" : \"CUST-DS559-NET-GROUP-1-IPS-ALLOW\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
-				CURLOPT_HTTPHEADER => array(
-					"cache-control: no-cache",
-					"content-type: application/json",
-					"X-chkp-sid: ".$sid
-				),
-			));
-
-			$response = curl_exec($curl);
-			Log::info(print_r($response, true));
-			sleep(2);
-			$err = curl_error($curl);
-
-			curl_close($curl);
-
-			if($err){
-				return "error";
-			}else{
-
-            $publish = $checkpoint->publishChanges($sid);
-
-            if($publish == 'success'){
-               return "success";
-            }else{
-               return "success y publish error";
-            }
-         }
-      }else{
-         return "error";
-      }
-   }
-
    public function addThreatRule(Request $request){
       Log::info($request);
       $checkpoint = new CheckpointController;
@@ -327,8 +270,8 @@ class NetworkController extends Controller{
 
          $name = $request['name'];
          $rule_position = "bottom";
-         $src = $request['source'];
-         $dst = $request['destination'];
+         $src = "Any";
+         $dst = "Any";
          $action = "Inactive";
 
          $array = array("name" => $name, "rule_position" => $rule_position, "source" => $src, "destination" => $dst, "layer" => $layer_name);
@@ -389,6 +332,10 @@ class NetworkController extends Controller{
                      $create2 = $checkpoint2->createThreatRule($array);
                      sleep(2);
 
+                     $array['rule_uid'] = $uid;
+
+                     $addException = $this->addThreatException($array);
+
                      $rule = new FwRuleException;
                      $rule->name = $name;
                      $rule->uid = $uid;
@@ -431,8 +378,6 @@ class NetworkController extends Controller{
                   ]);
                }
             }
-
-
          }
       }else{
          return response()->json([
@@ -466,7 +411,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-RM688\", \r\n  \"name\" : \"Rule Prueba3\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-RM688\", \r\n  \"uid\" : \"b413e51e-6992-4511-ab81-ebc400bab852\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -555,7 +500,7 @@ class NetworkController extends Controller{
       }
    }
 
-   public function removeThreatException(Request $request){
+   public function removeThreatRule(Request $request){
 
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
@@ -638,5 +583,458 @@ class NetworkController extends Controller{
          ]);
       }
    }
+
+   public function setThreatException(Request $request){
+
+      Log::info($request);
+      die();
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+      if(Session::has('sid_session')) $sid = Session::get('sid_session');
+      else $sid = $checkpoint->getLastSession();
+
+      if($sid){
+
+         $type_change = $request['type'];
+         $value_change = $request['new_value'];
+         $old_name = $request['old_name'];
+         $id_rule = $request['id_rule'];
+         $uid = $request['uid'];
+
+         $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $value_change, "uid" => $uid);
+
+      	$curl = curl_init();
+
+      	curl_setopt_array($curl, array(
+      		CURLOPT_URL => "https://172.16.3.114/web_api/set-threat-exception",
+      		CURLOPT_RETURNTRANSFER => true,
+      		CURLOPT_ENCODING => "",
+      		CURLOPT_MAXREDIRS => 10,
+      		CURLOPT_TIMEOUT => 30,
+      		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      		CURLOPT_SSL_VERIFYPEER => false,
+      		CURLOPT_SSL_VERIFYHOST => false,
+      		CURLOPT_CUSTOMREQUEST => "POST",
+      		CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$old_name\", \r\n \"$type_change\" : \"$value_change\" \r\n}",
+      		CURLOPT_HTTPHEADER => array(
+      			"cache-control: no-cache",
+      			"content-type: application/json",
+      			"X-chkp-sid: ".$sid
+      		),
+      	));
+
+      	$response = curl_exec($curl);
+         Log::info("respuesta 114");
+      	Log::info(print_r($response, true));
+      	$err = curl_error($curl);
+
+      	curl_close($curl);
+
+      	if($err){
+            return response()->json([
+      			'error' => [
+      				'message' => $err,
+      				'status_code' => 20
+      			]
+      		]);
+      	}else{
+
+      		$result = json_decode($response, true);
+
+            if($type_change == "name"){
+               $rule = FwRuleException::find($id_rule);
+               $rule->name = $value_change;
+               $rule->save();
+            }
+         }
+      }else{
+         return response()->json([
+            'error' => [
+               'message' => "Error en la conexión con checkpoint",
+               'status_code' => 20
+            ]
+         ]);
+      }
+   }
+
+   public function addThreatException($data){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+   	if(Session::has('sid_session')) $sid = Session::get('sid_session');
+   	else $sid = $checkpoint->getLastSession();
+
+      if($sid){
+
+         $layer = $data['layer'];
+         $rule_position = $data['rule_position'];
+         $rule_uid = $data['rule_uid'];
+         $name = $data['name'];
+         $source = $data['source'];
+         $destination = $data['destination'];
+
+         $curl = curl_init();
+
+         curl_setopt_array($curl, array(
+         	CURLOPT_URL => "https://172.16.3.114/web_api/add-threat-exception",
+         	CURLOPT_RETURNTRANSFER => true,
+         	CURLOPT_ENCODING => "",
+         	CURLOPT_MAXREDIRS => 10,
+         	CURLOPT_TIMEOUT => 30,
+         	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+         	CURLOPT_SSL_VERIFYPEER => false,
+         	CURLOPT_SSL_VERIFYHOST => false,
+         	CURLOPT_CUSTOMREQUEST => "POST",
+         	CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"$layer\", \r\n \"position\" : \"$rule_position\", \r\n \"rule-uid\" : \"$rule_uid\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$source\", \r\n \"destination\" : \"$destination\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+         	CURLOPT_HTTPHEADER => array(
+         		"cache-control: no-cache",
+         		"content-type: application/json",
+         		"X-chkp-sid: ".$sid
+         	),
+         ));
+
+         $response = curl_exec($curl);
+         Log::info("respuesta exception");
+         Log::info(print_r($response, true));
+         $err = curl_error($curl);
+
+         curl_close($curl);
+
+         if($err){
+            return "error";
+         }else{
+            return "success";
+         }
+      }else{
+         return "error checkpoint";
+      }
+   }
+
+   public function showRules(){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+      if(Session::has('sid_session')) $sid = Session::get('sid_session');
+ 		else $sid = $checkpoint->getLastSession();
+
+ 		if($sid){
+         $data = "{\r\n  \"name\" : \"Standard Threat Prevention\", \r\n  \"rule-uid\" : \"b413e51e-6992-4511-ab81-ebc400bab852\" \r\n}";
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/show-threat-rule",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => $data,
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			//sleep(3);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+            $publish = $checkpoint->publishChanges($sid);
+
+            if($publish == 'success'){
+               return "success";
+            }else{
+               return "success y publish error";
+            }
+         }
+      }else{
+         return "error";
+      }
+   }
+
+
+   public function showLayers(){
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+      if(Session::has('sid_session')) $sid = Session::get('sid_session');
+ 		else $sid = $checkpoint->getLastSession();
+
+ 		if($sid){
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/show-threat-layers",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => "{}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			//sleep(3);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+            return "success";
+         }
+      }else{
+         return "error";
+      }
+   }
+
+   public function newObjectNetwork(Request $request){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+      if(Session::has('sid_session')) {
+         $sid = Session::get('sid_session');
+      }else{
+         $sid = $checkpoint->getLastSession();
+      }
+
+      if($sid){
+         $user = JWTAuth::toUser($request['token']);
+
+         $company_id = $user['company_id'];
+         $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+         $company_data2 = json_decode(json_encode($company_data), true);
+         $company_id = $company_data2[0]['id'];
+         $tag = $company_data2[0]['tag'];
+         $token_company = $company_data2[0]['token_company'];
+
+         $server_ch = 1; //Es el id del checkpoint
+
+         $type_object = $request['type_object'];
+
+         if($type_object == "host"){
+            $type = "add-host";
+            $name_object = $request['name'];
+            $subnet = $request['subnet'];
+            $data = "{\r\n  \"name\" : \"$name_object\", \r\n  \"ip-address\" : \"$subnet\", \r\n  \"tags\" : [\"$tag\"]\r\n}";
+            $object_type_id = 6;
+
+         }else{
+            $type = "add-network";
+            $name_object = $request['name'];
+            $subnet = $request['subnet'];
+            $subnet_mask = $request['subnet_mask'];
+            $data = "{\r\n  \"name\" : \"$name_object\", \r\n  \"subnet\" : \"$subnet\", \r\n  \"subnet-mask\" : \"$subnet_mask\", \r\n  \"tags\" : [\"$tag\"]\r\n}";
+            $object_type_id = 5;
+         }
+
+         $curl = curl_init();
+
+         curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://172.16.3.114/web_api/".$type,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_HTTPHEADER => array(
+               "cache-control: no-cache",
+               "content-type: application/json",
+               "X-chkp-sid: ".$sid
+            ),
+         ));
+
+			$response = curl_exec($curl);
+			Log::info(print_r($response, true));
+			sleep(2);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+            return response()->json([
+            	'error' => [
+            		'message' => $err,
+            		'status_code' => 20
+            	]
+            ]);
+			}else{
+
+            $result = json_decode($response, true);
+ 				Log::info($result);
+
+ 				if(isset($result['code'])){
+               if($result['code'] == "err_validation_failed"){
+                  if(isset($result['errors'])){
+                     foreach($result['errors'] as $val){
+                        $msg_error = $val['message'];
+                     }
+                  }else{
+                     $msg_error = "Error! Verifique la máscara e IP ingresada";
+                  }
+
+ 						return response()->json([
+ 							'error' => [
+                        'msg_error' => $msg_error,
+ 								'message' => $result['message'],
+ 								'status_code' => 20
+ 							]
+ 						]);
+ 					}elseif ($result['code'] == "generic_err_invalid_parameter") {
+ 					   $msg_error = $result['message'];
+
+                  return response()->json([
+ 							'error' => [
+                        'msg_error' => $msg_error,
+ 								'message' => $result['message'],
+ 								'status_code' => 20
+ 							]
+ 						]);
+ 					}
+ 				}else{
+
+               $publish = $checkpoint->publishChanges($sid);
+
+     				if($publish == 'success'){
+                  $object2 = $checkpoint2->createObjectNetwork($type, $data);
+                  sleep(2);
+
+                  $uid = $result['uid'];
+
+   					$object_new = New FwObject;
+   					$object_new->name = $name_object;
+   					$object_new->uid = $uid;
+   					$object_new->type_object_id = $object_type_id;
+   					$object_new->server_id = $server_ch;
+   					$object_new->company_id = $company_id;
+   					$object_new->tag = $tag;
+   					$object_new->editable = 1;
+
+   					$object_new->save();
+
+                  if($object_new->id){
+                     Log::info("Se creó el objeto checkpoint");
+                     $object_id = $object_new->id;
+                     $type_address_id = 7;//Pertenece a rango de ip para checkpoint
+
+                     $addr_obj = new AddressObject;
+                     $addr_obj->ip_initial = $subnet;
+                     $addr_obj->ip_last = $subnet;
+                     $addr_obj->object_id = $object_id;
+                     $addr_obj->type_address_id = $type_address_id;
+                     $addr_obj->save();
+
+                     if($addr_obj){
+                        return response()->json([
+                           'success' => [
+                              'message' => "Objeto y subnet creado exitosamente ",
+                              'status_code' => 200
+                           ]
+                        ]);
+                     }else{
+                        return response()->json([
+                           'success' => [
+                              'message' => "Objeto creado exitosamente",
+                              'status_code' => 200
+                           ]
+                        ]);
+                     }
+                  }else{
+                     Log::info("Error al guardar obj en la bdd!!");
+                     return response()->json([
+                        'error' => [
+                           'message' => "El objeto no pudo ser creado",
+                           'status_code' => 20
+                        ]
+                     ]);
+                  }
+               }else{
+                  return response()->json([
+                     'error' => [
+                        'message' => "El objeto no pudo ser publicado",
+                        'status_code' => 20
+                     ]
+                  ]);
+               }
+            }
+         }
+      }else{
+         return response()->json([
+            'error' => [
+               'message' => "Error en la conexión con checkpoint",
+               'status_code' => 20
+            ]
+         ]);
+      }
+   }
+
+   public function getObjectsNetwork(Request $request){
+
+      $user = JWTAuth::toUser($request['token']);
+ 		$company_id = $user['company_id'];
+ 		$role_user = $user->roles->first()->name;
+
+ 		if($role_user == "superadmin"){
+         //Log::info("super");
+ 			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
+ 				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
+ 				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
+ 				->where('fw_objects.server_id', 1)
+            ->where('fw_objects.type_object_id', 5)
+ 				->orWhere('fw_objects.type_object_id', 6)
+ 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+ 				->get();
+ 		}else{
+         //Log::info("else");
+ 			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
+ 				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
+ 				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
+ 				->where('company_id', $company_id)
+ 				->where('fw_objects.server_id', 1)
+            ->where('fw_objects.type_object_id', 5)
+ 				->orWhere('fw_objects.type_object_id', 6)
+ 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+ 				->get();
+ 		}
+
+      $list_obj = json_decode(json_encode($obj), true);
+
+ 		return response()->json([
+ 			'data' => $list_obj
+ 		]);
+   }
+
+   
 
 }

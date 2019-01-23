@@ -100,6 +100,16 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_layers_exception', 'NetworkController@getLayersException');
 
          Route::post('/delete_exception', 'NetworkController@removeThreatException');
+
+         Route::post('/set_exception', 'NetworkController@setThreatException');
+
+         Route::get('/get_layers', 'NetworkController@showLayers');
+
+         Route::get('/get_rules', 'NetworkController@showRules');
+
+         Route::post('/new_object_network', 'NetworkController@newObjectNetwork');
+
+         Route::get('/get_objects_network', 'NetworkController@getObjectsNetwork');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){
@@ -139,8 +149,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_objects_server', 'LayersController@getObjectByServers');
          Route::post('/add_ip_list', 'LayersController@addIpList');
          Route::get('/get_ip_list', 'LayersController@getIpsList');
-         Route::get('get_ip_list_soc_block', 'LayersController@getIpsListSocBlock');
-         Route::get('get_ip_list_soc_allow', 'LayersController@getIpsListSocAllow');
+         Route::get('/get_ip_list_soc_block', 'LayersController@getIpsListSocBlock');
+         Route::get('/get_ip_list_soc_allow', 'LayersController@getIpsListSocAllow');
          Route::post('/remove_ip_list', 'LayersController@removeIpList');
          Route::post('/edit_ip_list', 'LayersController@editIps');
       });

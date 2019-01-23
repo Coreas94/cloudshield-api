@@ -1046,6 +1046,7 @@ class CheckpointController extends Controller
       });
 
  		$resp = json_decode($this->output, true);
+      Log::info($resp);
 
  		if(isset($resp['task-id'])){
  			$task = $resp['task-id'];
@@ -1063,7 +1064,7 @@ class CheckpointController extends Controller
     					}
     				}
             }else{
-               return "error";
+               return "error task details";
             }
  			}
 
@@ -1088,7 +1089,7 @@ class CheckpointController extends Controller
  		}
  		else{
  			//Log::info($resp['message']);
- 			return "error";
+ 			return "error, sin respuesta";
  		}
    }
 
