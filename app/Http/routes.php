@@ -101,7 +101,7 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
          Route::post('/delete_exception', 'NetworkController@removeThreatRule');
 
-         Route::post('/set_exception', 'NetworkController@setThreatException');
+         Route::post('/set_rule_exception', 'NetworkController@setThreatException');
 
          Route::get('/get_layers', 'NetworkController@showLayers');
 

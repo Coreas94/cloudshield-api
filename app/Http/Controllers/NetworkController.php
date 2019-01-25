@@ -490,9 +490,10 @@ class NetworkController extends Controller{
 
       $tag = $company_data2[0]['tag'];
 
-      $rules = FwRuleException::where('company_id', '=', $company_id)
+      $rules = FwRuleException::where('fw_rule_exception.company_id', '=', $company_id)
                ->join('fw_rules_exception_objects', 'fw_rule_exception.id', '=', 'fw_rules_exception_objects.rule_id')
-               ->select('fw_rule_exception.*', 'fw_rules_exception_objects.src_object', 'fw_rules_exception_objects.dst_object')
+               ->join('fw_layer_exception', 'fw_rule_exception.layer_id', '=', 'fw_layer_exception.id')
+               ->select('fw_rule_exception.*', 'fw_rules_exception_objects.src_object', 'fw_rules_exception_objects.dst_object', 'fw_layer_exception.name AS layer_name')
                ->get();
 
       $rules = json_decode(json_encode($rules), true);
@@ -629,7 +630,6 @@ class NetworkController extends Controller{
    public function setThreatException(Request $request){
 
       Log::info($request);
-      die();
 
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
@@ -644,23 +644,28 @@ class NetworkController extends Controller{
          $old_name = $request['old_name'];
          $id_rule = $request['id_rule'];
          $uid = $request['uid'];
+         $layer = $request['layer_name'];
 
          if($type_change == "source" || $type_change == "destination"){
             $data_field = "";
+            $change = "";
 				foreach($value_change as $row){
 					$data_field .= "\"$row\",";
+               $change = $row;
 				}
 
 				$data_field2 = substr($data_field, 0, -1);
 				$data_field2 = "[".$data_field2."]";
          }
 
-         $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $value_change, "uid" => $uid);
+         Log::info($data_field2);
+
+         $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $value_change, "uid" => $uid, "layer_name" => $layer);
 
       	$curl = curl_init();
 
       	curl_setopt_array($curl, array(
-      		CURLOPT_URL => "https://172.16.3.114/web_api/set-threat-exception",
+      		CURLOPT_URL => "https://172.16.3.114/web_api/set-threat-rule",
       		CURLOPT_RETURNTRANSFER => true,
       		CURLOPT_ENCODING => "",
       		CURLOPT_MAXREDIRS => 10,
@@ -669,7 +674,7 @@ class NetworkController extends Controller{
       		CURLOPT_SSL_VERIFYPEER => false,
       		CURLOPT_SSL_VERIFYHOST => false,
       		CURLOPT_CUSTOMREQUEST => "POST",
-      		CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$old_name\", \r\n \"$type_change\" : \"$value_change\" \r\n}",
+      		CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$old_name\", \r\n \"$type_change\" : $data_field2, \r\n \"layer\" : \"$layer\" \r\n}",
       		CURLOPT_HTTPHEADER => array(
       			"cache-control: no-cache",
       			"content-type: application/json",
@@ -693,12 +698,41 @@ class NetworkController extends Controller{
       		]);
       	}else{
 
-      		$result = json_decode($response, true);
+            $publish = $checkpoint->publishChanges($sid);
 
-            if($type_change == "name"){
-               $rule = FwRuleException::find($id_rule);
-               $rule->name = $value_change;
-               $rule->save();
+            if($publish == 'success'){
+
+         		$result = json_decode($response, true);
+               $objects = RulesExceptionObjects::where('rule_id', '=', $id_rule)->get();
+               $objects2 = json_decode(json_encode($objects), true);
+    				$id_object = $objects2[0]['id'];
+
+               if($type_change == "name"){
+                  $rule = FwRuleException::find($id_rule);
+                  $rule->name = $value_change;
+                  $rule->save();
+               }elseif($type_change == "source"){
+                  $src = RulesExceptionObjects::where('id', $id_object)
+                        ->update(['src_object' => $change]);
+
+               }elseif($type_change == "destination"){
+                  $dst = RulesExceptionObjects::where('id', $id_object)
+                        ->update(['dst_object' => $change]);
+               }
+
+               return response()->json([
+                  'success' => [
+                     'message' => "Datos actualizados",
+                     'status_code' => 200
+                  ]
+               ]);
+            }else{
+               return response()->json([
+                  'success' => [
+                     'message' => "Datos actualizados",
+                     'status_code' => 200
+                  ]
+               ]);
             }
          }
       }else{
