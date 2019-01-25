@@ -1101,8 +1101,6 @@ class CheckPointFunctionController extends Controller
       }
    }
 
-
-
    public function createThreatRule($data){
 
       if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
@@ -1128,7 +1126,7 @@ class CheckPointFunctionController extends Controller
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"$layer_name\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$src\", \r\n \"destination\" : \"$dst\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"$layer_name\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : $src, \r\n \"destination\" : $dst, \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",

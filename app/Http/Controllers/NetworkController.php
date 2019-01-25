@@ -34,6 +34,7 @@ use IPTools\IP;
 use App\FwGroup;
 use App\FwRuleException;
 use App\FwLayerException;
+use App\RulesExceptionObjects;
 
 use JWTAuth;
 
@@ -270,11 +271,31 @@ class NetworkController extends Controller{
 
          $name = $request['name'];
          $rule_position = "bottom";
-         $src = "Any";
-         $dst = "Any";
+         $src = $request['source'];
+         $dst = $request['destination'];
          $action = "Inactive";
 
-         $array = array("name" => $name, "rule_position" => $rule_position, "source" => $src, "destination" => $dst, "layer" => $layer_name);
+         $data_src = "";
+         $data_dst = "";
+         $src1 = "";
+         $dst1 = "";
+         foreach($src as $row){
+            $data_src .= "\"$row\",";
+            $src1 = $row;
+         }
+
+         $data_src2 = substr($data_src, 0, -1);
+         $data_src2 = "[".$data_src2."]";
+
+         foreach($dst as $row){
+            $data_dst .= "\"$row\",";
+            $dst1 = $row;
+         }
+
+         $data_dst2 = substr($data_dst, 0, -1);
+         $data_dst2 = "[".$data_dst2."]";
+
+         $array = array("name" => $name, "rule_position" => $rule_position, "source" => $data_src2, "destination" => $data_dst2, "layer" => $layer_name);
 
          $curl = curl_init();
 
@@ -288,7 +309,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"$layer_name\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : \"$src\", \r\n \"destination\" : \"$dst\", \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"$layer_name\", \r\n \"position\" : \"$rule_position\", \r\n \"name\" : \"$name\", \r\n \"source\" : $data_src2, \r\n \"destination\" : $data_dst2, \r\n  \"track\" : \"None\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -346,12 +367,29 @@ class NetworkController extends Controller{
                      $rule->save();
 
                      if($rule){
-                        return response()->json([
-                        	'success' => [
-                        		'message' => "Rule exception save successfully",
-                        		'status_code' => 200
-                        	]
-                        ]);
+
+                        if($rule->id){
+
+                        	$rule_objects = new RulesExceptionObjects;
+                        	$rule_objects->rule_id = $rule->id;
+                        	$rule_objects->src_object = $src1;
+                        	$rule_objects->dst_object = $dst1;
+                        	$rule_objects->save();
+
+                           return response()->json([
+                           	'success' => [
+                           		'message' => "Rule exception save successfully",
+                           		'status_code' => 200
+                           	]
+                           ]);
+                        }else{
+                           return response()->json([
+                           	'success' => [
+                           		'message' => "Rule exception save successfully without objects",
+                           		'status_code' => 200
+                           	]
+                           ]);
+                        }
                      }else{
                         return response()->json([
                         	'error' => [
@@ -411,7 +449,8 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"LAYER-CUST-RM688\", \r\n  \"uid\" : \"b413e51e-6992-4511-ab81-ebc400bab852\" \r\n}",
+				// CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"Standard Threat Prevention\" \r\n}",
+            CURLOPT_POSTFIELDS => "{\r\n  \"uid\" : \"2166edfd-948a-4ae5-8e1f-47574cdd2146\", \"layer\" : \"LAYER-CUST-RM688\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -451,8 +490,11 @@ class NetworkController extends Controller{
 
       $tag = $company_data2[0]['tag'];
 
+      $rules = FwRuleException::where('company_id', '=', $company_id)
+               ->join('fw_rules_exception_objects', 'fw_rule_exception.id', '=', 'fw_rules_exception_objects.rule_id')
+               ->select('fw_rule_exception.*', 'fw_rules_exception_objects.src_object', 'fw_rules_exception_objects.dst_object')
+               ->get();
 
-      $rules = FwRuleException::where('company_id', '=', $company_id)->get();
       $rules = json_decode(json_encode($rules), true);
 
       if(count($rules) > 0){
@@ -603,6 +645,16 @@ class NetworkController extends Controller{
          $id_rule = $request['id_rule'];
          $uid = $request['uid'];
 
+         if($type_change == "source" || $type_change == "destination"){
+            $data_field = "";
+				foreach($value_change as $row){
+					$data_field .= "\"$row\",";
+				}
+
+				$data_field2 = substr($data_field, 0, -1);
+				$data_field2 = "[".$data_field2."]";
+         }
+
          $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $value_change, "uid" => $uid);
 
       	$curl = curl_init();
@@ -722,7 +774,7 @@ class NetworkController extends Controller{
  		else $sid = $checkpoint->getLastSession();
 
  		if($sid){
-         $data = "{\r\n  \"name\" : \"Standard Threat Prevention\", \r\n  \"rule-uid\" : \"b413e51e-6992-4511-ab81-ebc400bab852\" \r\n}";
+         $data = "{\r\n \"name\" : \"Standard Threat Prevention\", \r\n  \"rule-uid\" : \"b413e51e-6992-4511-ab81-ebc400bab852\" \r\n}";
 
          $curl = curl_init();
 
@@ -1035,6 +1087,6 @@ class NetworkController extends Controller{
  		]);
    }
 
-   
+
 
 }

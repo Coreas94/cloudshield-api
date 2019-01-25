@@ -614,6 +614,9 @@ class CheckpointController extends Controller
 				$data_field2 = "[".$data_field2."]";
 			}
 
+         Log::info("DATA FIELD 2");
+         Log::info($data_field2);
+
          $curl = curl_init();
 
 			curl_setopt_array($curl, array(
@@ -1713,8 +1716,10 @@ class CheckpointController extends Controller
 
  							if($delete_adds){
 
- 								$delete_obj_db = DB::connection('checkpoint')->delete("DELETE FROM object_list WHERE id=".$id_obj_list);
- 								$delete_add_db = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE object_id=".$id_obj_list);
+                        if(isset($id_obj_list)){
+                           $delete_obj_db = DB::connection('checkpoint')->delete("DELETE FROM object_list WHERE id=".$id_obj_list);
+    								$delete_add_db = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE object_id=".$id_obj_list);
+                        }
 
  								return response()->json([
  									'success' => [
