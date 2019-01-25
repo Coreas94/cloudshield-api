@@ -853,7 +853,6 @@ class NetworkController extends Controller{
       }
    }
 
-
    public function showLayers(){
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
