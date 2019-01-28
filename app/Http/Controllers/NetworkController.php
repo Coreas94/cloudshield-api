@@ -279,6 +279,7 @@ class NetworkController extends Controller{
          $data_dst = "";
          $src1 = "";
          $dst1 = "";
+
          foreach($src as $row){
             $data_src .= "\"$row\",";
             $src1 = $row;
@@ -1119,7 +1120,5 @@ class NetworkController extends Controller{
  			'data' => $list_obj
  		]);
    }
-
-
 
 }

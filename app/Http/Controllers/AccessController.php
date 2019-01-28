@@ -65,16 +65,16 @@ class AccessController extends Controller{
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
 		Log::info($request);
-		// die();
+		//die();
 
 		$checkpoint2 = new CheckPointFunctionController;
 		$network = new NetworkController;
 
 		$v = Validator::make($request->all(), [
-   		"name_company" => "required",
-      	"address_company" => "required",
-      	"email_company" => "required|email",
-			"phone_company" => "required|numeric",
+   		"name_new_company" => "required",
+      	"address_new_company" => "required",
+      	"email_new_company" => "required|email",
+			"phone_new_company" => "required|numeric",
 
 			"name_new_user" => "required",
 			"new_username" => "required",
@@ -103,11 +103,11 @@ class AccessController extends Controller{
 			  $token_company .= $codeAlphabet[random_int(0, $max-1)];
 			}
 
-	    	$name = $request['name_company'];
-	    	$address = $request['address_company'];
-	    	$email = $request['email_company'];
-	    	$phone = $request['phone_company'];
-	    	$description = isset($request['description_company']) ? $request['description_company'] : "";
+	    	$name = $request['name_new_company'];
+	    	$address = $request['address_new_company'];
+	    	$email = $request['email_new_company'];
+	    	$phone = $request['phone_new_company'];
+	    	$description = isset($request['description_new_company']) ? $request['description_new_company'] : "";
 			$token = $request['token'];
 			$ips_assigned[] = $request['assigned_ips'];
 
@@ -128,7 +128,7 @@ class AccessController extends Controller{
 	    	$account = '000'.$random;
 	    	$tag = $acronym.''.$random;
 			$tag_mk = $tag.''.$random2;
-			$country_id = $request['country_company'];
+			$country_id = $request['country_new_company'];
 
 			/*Mandaré a guardar el tag cuando se crea la compañía*/
 			try{

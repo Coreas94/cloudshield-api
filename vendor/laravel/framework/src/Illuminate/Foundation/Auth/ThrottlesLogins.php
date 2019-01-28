@@ -17,6 +17,8 @@ trait ThrottlesLogins
      */
     protected function hasTooManyLoginAttempts(Request $request)
     {
+      $attempts = 5;
+      $lockoutMinites = 60;
         return app(RateLimiter::class)->tooManyAttempts(
             $this->getThrottleKey($request),
             $this->maxLoginAttempts(), $this->lockoutTime() / 60

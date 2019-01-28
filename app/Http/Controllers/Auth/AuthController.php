@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\ThrottlesLogins;
-use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 
 use Hash;
 use App\Http\Requests;
@@ -18,6 +16,8 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Auth;
 
 use JWTAuth;
+use Illuminate\Foundation\Auth\ThrottlesLogins;
+use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 
 class AuthController extends Controller
 {
@@ -40,6 +40,8 @@ class AuthController extends Controller
    * @var string
    */
    protected $redirectTo = '/';
+   protected $maxLoginAttempts = 3; // Amount of bad attempts user can make
+   protected $lockoutTime = 60; // Time for which user is going to be blocked in seconds
 
    /**
    * Create a new authentication controller instance.
@@ -48,7 +50,8 @@ class AuthController extends Controller
    */
    public function __construct()
    {
-     $this->middleware($this->guestMiddleware(), ['except' => 'logout']);
+      //$this->limiter = $limiter;
+      $this->middleware($this->guestMiddleware(), ['except' => 'logout']);
    }
 
    /**
@@ -82,46 +85,30 @@ class AuthController extends Controller
 
    public function api_login(Request $request){
 
-  		$validator = Validator::make($request->all(), ['email' => 'required', 'password' => 'required']);
+      $validator = Validator::make($request->all(), ['email' => 'required', 'password' => 'required']);
   		$input = $request->all();
-
-      $local_ip = getHostByName(getHostName());
 
   		if(!$token = JWTAuth::attempt($input)) {
   			// return response()->json(['result' => 'wrong email or password.']);
+         Log::info("FAIL ATTEMPT");
 
-         $this->validateLogin($request);
-
-         // If the class is using the ThrottlesLogins trait, we can automatically throttle
-         // the login attempts for this application. We'll key this by the username and
-         // the IP address of the client making these requests into this application.
          $throttles = $this->isUsingThrottlesLoginsTrait();
 
          if($throttles && $lockedOut = $this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
 
-            Log::info('aqui se bloquea 1');
-            $block = new BlockedIp;
-            $block->email = Input::get('email');
-            $block->ip_address = $local_ip;
-            $block->api_token = Input::get('_token');
-            $block->save();
-
+            Log::info("ENTRA AL THROTTLE");
             return $this->sendLockoutResponse($request);
          }
 
          $credentials = $this->getCredentials($request);
 
-         if(Auth::guard($this->getGuard())->attempt($credentials, $request->has('remember'))) {
-            return $this->handleUserWasAuthenticated($request, $throttles);
-         }
-
-         // If the login attempt was unsuccessful we will increment the number of attempts
-         // to login and redirect the user back to the login form. Of course, when this
-         // user surpasses their maximum number of attempts they will get locked out.
          if ($throttles && ! $lockedOut) {
+            Log::info("&&");
             $this->incrementLoginAttempts($request);
          }
+
+         //return $this->sendFailedLoginResponse($request);
 
   			return response()->json([
   				'error' => [
