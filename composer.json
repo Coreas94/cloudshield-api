@@ -17,7 +17,8 @@
         "symfony/process": "^2.8.44",
         "cviebrock/laravel-elasticsearch": "^2.0",
         "codemash/laravel-socket": "^1.0",
-        "laravelcollective/bus": "^5.2.0"
+        "laravelcollective/bus": "^5.2.0",
+        "sentry/sentry-laravel": "0.8.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

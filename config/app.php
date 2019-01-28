@@ -154,6 +154,7 @@ return [
         Cviebrock\LaravelElasticsearch\ServiceProvider::class,
         Codemash\Socket\SocketServiceProvider::class,
         Collective\Bus\BusServiceProvider::class,
+        'Sentry\SentryLaravel\SentryLaravelServiceProvider',
 
         /*
          * Application Service Providers...
@@ -212,7 +213,8 @@ return [
         'SSH' => Collective\Remote\RemoteFacade::class,
         'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
         'Elasticsearch' => Cviebrock\LaravelElasticsearch\Facade::class,
-        'Socket' => Codemash\Socket\Facades\Socket::class
+        'Socket' => Codemash\Socket\Facades\Socket::class,
+        'Sentry' => 'Sentry\SentryLaravel\SentryFacade',
 
     ],
 
