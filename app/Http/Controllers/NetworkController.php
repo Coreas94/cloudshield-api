@@ -1171,13 +1171,7 @@ class NetworkController extends Controller{
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
 
-      if(Session::has('sid_session')) $sid = Session::get('sid_session$type_object = $request['type'];
-
-         if($type_object == "host"){
-
-         }else{
-
-         }');
+      if(Session::has('sid_session')) $sid = Session::get('sid_session');
  		else $sid = $checkpoint->getLastSession();
 
  		if($sid){
@@ -1306,7 +1300,7 @@ class NetworkController extends Controller{
                $publish = $checkpoint->publishChanges($sid);
 
      				if($publish == 'success'){
-                  $object2 = $checkpoint2->createObjectNetwork($type, $data);
+                  $object2 = $checkpoint2->setObjectNetwork($type, $data);
                   sleep(2);
 
                   $uid = $result['uid'];
@@ -1337,7 +1331,7 @@ class NetworkController extends Controller{
                      if($addr_obj){
                         return response()->json([
                            'success' => [
-                              'message' => "Objeto y subnet creado exitosamente ",
+                              'message' => "Objeto y subnet editado exitosamente ",
                               'status_code' => 200
                            ]
                         ]);
@@ -1353,7 +1347,7 @@ class NetworkController extends Controller{
                      Log::info("Error al editar obj en la bdd!!");
                      return response()->json([
                         'error' => [
-                           'message' => "El objeto no pudo ser creado",
+                           'message' => "El objeto no pudo ser editado",
                            'status_code' => 20
                         ]
                      ]);
@@ -1377,6 +1371,5 @@ class NetworkController extends Controller{
          ]);
       }
    }
-
 
 }

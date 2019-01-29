@@ -1236,4 +1236,8 @@ class CheckPointFunctionController extends Controller
       }
    }
 
+   public function setObjectNetwork(){
+      
+   }
+
 }
