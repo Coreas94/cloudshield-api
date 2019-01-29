@@ -2,11 +2,12 @@
 
 namespace MongoDB\Tests;
 
+use MongoDB\Client;
 use MongoDB\Database;
 use MongoDB\Driver\Cursor;
 use MongoDB\Driver\Server;
+use MongoDB\Driver\WriteConcern;
 use MongoDB\Operation\DropCollection;
-use MongoDB\Operation\DropDatabase;
 
 /**
  * Documentation examples to be parsed for inclusion in the MongoDB manual.
@@ -19,8 +20,7 @@ class DocumentationExamplesTest extends FunctionalTestCase
     {
         parent::setUp();
 
-        $operation = new DropCollection($this->getDatabaseName(), $this->getCollectionName());
-        $operation->execute($this->getPrimaryServer());
+        $this->dropCollection();
     }
 
     public function tearDown()
@@ -29,8 +29,7 @@ class DocumentationExamplesTest extends FunctionalTestCase
             return;
         }
 
-        $operation = new DropCollection($this->getDatabaseName(), $this->getCollectionName());
-        $operation->execute($this->getPrimaryServer());
+        $this->dropCollection();
     }
 
     public function testExample_1_2()
@@ -979,7 +978,7 @@ class DocumentationExamplesTest extends FunctionalTestCase
             'documentKey' => ['_id' => 1],
         ];
 
-        $this->assertSameDocument($expectedChange, $lastChange);
+        $this->assertMatchesDocument($expectedChange, $lastChange);
 
         // Start Changestream Example 3
         $resumeToken = ($lastChange !== null) ? $lastChange->_id : null;
@@ -1002,7 +1001,7 @@ class DocumentationExamplesTest extends FunctionalTestCase
             'documentKey' => ['_id' => 2],
         ];
 
-        $this->assertSameDocument($expectedChange, $nextChange);
+        $this->assertMatchesDocument($expectedChange, $nextChange);
 
         // Start Changestream Example 4
         $pipeline = [['$match' => ['$or' => [['fullDocument.username' => 'alice'], ['operationType' => 'delete']]]]];
@@ -1180,6 +1179,235 @@ class DocumentationExamplesTest extends FunctionalTestCase
         $this->assertEquals('cuisine_1_name_1', $indexName);
     }
 
+    // Start Transactions Intro Example 1
+    private function updateEmployeeInfo1(\MongoDB\Client $client, \MongoDB\Driver\Session $session)
+    {
+        $session->startTransaction([
+            'readConcern' => new \MongoDB\Driver\ReadConcern('snapshot'),
+            'writeConcern' => new \MongoDB\Driver\WriteConcern(\MongoDB\Driver\WriteConcern::MAJORITY)
+        ]);
+
+        try {
+            $client->hr->employees->updateOne(
+                ['employee' => 3],
+                ['$set' => ['status' => 'Inactive']],
+                ['session' => $session]
+            );
+            $client->reporting->events->insertOne(
+                ['employee' => 3, 'status' => [ 'new' => 'Inactive', 'old' => 'Active']],
+                ['session' => $session]
+            );
+        } catch (\MongoDB\Driver\Exception\Exception $error) {
+            echo "Caught exception during transaction, aborting.\n";
+            $session->abortTransaction();
+            throw $error;
+        }
+
+        while (true) {
+            try {
+                $session->commitTransaction();
+                echo "Transaction committed.\n";
+                break;
+            } catch (\MongoDB\Driver\Exception\CommandException $error) {
+                $resultDoc = $error->getResultDocument();
+
+                if (isset($resultDoc->errorLabels) && in_array('UnknownTransactionCommitResult', $resultDoc->errorLabels)) {
+                    echo "UnknownTransactionCommitResult, retrying commit operation ...\n";
+                    continue;
+                } else {
+                    echo "Error during commit ...\n";
+                    throw $error;
+                }
+            } catch (\MongoDB\Driver\Exception\Exception $error) {
+                echo "Error during commit ...\n";
+                throw $error;
+            }
+        }
+    }
+    // End Transactions Intro Example 1
+
+    public function testTransactions_intro_example_1()
+    {
+        $this->skipIfTransactionsAreNotSupported();
+
+        $client = new Client($this->getUri());
+
+        /* The WC is required: https://docs.mongodb.com/manual/core/transactions/#transactions-and-locks */
+        $client->hr->dropCollection('employees', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+        $client->reporting->dropCollection('events', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+
+        /* Collections need to be created before a transaction starts */
+        $client->hr->createCollection('employees', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+        $client->reporting->createCollection('events', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+
+        $session = $client->startSession();
+
+        ob_start();
+        try {
+            $this->updateEmployeeInfo1($client, $session);
+        } finally {
+            ob_end_clean();
+        }
+    }
+
+    // Start Transactions Retry Example 1
+    private function runTransactionWithRetry1(callable $txnFunc, \MongoDB\Client $client, \MongoDB\Driver\Session $session)
+    {
+        while (true) {
+            try {
+                $txnFunc($client, $session);  // performs transaction
+                break;
+            } catch (\MongoDB\Driver\Exception\CommandException $error) {
+                $resultDoc = $error->getResultDocument();
+                echo "Transaction aborted. Caught exception during transaction.\n";
+
+                // If transient error, retry the whole transaction
+                if (isset($resultDoc->errorLabels) && in_array('TransientTransactionError', $resultDoc->errorLabels)) {
+                    echo "TransientTransactionError, retrying transaction ...\n";
+                    continue;
+                } else {
+                    throw $error;
+                }
+            } catch (\MongoDB\Driver\Exception\Exception $error) {
+                throw $error;
+            }
+        }
+    }
+    // End Transactions Retry Example 1
+
+    // Start Transactions Retry Example 2
+    private function commitWithRetry2(\MongoDB\Driver\Session $session)
+    {
+        while (true) {
+            try {
+                $session->commitTransaction();
+                echo "Transaction committed.\n";
+                break;
+            } catch (\MongoDB\Driver\Exception\CommandException $error) {
+                $resultDoc = $error->getResultDocument();
+
+                if (isset($resultDoc->errorLabels) && in_array('UnknownTransactionCommitResult', $resultDoc->errorLabels)) {
+                    echo "UnknownTransactionCommitResult, retrying commit operation ...\n";
+                    continue;
+                } else {
+                    echo "Error during commit ...\n";
+                    throw $error;
+                }
+            } catch (\MongoDB\Driver\Exception\Exception $error) {
+                echo "Error during commit ...\n";
+                throw $error;
+            }
+        }
+    }
+    // End Transactions Retry Example 2
+
+    // Start Transactions Retry Example 3
+    private function runTransactionWithRetry3(callable $txnFunc, \MongoDB\Client $client, \MongoDB\Driver\Session $session)
+    {
+        while (true) {
+            try {
+                $txnFunc($client, $session);  // performs transaction
+                break;
+            } catch (\MongoDB\Driver\Exception\CommandException $error) {
+                $resultDoc = $error->getResultDocument();
+
+                // If transient error, retry the whole transaction
+                if (isset($resultDoc->errorLabels) && in_array('TransientTransactionError', $resultDoc->errorLabels)) {
+                    continue;
+                } else {
+                    throw $error;
+                }
+            } catch (\MongoDB\Driver\Exception\Exception $error) {
+                throw $error;
+            }
+        }
+    }
+
+    private function commitWithRetry3(\MongoDB\Driver\Session $session)
+    {
+        while (true) {
+            try {
+                $session->commitTransaction();
+                echo "Transaction committed.\n";
+                break;
+            } catch (\MongoDB\Driver\Exception\CommandException $error) {
+                $resultDoc = $error->getResultDocument();
+
+                if (isset($resultDoc->errorLabels) && in_array('UnknownTransactionCommitResult', $resultDoc->errorLabels)) {
+                    echo "UnknownTransactionCommitResult, retrying commit operation ...\n";
+                    continue;
+                } else {
+                    echo "Error during commit ...\n";
+                    throw $error;
+                }
+            } catch (\MongoDB\Driver\Exception\Exception $error) {
+                echo "Error during commit ...\n";
+                throw $error;
+            }
+        }
+    }
+
+    private function updateEmployeeInfo3(\MongoDB\Client $client, \MongoDB\Driver\Session $session)
+    {
+        $session->startTransaction([
+            'readConcern' => new \MongoDB\Driver\ReadConcern("snapshot"),
+            'writeConcern' => new \MongoDB\Driver\WriteConcern(\MongoDB\Driver\WriteConcern::MAJORITY)
+        ]);
+
+        try {
+            $client->hr->employees->updateOne(
+                ['employee' => 3],
+                ['$set' => ['status' => 'Inactive']],
+                ['session' => $session]
+            );
+            $client->reporting->events->insertOne(
+                ['employee' => 3, 'status' => [ 'new' => 'Inactive', 'old' => 'Active']],
+                ['session' => $session]
+            );
+        } catch (\MongoDB\Driver\Exception\Exception $error) {
+            echo "Caught exception during transaction, aborting.\n";
+            $session->abortTransaction();
+            throw $error;
+        }
+
+        $this->commitWithRetry3($session);
+    }
+
+    private function doUpdateEmployeeInfo(\MongoDB\Client $client)
+    {
+        // Start a session.
+        $session = $client->startSession();
+
+        try {
+            $this->runTransactionWithRetry3([$this, 'updateEmployeeInfo3'], $client, $session);
+        } catch (\MongoDB\Driver\Exception\Exception $error) {
+            // Do something with error
+        }
+    }
+    // End Transactions Retry Example 3
+
+    public function testTransactions_retry_example_3()
+    {
+        $this->skipIfTransactionsAreNotSupported();
+
+        $client = new Client($this->getUri());
+
+        /* The WC is required: https://docs.mongodb.com/manual/core/transactions/#transactions-and-locks */
+        $client->hr->dropCollection('employees', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+        $client->reporting->dropCollection('events', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+
+        /* Collections need to be created before a transaction starts */
+        $client->hr->createCollection('employees', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+        $client->reporting->createCollection('events', ['writeConcern' => new \MongoDB\Driver\WriteConcern('majority')]);
+
+        ob_start();
+        try {
+            $this->doUpdateEmployeeInfo($client);
+        } finally {
+            ob_end_clean();
+        }
+    }
+
     /**
      * Return the test collection name.
      *
@@ -1198,5 +1426,15 @@ class DocumentationExamplesTest extends FunctionalTestCase
     private function assertInventoryCount($count)
     {
         $this->assertCollectionCount($this->getDatabaseName() . '.' . $this->getCollectionName(), $count);
+    }
+
+    private function dropCollection()
+    {
+        $options = version_compare($this->getServerVersion(), '3.4.0', '>=')
+            ? ['writeConcern' => new WriteConcern(WriteConcern::MAJORITY)]
+            : [];
+
+        $operation = new DropCollection($this->getDatabaseName(), $this->getCollectionName(), $options);
+        $operation->execute($this->getPrimaryServer());
     }
 }

@@ -1,13 +1,8 @@
-arg_name: param
-name: $pipeline
-type: array|object
-description: |
-  The pipeline of stages to append to an initial ``$changeStream`` stage.
-interface: phpmethod
-operation: ~
-optional: true
+source:
+  file: apiargs-method-watch-param.yaml
+  ref: $pipeline
 ---
 source:
-  file: apiargs-common-param.yaml
+  file: apiargs-method-watch-param.yaml
   ref: $options
 ...

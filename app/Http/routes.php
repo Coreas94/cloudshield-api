@@ -89,7 +89,7 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/create_group', 'NetworkController@createGroup');
 
          /**Ruta para crear Threat Rule**/
-         Route::post('/new_threat_rule', 'NetworkController@addThreatRule');
+         Route::post('/new_threat_rule', 'NetworkController@addThreatException');
 
          Route::post('/new_layer', 'NetworkController@addThreatLayer');
 
@@ -110,6 +110,12 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/new_object_network', 'NetworkController@newObjectNetwork');
 
          Route::get('/get_objects_network', 'NetworkController@getObjectsNetwork');
+
+         Route::get('/show_exc', 'NetworkController@showThreatException');
+
+         Route::get('/show_groups', 'NetworkController@showGroups');
+
+         Route::get('/publish2', 'NetworkController@publish2');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){

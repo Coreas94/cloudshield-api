@@ -23,8 +23,8 @@ class CountFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectNotHasAttribute('readConcern', $command);
+            function(array $event) {
+                $this->assertObjectNotHasAttribute('readConcern', $event['started']->getCommand());
             }
         );
     }
@@ -55,7 +55,7 @@ class CountFunctionalTest extends FunctionalTestCase
 
         foreach ($hintsUsingSparseIndex as $hint) {
             $operation = new Count($this->getDatabaseName(), $this->getCollectionName(), $filter, ['hint' => $hint]);
-            $this->assertEquals(2, $operation->execute($this->getPrimaryServer()));
+            $this->assertSame(2, $operation->execute($this->getPrimaryServer()));
         }
 
         $hintsNotUsingSparseIndex = [
@@ -66,7 +66,7 @@ class CountFunctionalTest extends FunctionalTestCase
 
         foreach ($hintsNotUsingSparseIndex as $hint) {
             $operation = new Count($this->getDatabaseName(), $this->getCollectionName(), $filter, ['hint' => $hint]);
-            $this->assertEquals(3, $operation->execute($this->getPrimaryServer()));
+            $this->assertSame(3, $operation->execute($this->getPrimaryServer()));
         }
     }
 
@@ -87,8 +87,8 @@ class CountFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectHasAttribute('lsid', $command);
+            function(array $event) {
+                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
             }
         );
     }

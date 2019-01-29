@@ -5,6 +5,7 @@ namespace MongoDB\Tests\Operation;
 use MongoDB\Collection;
 use MongoDB\InsertManyResult;
 use MongoDB\Driver\WriteConcern;
+use MongoDB\Exception\BadMethodCallException;
 use MongoDB\Model\BSONDocument;
 use MongoDB\Operation\InsertMany;
 use MongoDB\Tests\CommandObserver;
@@ -69,8 +70,8 @@ class InsertManyFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectHasAttribute('lsid', $command);
+            function(array $event) {
+                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
             }
         );
     }
@@ -90,11 +91,11 @@ class InsertManyFunctionalTest extends FunctionalTestCase
 
     /**
      * @depends testUnacknowledgedWriteConcern
-     * @expectedException MongoDB\Exception\BadMethodCallException
-     * @expectedExceptionMessageRegExp /[\w:\\]+ should not be called for an unacknowledged write result/
      */
     public function testUnacknowledgedWriteConcernAccessesInsertedCount(InsertManyResult $result)
     {
+        $this->expectException(BadMethodCallException::class);
+        $this->expectExceptionMessageRegExp('/[\w:\\\\]+ should not be called for an unacknowledged write result/');
         $result->getInsertedCount();
     }
 

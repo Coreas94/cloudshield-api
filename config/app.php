@@ -215,7 +215,6 @@ return [
         'Elasticsearch' => Cviebrock\LaravelElasticsearch\Facade::class,
         'Socket' => Codemash\Socket\Facades\Socket::class,
         'Sentry' => 'Sentry\SentryLaravel\SentryFacade',
-
     ],
 
 ];

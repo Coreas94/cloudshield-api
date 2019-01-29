@@ -6,11 +6,8 @@ use MongoDB\Driver\Command;
 use MongoDB\Driver\Cursor;
 use MongoDB\Driver\Manager;
 use MongoDB\Driver\ReadPreference;
-use MongoDB\Model\BSONArray;
-use MongoDB\Model\BSONDocument;
-use InvalidArgumentException;
+use MongoDB\Driver\Server;
 use stdClass;
-use Traversable;
 use UnexpectedValueException;
 
 abstract class FunctionalTestCase extends TestCase
@@ -47,34 +44,6 @@ abstract class FunctionalTestCase extends TestCase
         $this->assertInstanceOf('MongoDB\BSON\ObjectId', $expectedObjectId);
         $this->assertInstanceOf('MongoDB\BSON\ObjectId', $actualObjectId);
         $this->assertEquals((string) $expectedObjectId, (string) $actualObjectId);
-    }
-
-    protected function assertSameDocument($expectedDocument, $actualDocument)
-    {
-        $this->assertEquals(
-            \MongoDB\BSON\toJSON(\MongoDB\BSON\fromPHP($this->normalizeBSON($expectedDocument))),
-            \MongoDB\BSON\toJSON(\MongoDB\BSON\fromPHP($this->normalizeBSON($actualDocument)))
-        );
-    }
-
-    protected function assertSameDocuments(array $expectedDocuments, $actualDocuments)
-    {
-        if ($actualDocuments instanceof Traversable) {
-            $actualDocuments = iterator_to_array($actualDocuments);
-        }
-
-        if ( ! is_array($actualDocuments)) {
-            throw new InvalidArgumentException('$actualDocuments is not an array or Traversable');
-        }
-
-        $normalizeRootDocuments = function($document) {
-            return \MongoDB\BSON\toJSON(\MongoDB\BSON\fromPHP($this->normalizeBSON($document)));
-        };
-
-        $this->assertEquals(
-            array_map($normalizeRootDocuments, $expectedDocuments),
-            array_map($normalizeRootDocuments, $actualDocuments)
-        );
     }
 
     protected function getFeatureCompatibilityVersion(ReadPreference $readPreference = null)
@@ -128,47 +97,40 @@ abstract class FunctionalTestCase extends TestCase
         throw new UnexpectedValueException('Could not determine server version');
     }
 
-    /**
-     * Normalizes a BSON document or array for use with assertEquals().
-     *
-     * The argument will be converted to a BSONArray or BSONDocument based on
-     * its type and keys. Document fields will be sorted alphabetically. Each
-     * value within the array or document will then be normalized recursively.
-     *
-     * @param array|object $bson
-     * @return BSONDocument|BSONArray
-     * @throws InvalidArgumentException if $bson is not an array or object
-     */
-    private function normalizeBSON($bson)
+    protected function getServerStorageEngine(ReadPreference $readPreference = null)
     {
-        if ( ! is_array($bson) && ! is_object($bson)) {
-            throw new InvalidArgumentException('$bson is not an array or object');
+        $cursor = $this->manager->executeCommand(
+            $this->getDatabaseName(),
+            new Command(['serverStatus' => 1]),
+            $readPreference ?: new ReadPreference('primary')
+        );
+
+        $result = current($cursor->toArray());
+
+        if (isset($result->storageEngine->name) && is_string($result->storageEngine->name)) {
+            return $result->storageEngine->name;
         }
 
-        if ($bson instanceof BSONArray || (is_array($bson) && $bson === array_values($bson))) {
-            if ( ! $bson instanceof BSONArray) {
-                $bson = new BSONArray($bson);
-            }
-        } else {
-            if ( ! $bson instanceof BSONDocument) {
-                $bson = new BSONDocument((array) $bson);
-            }
+        throw new UnexpectedValueException('Could not determine server storage engine');
+    }
 
-            $bson->ksort();
+    protected function skipIfTransactionsAreNotSupported()
+    {
+        if ($this->getPrimaryServer()->getType() === Server::TYPE_STANDALONE) {
+            $this->markTestSkipped('Transactions are not supported on standalone servers');
         }
 
-        foreach ($bson as $key => $value) {
-            if ($value instanceof BSONArray || (is_array($value) && $value === array_values($value))) {
-                $bson[$key] = $this->normalizeBSON($value);
-                continue;
-            }
-
-            if ($value instanceof stdClass || $value instanceof BSONDocument || is_array($value)) {
-                $bson[$key] = $this->normalizeBSON($value);
-                continue;
-            }
+        // TODO: MongoDB 4.2 should support sharded clusters (see: PHPLIB-374)
+        if ($this->getPrimaryServer()->getType() === Server::TYPE_MONGOS) {
+            $this->markTestSkipped('Transactions are not supported on sharded clusters');
         }
 
-        return $bson;
+        if (version_compare($this->getFeatureCompatibilityVersion(), '4.0', '<')) {
+            $this->markTestSkipped('Transactions are only supported on FCV 4.0 or higher');
+        }
+
+        if ($this->getServerStorageEngine() !== 'wiredTiger') {
+            $this->markTestSkipped('Transactions require WiredTiger storage engine');
+        }
     }
 }

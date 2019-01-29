@@ -8,6 +8,8 @@ use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\ReadConcern;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
+use MongoDB\Exception\InvalidArgumentException;
+use MongoDB\Operation\Count;
 use MongoDB\Operation\MapReduce;
 use MongoDB\Tests\CommandObserver;
 use stdClass;
@@ -18,21 +20,21 @@ use stdClass;
 class CollectionFunctionalTest extends FunctionalTestCase
 {
     /**
-     * @expectedException MongoDB\Exception\InvalidArgumentException
      * @dataProvider provideInvalidDatabaseAndCollectionNames
      */
     public function testConstructorDatabaseNameArgument($databaseName)
     {
+        $this->expectException(InvalidArgumentException::class);
         // TODO: Move to unit test once ManagerInterface can be mocked (PHPC-378)
         new Collection($this->manager, $databaseName, $this->getCollectionName());
     }
 
     /**
-     * @expectedException MongoDB\Exception\InvalidArgumentException
      * @dataProvider provideInvalidDatabaseAndCollectionNames
      */
     public function testConstructorCollectionNameArgument($collectionName)
     {
+        $this->expectException(InvalidArgumentException::class);
         // TODO: Move to unit test once ManagerInterface can be mocked (PHPC-378)
         new Collection($this->manager, $this->getDatabaseName(), $collectionName);
     }
@@ -46,11 +48,11 @@ class CollectionFunctionalTest extends FunctionalTestCase
     }
 
     /**
-     * @expectedException MongoDB\Exception\InvalidArgumentException
      * @dataProvider provideInvalidConstructorOptions
      */
     public function testConstructorOptionTypeChecks(array $options)
     {
+        $this->expectException(InvalidArgumentException::class);
         new Collection($this->manager, $this->getDatabaseName(), $this->getCollectionName(), $options);
     }
 
@@ -121,7 +123,8 @@ class CollectionFunctionalTest extends FunctionalTestCase
                     ]
                 );
             },
-            function(stdClass $command) {
+            function(array $event) {
+                $command = $event['started']->getCommand();
                 $this->assertObjectHasAttribute('lsid', $command);
                 $this->assertObjectHasAttribute('maxTimeMS', $command);
                 $this->assertObjectHasAttribute('writeConcern', $command);
@@ -142,12 +145,23 @@ class CollectionFunctionalTest extends FunctionalTestCase
     }
 
     /**
-     * @expectedException MongoDB\Exception\InvalidArgumentException
      * @todo Move this to a unit test once Manager can be mocked
      */
     public function testDropIndexShouldNotAllowWildcardCharacter()
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->collection->dropIndex('*');
+    }
+
+    public function testExplain()
+    {
+        $this->createFixtures(3);
+
+        $operation = new Count($this->getDatabaseName(), $this->getCollectionName(), ['x' => ['$gte' => 1]], []);
+
+        $result = $this->collection->explain($operation);
+
+        $this->assertArrayHasKey('queryPlanner', $result);
     }
 
     public function testFindOne()

@@ -2,6 +2,7 @@
 
 namespace MongoDB\Tests\Operation;
 
+use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Model\IndexInfo;
 use MongoDB\Operation\CreateIndexes;
 use MongoDB\Operation\DropIndexes;
@@ -113,9 +114,6 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         });
     }
 
-    /**
-     * @expectedException MongoDB\Driver\Exception\RuntimeException
-     */
     public function testCreateConflictingIndexesWithCommand()
     {
         $indexes = [
@@ -124,7 +122,9 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         ];
 
         $operation = new CreateIndexes($this->getDatabaseName(), $this->getCollectionName(), $indexes);
-        $createdIndexNames = $operation->execute($this->getPrimaryServer());
+
+        $this->expectException(RuntimeException::class);
+        $operation->execute($this->getPrimaryServer());
     }
 
     public function testDefaultWriteConcernIsOmitted()
@@ -140,8 +140,8 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectNotHasAttribute('writeConcern', $command);
+            function(array $event) {
+                $this->assertObjectNotHasAttribute('writeConcern', $event['started']->getCommand());
             }
         );
     }
@@ -163,8 +163,8 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectHasAttribute('lsid', $command);
+            function(array $event) {
+                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
             }
         );
     }
