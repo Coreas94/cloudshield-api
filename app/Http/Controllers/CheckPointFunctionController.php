@@ -31,6 +31,7 @@ use IPTools\Range;
 use IPTools\Network;
 use IPTools\IP;
 use App\Http\Control;
+use App\FwLayerException;
 
 class CheckPointFunctionController extends Controller
 {
@@ -1236,8 +1237,148 @@ class CheckPointFunctionController extends Controller
       }
    }
 
-   public function setObjectNetwork(){
-      
+   public function addThreatException2($data){
+
+   	if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
+   	else $sid = $this->getLastSession();
+
+      if($sid){
+
+         $user = JWTAuth::toUser($data['token']);
+         $company_id = $user['company_id'];
+         $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+         $company_data2 = json_decode(json_encode($company_data), true);
+         $tag = $company_data2[0]['tag'];
+
+         $layer_data = FwLayerException::where('company_id', '=', $company_id)->get();
+         $layer = json_decode(json_encode($layer_data), true);
+         $layer_name = $layer[0]['name'];
+         $layer_id = $layer[0]['id'];
+
+         $name = $data['name'];
+         $rule_position = "bottom";
+         $src = $data['source'];
+         $dst = $data['destination'];
+         $action = "Inactive";
+
+         $curl = curl_init();
+
+         curl_setopt_array($curl, array(
+         	CURLOPT_URL => "https://172.16.3.118/web_api/add-threat-exception",
+         	CURLOPT_RETURNTRANSFER => true,
+         	CURLOPT_ENCODING => "",
+         	CURLOPT_MAXREDIRS => 10,
+         	CURLOPT_TIMEOUT => 30,
+         	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+         	CURLOPT_SSL_VERIFYPEER => false,
+         	CURLOPT_SSL_VERIFYHOST => false,
+         	CURLOPT_CUSTOMREQUEST => "POST",
+         	CURLOPT_POSTFIELDS => "{\r\n \"position\" : \"$rule_position\", \r\n \"exception-group-name\" : \"Global Exceptions\", \r\n \"name\" : \"$name\", \r\n \"source\" : $src, \r\n \"destination\" : $dst, \r\n  \"track\" : \"None\", \r\n  \"action\" : \"Inactive\", \r\n \"protected-scope\" : \"Any\", \r\n  \"install-on\" : \"Policy Targets\" \r\n}",
+         	CURLOPT_HTTPHEADER => array(
+         		"cache-control: no-cache",
+         		"content-type: application/json",
+         		"X-chkp-sid: ".$sid
+         	),
+         ));
+
+         $response = curl_exec($curl);
+         $err = curl_error($curl);
+
+         curl_close($curl);
+
+         if($err){
+            return "error";
+         }else{
+
+            $result = json_decode($response, true);
+
+            if(isset($result['code']) && $result['code'] == "generic_err_object_not_found"){
+               return "error";
+            }else{
+               if(isset($result['uid'])){
+                  $uid = $result['uid'];
+
+                  $publish = $this->publishChanges($sid);
+
+                  if($publish == 'success'){
+                     return "success";
+                  }else{
+                     return "error";
+                  }
+               }else{
+                  return "error";
+               }
+            }
+         }
+      }else{
+         return "error";
+      }
+   }
+
+   public function setObjectNetwork($data){
+
+      if(Session::has('sid_session')) $sid = Session::get('sid_session');
+ 		else $sid = $this->getLastSession();
+
+ 		if($sid){
+
+         $type = $data['type'];
+         $postfield = $data['postfield'];
+
+         $curl = curl_init();
+
+         curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://172.16.3.118/web_api/".$type,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => $postfield,
+            CURLOPT_HTTPHEADER => array(
+               "cache-control: no-cache",
+               "content-type: application/json",
+               "X-chkp-sid: ".$sid
+            ),
+         ));
+
+			$response = curl_exec($curl);
+			sleep(2);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+            return "error";
+			}else{
+
+            $result = json_decode($response, true);
+
+ 				if(isset($result['code'])){
+               if($result['code'] == "err_validation_failed"){
+ 						return "error";
+ 					}elseif ($result['code'] == "generic_err_invalid_parameter") {
+ 					   $msg_error = $result['message'];
+
+                  return "error";
+ 					}
+ 				}else{
+
+               $publish = $this->publishChanges($sid);
+
+     				if($publish == 'success'){
+                  return "success";
+               }else{
+                  return "error";
+               }
+            }
+         }
+      }else{
+         return "error";
+      }
    }
 
 }

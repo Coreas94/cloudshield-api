@@ -688,8 +688,6 @@ class NetworkController extends Controller{
 				$data_field2 = "[".$data_field2."]";
          }
 
-         Log::info($data_field2);
-
          $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $value_change, "uid" => $uid, "layer_name" => $layer);
 
       	$curl = curl_init();
@@ -825,6 +823,8 @@ class NetworkController extends Controller{
          $data_dst2 = substr($data_dst, 0, -1);
          $data_dst2 = "[".$data_dst2."]";
 
+         $array_threat = array("token" => $request['token'], "name" => $name, "source" => $data_src2, "destination" => $data_dst2);
+
          $curl = curl_init();
 
          curl_setopt_array($curl, array(
@@ -871,7 +871,7 @@ class NetworkController extends Controller{
 
                   if($publish == 'success'){
 
-                     $create2 = $checkpoint2->createThreatRule($array);
+                     $create2 = $checkpoint2->addThreatException2($array_threat);
                      sleep(2);
 
                      $array['rule_uid'] = $uid;
@@ -1227,6 +1227,8 @@ class NetworkController extends Controller{
             $data = "{\r\n  \"name\" : \"$name_object\", \r\n  \"subnet\" : \"$subnet\", \r\n  \"subnet-mask\" : \"$subnet_mask\" \r\n}";
             $object_type_id = 5;
          }
+
+         $array_post = array("type" => $type, "postfield" => $data);
 
          $curl = curl_init();
 
