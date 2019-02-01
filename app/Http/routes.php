@@ -27,6 +27,8 @@ Route::get('change_errors', 'Controller@changeErrorData');
 
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
+   Route::post('/block_ip', 'Auth\AuthController@blockAttemps');
+
    Route::group(['middleware' => ['jwt-auth']], function(){
 
       Route::group(['prefix' => 'checkpoint'], function(){

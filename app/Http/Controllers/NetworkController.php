@@ -49,10 +49,10 @@ class NetworkController extends Controller{
 
       $tag = $company_data2[0]['tag'];
 
-      $rules = FwRuleException::where('fw_rule_exception.company_id', '=', $company_id)
-               ->join('fw_rules_exception_objects', 'fw_rule_exception.id', '=', 'fw_rules_exception_objects.rule_id')
-               ->join('fw_layer_exception', 'fw_rule_exception.layer_id', '=', 'fw_layer_exception.id')
-               ->select('fw_rule_exception.*', 'fw_rules_exception_objects.src_object', 'fw_rules_exception_objects.dst_object', 'fw_layer_exception.name AS layer_name')
+      $rules = FwRuleException::where('fw_rules_exception.company_id', '=', $company_id)
+               ->join('fw_rules_exception_objects', 'fw_rules_exception.id', '=', 'fw_rules_exception_objects.rule_id')
+               ->join('fw_layer_exception', 'fw_rules_exception.layer_id', '=', 'fw_layer_exception.id')
+               ->select('fw_rules_exception.*', 'fw_rules_exception_objects.src_object', 'fw_rules_exception_objects.dst_object', 'fw_layer_exception.name AS layer_name')
                ->get();
 
       $rules = json_decode(json_encode($rules), true);
@@ -125,7 +125,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
 				// CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"Standard Threat Prevention\" \r\n}",
-               CURLOPT_POSTFIELDS => "{\r\n \"uid\" : \"b413e51e-6992-4511-ab81-ebc400bab852\", \"layer\" : \"CLUSTER-IP-REPUTATION\" \r\n}",
+            CURLOPT_POSTFIELDS => "{\r\n \"uid\" : \"b413e51e-6992-4511-ab81-ebc400bab852\", \"layer\" : \"CLUSTER-IP-REPUTATION\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -888,7 +888,6 @@ class NetworkController extends Controller{
                      if($rule){
 
                         if($rule->id){
-
                         	$rule_objects = new RulesExceptionObjects;
                         	$rule_objects->rule_id = $rule->id;
                         	$rule_objects->src_object = $src1;
