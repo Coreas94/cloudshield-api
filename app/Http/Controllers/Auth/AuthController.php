@@ -6,6 +6,7 @@ use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
 use App\BlockedIp;
+use App\WhitelistCompany;
 
 use Hash;
 use App\Http\Requests;
@@ -116,41 +117,53 @@ class AuthController extends Controller
 
    public function api_login(Request $request){
 
-      $validator = Validator::make($request->all(), ['email' => 'required', 'password' => 'required']);
-  		$input = $request->all();
+      $ips_allow = WhitelistCompany::pluck('ip_allow')->toArray();
       $ip = \request()->ip();
 
-      $blocked = BlockedIp::where('email', '=', $input['email'])->orWhere('ip_address', '=', $ip)->get()->toArray();
+      if(in_array($ip, $ips_allow)){
 
-      if(count($blocked) > 0){
+         $validator = Validator::make($request->all(), ['email' => 'required', 'password' => 'required']);
+     		$input = $request->all();
+
+         $blocked = BlockedIp::where('email', '=', $input['email'])->orWhere('ip_address', '=', $ip)->get()->toArray();
+
+         if(count($blocked) > 0){
+            return response()->json([
+               'error' => [
+                  'message' => 'User blocked, please contact the administrator.',
+                  'status_code' => 5
+               ]
+            ]);
+         }else{
+            if(!$token = JWTAuth::attempt($input)) {
+        			// return response()->json(['result' => 'wrong email or password.']);
+        			return response()->json([
+        				'error' => [
+        					'message' => 'Login failed',
+        					'status_code' => 20
+        				]
+        			]);
+        		}
+
+        		$user = JWTAuth::toUser($token);
+        		$role_user = $user->roles->first()->name;
+
+        		return response()->json([
+        			'success' => [
+        				'api_token' => $token,
+        				'role_user' => $role_user,
+        				'message' => 'Login successful',
+        				'status_code' => 200
+        			]
+        		]);
+         }
+      }else{
          return response()->json([
             'error' => [
-               'message' => 'User blocked, please contact the administrator.',
-               'status_code' => 5
+               'message' => 'Unauthorized IP',
+               'status_code' => 20
             ]
          ]);
-      }else{
-         if(!$token = JWTAuth::attempt($input)) {
-     			// return response()->json(['result' => 'wrong email or password.']);
-     			return response()->json([
-     				'error' => [
-     					'message' => 'Login failed',
-     					'status_code' => 20
-     				]
-     			]);
-     		}
-
-     		$user = JWTAuth::toUser($token);
-     		$role_user = $user->roles->first()->name;
-
-     		return response()->json([
-     			'success' => [
-     				'api_token' => $token,
-     				'role_user' => $role_user,
-     				'message' => 'Login successful',
-     				'status_code' => 200
-     			]
-     		]);
       }
 	}
 

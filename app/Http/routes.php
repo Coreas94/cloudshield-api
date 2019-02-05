@@ -31,6 +31,10 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
    Route::group(['middleware' => ['jwt-auth']], function(){
 
+      Route::get('/get_ip_blocked', 'AccessController@getIpsBlocked');
+
+      Route::post('/unlock_ip', 'AccessController@deleteIpBlocked');
+
       Route::group(['prefix' => 'checkpoint'], function(){
          Route::post('/test', 'CheckpointController@prueba2');
 
@@ -144,6 +148,10 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/newCompany', 'AccessController@addCompany'); //ADD NEW COMPANY
          Route::post('/update_company', 'AccessController@updateCompany'); //UPDATE COMPANY
          Route::post('/delete_company', ['as' => 'access_control/delete _company', 'uses' => 'AccessController@destroy']); //DELETE COMPANY
+
+         Route::get('/get_whitelist_ip', 'WhitelistCompanyController@getIpsCompany');
+         Route::post('/add_ip_whitelist', 'WhitelistCompanyController@addIpsWhitelist');
+         Route::post('/edit_ip_whitelist', 'WhitelistCompanyController@editIpWhitelist');
       });
 
       Route::group(['prefix' => 'user'], function(){

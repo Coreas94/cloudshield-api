@@ -21,11 +21,12 @@ use Hash;
 use App\FwSectionAccess;
 use App\FwObject;
 use App\Http\Controllers\CheckPointFunctionController;
+use App\BlockedIp;
+use App\WhitelistCompany;
 
 use JWTAuth;
 
 class AccessController extends Controller{
-
 
 	public function getDataCompanies(Request $request){
 
@@ -111,6 +112,8 @@ class AccessController extends Controller{
 			$token = $request['token'];
 			$ips_assigned[] = $request['assigned_ips'];
 
+			$whitelist_ip = $request['whitelist_ip'];
+
 			foreach($ips_assigned as $value){
 				$ip_initial_mk = $value['ip_init'];
 				$ip_last_mk = $value['ip_last'];
@@ -174,6 +177,12 @@ class AccessController extends Controller{
 							"phone" => $request['phone_new_user'],
 							"company_id" => $company->id
 						);
+
+						//GUARDAR IP WHITELIST POR DEFECTO DEL CLIENTE
+						$whitelist = new WhitelistCompany;
+						$whitelist->ip_allow = $whitelist_ip;
+						$whitelist->company_id = $company->id;
+						$whitelist->save();
 
 						//AQUI MANDO A CREAR LOS OBJETOS AL CHECKPOINT
 						$object = $firewall->createObjectsCh($dataArray, $checkpoint, $ips_assigned);
@@ -306,7 +315,7 @@ class AccessController extends Controller{
 								      if ($err) {
 								        Log::info("cURL Error #:" . $err);
 										  $response_mk = 0;
-								      } else {
+								      }else{
 								         $result = json_decode($response, true);
 								         Log::info($result['token']);
 
@@ -630,5 +639,38 @@ class AccessController extends Controller{
          ]);
 		}
  	}
+
+	public function getIpsBlocked(Request $request){
+
+		$blocked = BlockedIp::get();
+
+		return response()->json([
+			'data' => $blocked
+		]);
+	}
+
+	public function deleteIpBlocked(Request $request){
+
+		$id_block = $request['id'];
+
+		$delete = BlockedIp::find($id_block);
+		$delete->delete();
+
+		if($delete){
+			return response()->json([
+            'success' => [
+               'message' => 'IP y Usuario desbloqueado',
+               'status_code' => 200
+            ]
+         ]);
+		}else{
+			return response()->json([
+            'error' => [
+               'message' => 'No se pudo desbloquear el usuario',
+               'status_code' => 20
+            ]
+         ]);
+		}
+	}
 
 }
