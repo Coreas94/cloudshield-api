@@ -23,10 +23,7 @@ use JWTAuth;
 class WhitelistCompanyController extends Controller{
 
    public function getIpsCompany(Request $request){
-      //$company_id = $request['company_id'];
-      $userLog = JWTAuth::toUser($request['token']);
-      $api_token = $userLog['api_token'];
-      $company_id = $userLog['company_id'];
+      $company_id = $request['company_id'];
 
       $ips = WhitelistCompany::where('company_id', '=', $company_id)->get();
 
@@ -39,8 +36,8 @@ class WhitelistCompanyController extends Controller{
          ]);
       }else{
          return response()->json([
-            'error' => [
-               'data' => "No data",
+            'success' => [
+               'data' => [],
                'status_code' => 20
             ]
          ]);
@@ -49,11 +46,8 @@ class WhitelistCompanyController extends Controller{
 
    public function addIpsWhitelist(Request $request){
 
-      $userLog = JWTAuth::toUser($request['token']);
-      $api_token = $userLog['api_token'];
-      $company_id = $userLog['company_id'];
-
       $ip = $request['whitelist_ip'];
+      $company_id = $request['company_id'];
 
       $new_ip = new WhitelistCompany;
       $new_ip->ip_allow = $ip;
@@ -100,7 +94,30 @@ class WhitelistCompanyController extends Controller{
             ]
          ]);
       }
+   }
 
+   public function deleteWhitelistIp(Request $request){
+
+      $id_ip = $request['id_ip'];
+
+      $delete = WhitelistCompany::find($id_ip);
+		$delete->delete();
+
+      if($delete){
+         return response()->json([
+            'success' => [
+               'message' => "IP eliminada correctamente",
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+            'error' => [
+               'message' => "IP no pudo ser eliminada",
+               'status_code' => 20
+            ]
+         ]);
+      }
    }
 
 }
