@@ -1271,7 +1271,7 @@ class NetworkController extends Controller{
 
 			$response = curl_exec($curl);
 			Log::info(print_r($response, true));
-			sleep(2);
+			sleep(1);
 			$err = curl_error($curl);
 
 			curl_close($curl);
@@ -1329,7 +1329,7 @@ class NetworkController extends Controller{
 
      				if($publish == 'success'){
                   $object2 = $checkpoint2->setObjectNetwork($array_post);
-                  sleep(2);
+                  sleep(1);
 
                   $uid = $result['uid'];
                   $object_id = $request['id'];
