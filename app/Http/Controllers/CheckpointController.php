@@ -2784,66 +2784,75 @@ class CheckpointController extends Controller
  				$company_data2 = json_decode(json_encode($company_data), true);
  				$tag = $company_data2[0]['tag'];
 
- 				foreach($result['rulebase'] as $key => $value){
+            if(isset($result['rulebase'])){
+               foreach($result['rulebase'] as $key => $value){
 
- 					$name_sep = explode("-", $value['name']);
- 					$company_tag = isset($name_sep[1]) ? $name_sep[1] : 'none';
+    					$name_sep = explode("-", $value['name']);
+    					$company_tag = isset($name_sep[1]) ? $name_sep[1] : 'none';
 
- 					$data[$i]['section'] = array($value['name']);
+    					$data[$i]['section'] = array($value['name']);
 
- 					foreach($value['rulebase'] as $key2 => $row){
- 						$data[$i]['tag'] = $company_tag;
+    					foreach($value['rulebase'] as $key2 => $row){
+    						$data[$i]['tag'] = $company_tag;
 
- 						$data[$i]['name'] = $row['name'];
- 						$data[$i]['uid'] = $row['uid'];
- 						$data[$i]['type'] = $row['type'];
- 						$data[$i]['comments'] = $row['comments'];
- 						$data[$i]['enabled'] = $row['enabled'];
- 						$data[$i]['rule_number'] = array($row['rule-number']);
+    						$data[$i]['name'] = $row['name'];
+    						$data[$i]['uid'] = $row['uid'];
+    						$data[$i]['type'] = $row['type'];
+    						$data[$i]['comments'] = $row['comments'];
+    						$data[$i]['enabled'] = $row['enabled'];
+    						$data[$i]['rule_number'] = array($row['rule-number']);
 
- 						foreach ($row['source'] as $value2) {
- 							$data[$i]['source'][] = $value2['name'];
- 						}
+    						foreach ($row['source'] as $value2) {
+    							$data[$i]['source'][] = $value2['name'];
+    						}
 
- 						foreach ($row['destination'] as $value2) {
- 							$data[$i]['destination'][] = $value2['name'];
- 						}
+    						foreach ($row['destination'] as $value2) {
+    							$data[$i]['destination'][] = $value2['name'];
+    						}
 
- 						foreach ($row['service'] as $value2) {
- 							$data[$i]['service'][] = $value2['name'];
- 						}
+    						foreach ($row['service'] as $value2) {
+    							$data[$i]['service'][] = $value2['name'];
+    						}
 
- 						foreach ($row['vpn'] as $value2) {
- 							$data[$i]['vpn'] = $value2['name'];
- 						}
+    						foreach ($row['vpn'] as $value2) {
+    							$data[$i]['vpn'] = $value2['name'];
+    						}
 
- 						$data[$i]['action'] = $row['action']['name'];
+    						$data[$i]['action'] = $row['action']['name'];
 
- 						$i++;
- 					}
- 				}
+    						$i++;
+    					}
+    				}
 
- 				if($role_user != "superadmin"){
- 					foreach ($data as $key => $value) {
- 						if($value['tag'] == $tag){
- 							array_push($data2, $value);
- 						}
- 						$i2++;
- 					}
+    				if($role_user != "superadmin"){
+    					foreach ($data as $key => $value) {
+    						if($value['tag'] == $tag){
+    							array_push($data2, $value);
+    						}
+    						$i2++;
+    					}
 
- 					$data = $data2;
- 				}
+    					$data = $data2;
+    				}
 
- 				return response()->json([
- 					'data' => $data,
- 					//'data2' => $data2,
- 					'status_code' => 200
- 				]);
+    				return response()->json([
+    					'data' => $data,
+    					//'data2' => $data2,
+    					'status_code' => 200
+    				]);
+            }else{
+               return response()->json([
+       				'error' => [
+       					'message' => 'Error al obtener las políticas',
+       					'status_code' => 20
+       				]
+       			]);
+            }
  			}
  		}else{
  			return response()->json([
  				'error' => [
- 					'message' => 'error al obtener las políticas',
+ 					'message' => 'Error al obtener las políticas',
  					'status_code' => 20
  				]
  			]);
