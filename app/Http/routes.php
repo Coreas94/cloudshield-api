@@ -122,6 +122,10 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/show_groups', 'NetworkController@showGroups');
 
          Route::get('/publish2', 'NetworkController@publish2');
+
+         Route::post('/get_ips_network', 'NetworkController@getIpsByNetwork');
+
+         Route::post('/set_object_network', 'NetworkController@setObjectNetwork');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){

@@ -970,10 +970,17 @@ class NetworkController extends Controller{
 
          $type_object = $request['type_object'];
 
+         if(isset($request['subnet_mask'])){
+            $mask = $request['subnet_mask'];
+         }else{
+            $mask = "null";
+         }
+
          if($type_object == "host"){
             $type = "add-host";
             $name_object = $request['name'];
             $subnet = $request['subnet'];
+            $subnet_mask = $mask;
             $data = "{\r\n  \"name\" : \"$name_object\", \r\n  \"ip-address\" : \"$subnet\", \r\n  \"tags\" : [\"$tag\"]\r\n}";
             $object_type_id = 6;
 
@@ -981,7 +988,7 @@ class NetworkController extends Controller{
             $type = "add-network";
             $name_object = $request['name'];
             $subnet = $request['subnet'];
-            $subnet_mask = $request['subnet_mask'];
+            $subnet_mask = $mask;
             $data = "{\r\n  \"name\" : \"$name_object\", \r\n  \"subnet\" : \"$subnet\", \r\n  \"subnet-mask\" : \"$subnet_mask\", \r\n  \"tags\" : [\"$tag\"]\r\n}";
             $object_type_id = 5;
          }
@@ -1079,10 +1086,13 @@ class NetworkController extends Controller{
                      $object_id = $object_new->id;
                      $type_address_id = 7;//Pertenece a rango de ip para checkpoint
 
+
+
                      $addr_obj = new AddressObject;
                      $addr_obj->ip_initial = $subnet;
                      $addr_obj->ip_last = $subnet;
                      $addr_obj->object_id = $object_id;
+                     $addr_obj->subnet_mask = $subnet_mask;
                      $addr_obj->type_address_id = $type_address_id;
                      $addr_obj->save();
 
@@ -1139,23 +1149,25 @@ class NetworkController extends Controller{
  		if($role_user == "superadmin"){
          //Log::info("super");
  			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
+            ->join('fw_address_objects', 'fw_objects.id', '=', 'fw_address_objects.object_id')
  				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
  				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
  				->where('fw_objects.server_id', 1)
             ->where('fw_objects.type_object_id', 5)
  				->orWhere('fw_objects.type_object_id', 6)
- 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+ 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server', 'fw_address_objects.ip_initial AS ip_address', 'fw_address_objects.subnet_mask')
  				->get();
  		}else{
          //Log::info("else");
  			$obj = FwObject::join('fw_companies', 'fw_objects.company_id', '=', 'fw_companies.id')
+            ->join('fw_address_objects', 'fw_objects.id', '=', 'fw_address_objects.object_id')
  				->join('fw_object_types', 'fw_objects.type_object_id', '=', 'fw_object_types.id')
  				->join('fw_servers', 'fw_objects.server_id', '=', 'fw_servers.id')
  				->where('company_id', $company_id)
  				->where('fw_objects.server_id', 1)
             ->where('fw_objects.type_object_id', 5)
  				->orWhere('fw_objects.type_object_id', 6)
- 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server')
+ 				->select('fw_objects.*', 'fw_objects.name AS short_name', 'fw_companies.name AS company', 'fw_object_types.name AS type', 'fw_servers.name AS server', 'fw_address_objects.ip_initial AS ip_address', 'fw_address_objects.subnet_mask')
  				->get();
  		}
 
@@ -1189,7 +1201,7 @@ class NetworkController extends Controller{
    }
 
    public function setObjectNetwork(Request $request){
-
+      Log::info($request);
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
 
@@ -1211,19 +1223,27 @@ class NetworkController extends Controller{
 
          $type_object = $request['type_object'];
 
+         if(isset($request['subnet_mask'])){
+            $mask = $request['subnet_mask'];
+         }else{
+            $mask = "null";
+         }
+
          if($type_object == "host"){
             $type = "set-host";
             $name_object = $request['name'];
             $subnet = $request['subnet'];
+            $subnet_mask = $mask;
             $data = "{\r\n  \"name\" : \"$name_object\", \r\n  \"ip-address\" : \"$subnet\" \r\n}";
             $object_type_id = 6;
 
          }else{
             $type = "set-network";
             $name_object = $request['name'];
+            $old_name = $request['old_name'];
             $subnet = $request['subnet'];
-            $subnet_mask = $request['subnet_mask'];
-            $data = "{\r\n  \"name\" : \"$name_object\", \r\n  \"subnet\" : \"$subnet\", \r\n  \"subnet-mask\" : \"$subnet_mask\" \r\n}";
+            $subnet_mask = $mask;
+            $data = "{\r\n  \"name\" : \"$old_name\", \r\n  \"new-name\" : \"$name_object\",\r\n  \"subnet\" : \"$subnet\", \r\n  \"subnet-mask\" : \"$subnet_mask\" \r\n}";
             $object_type_id = 5;
          }
 
@@ -1295,39 +1315,34 @@ class NetworkController extends Controller{
  								'status_code' => 20
  							]
  						]);
- 					}
+ 					}else{
+                  return response()->json([
+ 							'error' => [
+ 								'message' => $result['message'],
+ 								'status_code' => 20
+ 							]
+ 						]);
+               }
  				}else{
 
                $publish = $checkpoint->publishChanges($sid);
 
      				if($publish == 'success'){
-                  $object2 = $checkpoint2->setObjectNetwork($type, $data);
+                  $object2 = $checkpoint2->setObjectNetwork($array_post);
                   sleep(2);
 
                   $uid = $result['uid'];
+                  $object_id = $request['id'];
 
-   					$object_new = New FwObject;
-   					$object_new->name = $name_object;
-   					$object_new->uid = $uid;
-   					$object_new->type_object_id = $object_type_id;
-   					$object_new->server_id = $server_ch;
-   					$object_new->company_id = $company_id;
-   					$object_new->tag = $tag;
-   					$object_new->editable = 1;
+                  $obj = FwObject::find($object_id);
+                  $obj->name = $name_object;
+                  $obj->save();
 
-   					$object_new->save();
-
-                  if($object_new->id){
+                  if($obj->id){
                      Log::info("Se creó el objeto checkpoint");
-                     $object_id = $object_new->id;
-                     $type_address_id = 7;//Pertenece a rango de ip para checkpoint
 
-                     $addr_obj = new AddressObject;
-                     $addr_obj->ip_initial = $subnet;
-                     $addr_obj->ip_last = $subnet;
-                     $addr_obj->object_id = $object_id;
-                     $addr_obj->type_address_id = $type_address_id;
-                     $addr_obj->save();
+                     $addr_obj = AddressObject::where('object_id', $object_id)
+                        ->update(['ip_initial' => $subnet, 'ip_last' => $subnet, 'subnet_mask' => $subnet_mask]);
 
                      if($addr_obj){
                         return response()->json([
@@ -1371,6 +1386,35 @@ class NetworkController extends Controller{
             ]
          ]);
       }
+   }
+
+   public function getIpsByNetwork(Request $request){
+ 		$object_id = $request['object_id'];
+ 		$ips = DB::table('fw_address_objects')
+ 			->join('fw_objects', 'fw_address_objects.object_id', '=', 'fw_objects.id')
+ 			->where('object_id', $object_id)
+ 			->select('fw_address_objects.*', 'fw_objects.name as objeto')
+ 			->get();
+
+      $ips = json_decode(json_encode($ips), true);
+      //Log::info($ips);
+      $testarray = [];
+      foreach ($ips as $key => $value) {
+         $rango = $value['ip_initial'].'-'.$value['ip_last'];
+
+         $test = Range::parse($rango)->contains(new IP('1.1.1.1'));
+
+         if($test){
+            unset($ips[$key]);
+         }else{
+            array_push($testarray, $value);
+         }
+      }
+
+ 		return response()->json([
+ 			'data' => $testarray,
+ 			'object_id' => $object_id
+ 		]);
    }
 
 }

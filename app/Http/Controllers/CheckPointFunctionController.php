@@ -1316,8 +1316,9 @@ class CheckPointFunctionController extends Controller
    }
 
    public function setObjectNetwork($data){
-
-      if(Session::has('sid_session')) $sid = Session::get('sid_session');
+      Log::info("HOLAAAAAAAAAAAAAA");
+      Log::info($data);
+      if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
  		if($sid){
