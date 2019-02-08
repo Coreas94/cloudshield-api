@@ -61,7 +61,13 @@ class AccessController extends Controller{
 
 		$arreglo = new Collection($array_company);
 
-		return response()->json($arreglo);
+		//return response()->json($arreglo);
+		return response()->json([
+			'success' => [
+				'data' => $arreglo,
+				'status_code' => 200
+			]
+	 	]);
 	}
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){

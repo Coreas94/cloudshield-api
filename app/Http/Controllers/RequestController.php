@@ -183,7 +183,7 @@ class RequestController extends Controller{
    		]);
       }else{
          return response()->json([
-   			'data' => "No data",
+   			'data' => [],
             'data_all' => $new_obj_all
    		]);
       }

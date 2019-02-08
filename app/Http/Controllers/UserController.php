@@ -142,7 +142,12 @@ class UserController extends Controller
 		 	$i++;
 		}
 
-  		return response()->json($array_user);
+		return response()->json([
+			'success' => [
+				'data' => $array_user,
+				'status_code' => 200
+			]
+	 	]);
 	}
 
 	public function addUser(Request $request){

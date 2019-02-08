@@ -1,7 +1,8 @@
 <?php
 
 return array(
-    'dsn' => env('SENTRY_DSN'),
+    //'dsn' => env('SENTRY_DSN'),
+    'dsn' => 'https://1217784893374aa694b048762b1affd4@sentry.io/1381556',
 
     // capture release as git sha
     // 'release' => trim(exec('git log --pretty="%h" -n1 HEAD')),

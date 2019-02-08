@@ -67,7 +67,7 @@ class NetworkController extends Controller{
       }else{
          return response()->json([
             'error' => [
-               'data' => "No data",
+               'data' => [],
                'status_code' => 20
             ]
          ]);
@@ -95,7 +95,7 @@ class NetworkController extends Controller{
       }else{
          return response()->json([
             'error' => [
-               'data' => "No data",
+               'data' => [],
                'status_code' => 20
             ]
          ]);
