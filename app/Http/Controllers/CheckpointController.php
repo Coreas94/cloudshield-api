@@ -1434,9 +1434,21 @@ class CheckpointController extends Controller
 
  		$new_obj = json_decode(json_encode($list_obj), true);
 
- 		return response()->json([
- 			'data' => $list_obj
- 		]);
+      if(count($list_obj) > 0){
+         return response()->json([
+            'success' => [
+               'data' => $list_obj,
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+ 				'error' => [
+ 					'message' => "No data",
+ 					'status_code' => 20
+ 				]
+ 			]);
+      }
   	}
 
    public function addObjectCompany($data){//SE USA PARA GUARDAR OBJETOS NUEVA COMPANY

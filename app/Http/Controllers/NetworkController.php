@@ -393,14 +393,14 @@ class NetworkController extends Controller{
    				'server_id' => $server_id,
    				'company_id' => $company_id,
    				'tag' => $tag,
-   				'token' => $request['token']
+   				'token' => $token
    			),
    			1 => array(
    				'group_name' => 'CUST-'.$tag.'-NET-GROUP-IPS-WHITELIST',
    				'server_id' => $server_id,
    				'company_id' => $company_id,
    				'tag' => $tag,
-   				'token' => $request['token']
+   				'token' => $token
    			)
    		);
 
@@ -1173,9 +1173,21 @@ class NetworkController extends Controller{
 
       $list_obj = json_decode(json_encode($obj), true);
 
- 		return response()->json([
- 			'data' => $list_obj
- 		]);
+      if(count($list_obj) > 0){
+         return response()->json([
+            'success' => [
+               'data' => $list_obj,
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+ 				'error' => [
+ 					'message' => "No data",
+ 					'status_code' => 20
+ 				]
+ 			]);
+      }
    }
 
    public function publish2(){

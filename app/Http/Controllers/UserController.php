@@ -50,25 +50,25 @@ class UserController extends Controller
 		 	$role_user = $request['role_user'];
 
 		 	try{
-			    $user = User::find($user_id);
-			    #$user->first_name = (isset($name_sep[0])) ? $name_sep[0] : '';
-			    $user->name = $name_sep[0];
-			    #$user->last_name = (isset($name_sep[1])) ? $name_sep[1] : '';
-			    $user->lastname = $name_sep[1];
-			    $user->username = $request['username'];
-			    $user->email = $request['email_user'];
-			    $user->password = Hash::make($request['password_user']);
-			    $user->phone = $request['phone_user'];
-			    $user->company_id = 1;
+		    	$user = User::find($user_id);
+		    	#$user->first_name = (isset($name_sep[0])) ? $name_sep[0] : '';
+		    	$user->name = $name_sep[0];
+		    	#$user->last_name = (isset($name_sep[1])) ? $name_sep[1] : '';
+		    	$user->lastname = $name_sep[1];
+		    	$user->username = $request['username'];
+		    	$user->email = $request['email_user'];
+	    		$user->password = Hash::make($request['password_user']);
+		    	$user->phone = $request['phone_user'];
+		    	$user->company_id = 1;
 				$user->active = 1;
 				$user->api_token = str_random(40); //our api token
-			    $user->save();
+		    	$user->save();
 
-			    if($user->id){
+		    	if($user->id){
 
 					$role = DB::table('role_user')
-			          ->where('user_id', $user_id)
-			          ->update(['role_id' => $role_user]);
+		          	->where('user_id', $user_id)
+		          	->update(['role_id' => $role_user]);
 
 			       	return response()->json([
 			          	'success' => [
@@ -77,25 +77,25 @@ class UserController extends Controller
 			             	'status_code' => 200
 			          	]
 			       	]);
-			    }else{
-			       return response()->json([
+		    	}else{
+		       	return response()->json([
 						'error' => [
 							'message' => 'User not created',
 							'status_code' => 20
 						]
 					]);
-			    }
+		    	}
 
-		 	}catch(Exception $e){
-			    // do task when error
-			    Log::info($e->getMessage());
-			    return response()->json([
+	 		}catch(Exception $e){
+		    	// do task when error
+		    	Log::info($e->getMessage());
+		    	return response()->json([
 					'error' => [
 						'message' => $e->getMessage(),
 						'status_code' => 20
 					]
 				]);
-		 	}
+	 		}
 		}
 	}
 
@@ -163,51 +163,50 @@ class UserController extends Controller
 	  	if($v->fails()){
 	     	// return redirect()->back()->withErrors($v->errors());
 	     	return response()->json([
-		        'error' => [
-		           'data' => $v->errors(),
-		           'status_code' => 20
-		        ]
+	        	'error' => [
+           		'data' => $v->errors(),
+	           	'status_code' => 20
+	        	]
 	     	]);
 	  	}else{
 	     	$name_sep = explode(' ', $request['name_new_user']);
 
 	     	if(Session::has("company_tag")){
-	            $tag = Session::get("company_tag");
-	            $company_data = DB::table("fw_companies")->where("tag", "=", $tag)->get();
-	            $company_data = json_encode($company_data);
-	            $company_data2 = json_decode($company_data, true);
-	            $company_id = $company_data2[0]['id'];
+            $tag = Session::get("company_tag");
+            $company_data = DB::table("fw_companies")->where("tag", "=", $tag)->get();
+            $company_data = json_encode($company_data);
+            $company_data2 = json_decode($company_data, true);
+            $company_id = $company_data2[0]['id'];
 		 	}else{
-	            $company_id = 2;
+            $company_id = 2;
 		 	}
 
 	     	try{
-	            $user = new User;
-	            $user->name = $name_sep[0];
-	            $user->lastname = $name_sep[1];
-	            $user->username = $request['username_new_user'];
-	            $user->email = $request['email_new_user'];
-	            $user->password = Hash::make($request['password_new_user']);
-	            $user->phone = $request['phone_new_user'];
-	            $user->company_id = $company_id;
-	            $user->active = 1;
-	            $user->api_token = str_random(40);//api token
-	            $user->save();
+            $user = new User;
+            $user->name = $name_sep[0];
+            $user->lastname = $name_sep[1];
+            $user->username = $request['username_new_user'];
+            $user->email = $request['email_new_user'];
+            $user->password = Hash::make($request['password_new_user']);
+            $user->phone = $request['phone_new_user'];
+            $user->company_id = $company_id;
+            $user->active = 1;
+            $user->api_token = str_random(40);//api token
+            $user->save();
 
-	            if($user->id){
-	               $id = DB::table('role_user')->insertGetId(
-	                  ['user_id' => $user->id, 'role_id' => $request['role_new_user']]
-	               );
-	            }
+            if($user->id){
+               $id = DB::table('role_user')->insertGetId(
+                  ['user_id' => $user->id, 'role_id' => $request['role_new_user']]
+               );
+            }
 
-	            Session::flash("user_success", trans('user.user_created'));
+            Session::flash("user_success", trans('user.user_created'));
 
 	     	}catch(Exception $e){
-	            // do task when error
-	            Log::info($e->getMessage());
-	            Session::flash("errorUser", trans('user.user_not_created'));
+            // do task when error
+            Log::info($e->getMessage());
+            Session::flash("errorUser", trans('user.user_not_created'));
 	     	}
-
          	return redirect("user/user_index");
       	}
    	}
