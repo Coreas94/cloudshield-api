@@ -453,7 +453,7 @@ class NetworkController extends Controller{
     					}
      				}else{
 
-                  $create2 = $checkpoint2->createGroup($data);
+                  $create2 = $checkpoint2->createGroup($token, $group_name);
                   sleep(2);
 
      					$uid = $result['uid'];

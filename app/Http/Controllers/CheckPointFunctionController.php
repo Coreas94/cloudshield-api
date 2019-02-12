@@ -976,7 +976,7 @@ class CheckPointFunctionController extends Controller
  		}
    }
 
-   public function createGroup($data){
+   public function createGroup($token, $group_name){
 
       if(Session::has('sid_session_2'))
          $sid = Session::get('sid_session_2');
@@ -984,11 +984,13 @@ class CheckPointFunctionController extends Controller
 
       if($sid){
 
-         $tag = $data['tag'];
-   		$company_id = $data['company_id'];
-         $group_name = $data['group_name'];
+         $user = JWTAuth::toUser($token);
+         $company_id = $user['company_id'];
+         $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+         $company_data2 = json_decode(json_encode($company_data), true);
+
+         $tag = $company_data2[0]['tag'];
          $server_id = 1;
-   		$token = $data['token'];
 
          $curl = curl_init();
 
