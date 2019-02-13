@@ -32,7 +32,6 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
    Route::group(['middleware' => ['jwt-auth']], function(){
 
       Route::get('/get_ip_blocked', 'AccessController@getIpsBlocked');
-
       Route::post('/unlock_ip', 'AccessController@deleteIpBlocked');
 
       Route::group(['prefix' => 'checkpoint'], function(){
