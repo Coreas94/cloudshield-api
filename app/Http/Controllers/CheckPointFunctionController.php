@@ -1172,7 +1172,7 @@ class CheckPointFunctionController extends Controller
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\", \r\n \"layer\" : \"CLUSTER-IP-REPUTATION\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",

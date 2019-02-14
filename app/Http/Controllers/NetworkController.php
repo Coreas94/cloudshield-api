@@ -574,7 +574,8 @@ class NetworkController extends Controller{
    }
 
    public function removeThreatRule(Request $request){
-
+      Log::info($request);
+      die();
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
 
@@ -598,7 +599,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\", \r\n \"layer\" : \"CLUSTER-IP-REPUTATION\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -628,7 +629,7 @@ class NetworkController extends Controller{
                $remove2 = $checkpoint2->removeThreatRule2($name_rule);
                sleep(2);
 
-               $delete = FwRuleException::where('id', $id_rule)->delete();
+               //$delete = FwRuleException::where('id', $id_rule)->delete();
 
                if($delete){
                   return response()->json([
@@ -686,6 +687,8 @@ class NetworkController extends Controller{
 
 				$data_field2 = substr($data_field, 0, -1);
 				$data_field2 = "[".$data_field2."]";
+         }else{
+            $data_field2 = $value_change;
          }
 
          $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $value_change, "uid" => $uid, "layer_name" => $layer);
@@ -1085,8 +1088,6 @@ class NetworkController extends Controller{
                      Log::info("Se creó el objeto checkpoint");
                      $object_id = $object_new->id;
                      $type_address_id = 7;//Pertenece a rango de ip para checkpoint
-
-
 
                      $addr_obj = new AddressObject;
                      $addr_obj->ip_initial = $subnet;
