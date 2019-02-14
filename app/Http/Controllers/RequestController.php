@@ -118,12 +118,14 @@ class RequestController extends Controller{
             ->join('users', 'request_ips.request_user_id', '=', 'users.id')
             ->where('request_ips.status', '=', 0)
             ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
+            ->orderBy('request_ips.id', 'desc')
             ->get();
 
          $request_all = RequestIp::join('fw_companies', 'request_ips.company_id', '=', 'fw_companies.id')
             ->join('fw_objects', 'request_ips.object_id', '=', 'fw_objects.id')
             ->join('users', 'request_ips.request_user_id', '=', 'users.id')
             ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
+            ->orderBy('request_ips.id', 'desc')
             ->get();
 
       }else{
@@ -133,6 +135,7 @@ class RequestController extends Controller{
             ->where('request_ips.status', '=', 0)
             ->where('request_ips.company_id', '=', $company_id)
             ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
+            ->orderBy('request_ips.id', 'desc')
             ->get();
 
          $request_all = RequestIp::join('fw_companies', 'request_ips.company_id', '=', 'fw_companies.id')
@@ -140,6 +143,7 @@ class RequestController extends Controller{
             ->join('users', 'request_ips.request_user_id', '=', 'users.id')
             ->where('request_ips.company_id', '=', $company_id)
             ->select('request_ips.*', 'fw_objects.name AS object_name', 'fw_companies.name AS company', 'users.name', 'users.lastname')
+            ->orderBy('request_ips.id', 'desc')
             ->get();
       }
 

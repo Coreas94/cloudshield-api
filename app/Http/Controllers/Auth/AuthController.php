@@ -62,8 +62,7 @@ class AuthController extends Controller
    * @param  array  $data
    * @return \Illuminate\Contracts\Validation\Validator
    */
-   protected function validator(array $data)
-   {
+   protected function validator(array $data){
       return Validator::make($data, [
          'name' => 'required|max:255',
          'email' => 'required|email|max:255|unique:users',
@@ -119,7 +118,6 @@ class AuthController extends Controller
 
       $ips_allow = WhitelistCompany::pluck('ip_allow')->toArray();
       $ip = \request()->ip();
-
       Log::info($ip);
 
       if(in_array($ip, $ips_allow)){
