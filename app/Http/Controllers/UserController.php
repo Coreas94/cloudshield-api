@@ -111,6 +111,7 @@ class UserController extends Controller
 			->join('roles', 'role_user.role_id', '=', 'roles.id')
 			->select('users.id AS id', 'users.name AS uname', 'users.lastname AS ulastname', 'users.username', 'users.email', 'users.phone', 'fw_companies.name AS company', 'roles.display_name AS role')
 			->where('users.deleted_at', NULL)
+			->where('fw_companies.deleted_at', NULL)
 			->get();
 
 		}else{
@@ -120,6 +121,7 @@ class UserController extends Controller
 			->join('roles', 'role_user.role_id', '=', 'roles.id')
 			->select('users.id AS id', 'users.name AS uname', 'users.lastname AS ulastname', 'users.username', 'users.email', 'users.phone', 'fw_companies.name AS company', 'roles.display_name AS role')
 			->where('users.deleted_at', NULL)
+			->where('fw_companies.deleted_at', NULL)
 			->where('users.company_id', $userLog['company_id'])
 			->get();
 		}
@@ -262,19 +264,23 @@ class UserController extends Controller
    	public function verifyToken(Request $request){
 
       	try {
-   			if (! $user = JWTAuth::parseToken()->authenticate()) {
+   			if(! $user = JWTAuth::parseToken()->authenticate()) {
 		      	return response()->json(['user_not_found'], 404);
    			}
-   		} catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+   		}catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
    			return response()->json(['token_expired'], $e->getStatusCode());
-   		} catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+   		}catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
    			return response()->json(['token_invalid'], $e->getStatusCode());
-   		} catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
+   		}catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
    			return response()->json(['token_absent'], $e->getStatusCode());
    		}
 
-   		// the token is valid and we have found the user via the sub claim
-      	return response()->json(compact('user'));
+			if(!empty($user['deleted_at'])){
+				return response()->json(['user_deleted']);
+			}else{
+				// the token is valid and we have found the user via the sub claim
+				return response()->json(compact('user'));
+			}
 
    	}
 }

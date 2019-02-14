@@ -2313,7 +2313,6 @@ class CheckpointController extends Controller
       }
    }
 
-
    public function createTag($tag){
       $checkpoint2 = new CheckPointFunctionController;
 

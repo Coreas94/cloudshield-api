@@ -59,7 +59,11 @@ class AccessController extends Controller{
 			$i++;
 		}
 
+		Log::info($array_company);
+
 		$arreglo = new Collection($array_company);
+
+		Log::info($arreglo);
 
 		//return response()->json($arreglo);
 		return response()->json([

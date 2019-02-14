@@ -120,6 +120,8 @@ class AuthController extends Controller
       $ips_allow = WhitelistCompany::pluck('ip_allow')->toArray();
       $ip = \request()->ip();
 
+      Log::info($ip);
+
       if(in_array($ip, $ips_allow)){
 
          $validator = Validator::make($request->all(), ['email' => 'required', 'password' => 'required']);
