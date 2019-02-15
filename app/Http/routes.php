@@ -104,7 +104,7 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
          Route::get('/get_layers_exception', 'NetworkController@getLayersException');
 
-         Route::post('/delete_exception', 'NetworkController@removeThreatRule');
+         Route::post('/delete_exception', 'NetworkController@removeThreatException');
 
          Route::post('/set_rule_exception', 'NetworkController@setThreatException');
 
@@ -125,6 +125,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/get_ips_network', 'NetworkController@getIpsByNetwork');
 
          Route::post('/set_object_network', 'NetworkController@setObjectNetwork');
+
+         Route::get('/test_exc', 'NetworkController@exceptiontest');
       });
 
       Route::group(['prefix' => 'fortisiem'], function(){

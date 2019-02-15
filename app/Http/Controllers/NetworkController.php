@@ -289,7 +289,7 @@ class NetworkController extends Controller{
 			));
 
 			$response = curl_exec($curl);
-         return $response;
+         //return $response;
 			Log::info(print_r($response, true));
 			//sleep(3);
 			$err = curl_error($curl);
@@ -573,9 +573,9 @@ class NetworkController extends Controller{
       }
    }
 
-   public function removeThreatRule(Request $request){
+   public function removeThreatException(Request $request){
       Log::info($request);
-      die();
+      //die();
       $checkpoint = new CheckpointController;
       $checkpoint2 = new CheckPointFunctionController;
 
@@ -586,6 +586,8 @@ class NetworkController extends Controller{
 
          $id_rule = $request['id'];
          $name_rule = $request['name_rule'];
+         $uid = $request['uid'];
+         #$uid = "590d9abd-fed3-41e7-8c31-4b7518e13494";
 
          $curl = curl_init();
 
@@ -599,7 +601,7 @@ class NetworkController extends Controller{
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\", \r\n \"layer\" : \"CLUSTER-IP-REPUTATION\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\", \r\n \"rule-uid\" : \"$uid\", \r\n \"exception-group-name\" : \"Global Exceptions\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
@@ -608,6 +610,7 @@ class NetworkController extends Controller{
 			));
 
 			$response = curl_exec($curl);
+         return $response;
 			Log::info(print_r($response, true));
 			//sleep(3);
 			$err = curl_error($curl);
@@ -626,10 +629,10 @@ class NetworkController extends Controller{
 
             if($publish == 'success'){
 
-               $remove2 = $checkpoint2->removeThreatRule2($name_rule);
+               /*$remove2 = $checkpoint2->removeThreatRule2($name_rule);
                sleep(2);
 
-               //$delete = FwRuleException::where('id', $id_rule)->delete();
+               $delete = FwRuleException::where('id', $id_rule)->delete();*
 
                if($delete){
                   return response()->json([
@@ -638,7 +641,8 @@ class NetworkController extends Controller{
                         'status_code' => 200
                      ]
                   ]);
-               }
+               }*/
+               return "publish";
             }else{
                return response()->json([
                   'success' => [
@@ -688,15 +692,15 @@ class NetworkController extends Controller{
 				$data_field2 = substr($data_field, 0, -1);
 				$data_field2 = "[".$data_field2."]";
          }else{
-            $data_field2 = $value_change;
+            $type_change = "new-name";
+            $data_field2 = "\"$value_change\"";
          }
 
-         $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $value_change, "uid" => $uid, "layer_name" => $layer);
-
+         $array = array("old_name" => $old_name, "type_change" => $type_change, "value_change" => $data_field2, "uid" => $uid, "layer_name" => $layer);
       	$curl = curl_init();
 
       	curl_setopt_array($curl, array(
-      		CURLOPT_URL => "https://172.16.3.114/web_api/set-threat-rule",
+      		CURLOPT_URL => "https://172.16.3.114/web_api/set-threat-exception",
       		CURLOPT_RETURNTRANSFER => true,
       		CURLOPT_ENCODING => "",
       		CURLOPT_MAXREDIRS => 10,
@@ -705,7 +709,7 @@ class NetworkController extends Controller{
       		CURLOPT_SSL_VERIFYPEER => false,
       		CURLOPT_SSL_VERIFYHOST => false,
       		CURLOPT_CUSTOMREQUEST => "POST",
-      		CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$old_name\", \r\n \"$type_change\" : $data_field2, \r\n \"layer\" : \"$layer\" \r\n}",
+      		CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$old_name\", \r\n \"$type_change\" : $data_field2, \r\n \"exception-group-name\" : \"Global Exceptions\" \r\n}",
       		CURLOPT_HTTPHEADER => array(
       			"cache-control: no-cache",
       			"content-type: application/json",
@@ -738,7 +742,7 @@ class NetworkController extends Controller{
                $objects2 = json_decode(json_encode($objects), true);
     				$id_object = $objects2[0]['id'];
 
-               if($type_change == "name"){
+               if($type_change == "new-name"){
                   $rule = FwRuleException::find($id_rule);
                   $rule->name = $value_change;
                   $rule->save();
@@ -858,6 +862,7 @@ class NetworkController extends Controller{
          }else{
 
             $result = json_decode($response, true);
+            Log::info(print_r($result, true));
 
             if(isset($result['code']) && $result['code'] == "generic_err_object_not_found"){
                return response()->json([
@@ -1428,6 +1433,62 @@ class NetworkController extends Controller{
  			'data' => $testarray,
  			'object_id' => $object_id
  		]);
+   }
+
+
+   public function exceptiontest(Request $request){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+ 		if(Session::has('sid_session')) $sid = Session::get('sid_session');
+ 		else $sid = $checkpoint->getLastSession();
+
+ 		if($sid){
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+				CURLOPT_URL => "https://172.16.3.114/web_api/show-threat-exception",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				// CURLOPT_POSTFIELDS => "{\r\n  \"name\" : \"Standard Threat Prevention\" \r\n}",
+            CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"pruebaExc294\", \"rule-number\" : \"1\", \r\n \"layer\" : \"LAYER-CUST-RM688\" \r\n}",
+				CURLOPT_HTTPHEADER => array(
+					"cache-control: no-cache",
+					"content-type: application/json",
+					"X-chkp-sid: ".$sid
+				),
+			));
+
+			$response = curl_exec($curl);
+         return $response;
+			Log::info(print_r($response, true));
+			//sleep(3);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return "error";
+			}else{
+            $publish = $checkpoint->publishChanges($sid);
+
+            if($publish == 'success'){
+               return "success";
+            }else{
+               return "success y publish error";
+            }
+         }
+      }else{
+         return "error";
+      }
    }
 
 }

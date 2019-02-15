@@ -399,7 +399,7 @@ class LayersController extends Controller
 					]
 				]);
 			}
-		}
+		}//fin foreach
    }
 
    public function removeIpList(Request $request, CheckpointController $checkpoint){
