@@ -573,8 +573,11 @@ class LayersController extends Controller
 
    public function editIps(Request $request){
 
+		Log::info($request);
+		//die();
+
       $id_ip = $request['id_ip'];
-      $object_name = $request['name_object'];
+      $object_name = $request['object_name'];
       $old_ip_initial = $request['old_ip'];
       $old_ip_last = $request['old_ip'];
 
@@ -590,19 +593,20 @@ class LayersController extends Controller
 		$ip_object->save();
 
       if($ip_object){
+			Log::info('ip_object');
 
-         $ssh_command = 'tscpgw_api -g "172.16.3.112" -a delrip -o '.$object_name.' -r '. $old_range;
+			$ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$old_ip_initial." ".$old_ip_last."'";
          \SSH::into('checkpoint')->run($ssh_command, function($line){
             Log::info($line.PHP_EOL);
             $this->output = $line.PHP_EOL;
          });
 
-         sleep(3);
+         sleep(2);
 
          $evaluate = $this->output;
          Log::info("1099 ". $evaluate);
 
-         while (stripos($evaluate, "try again") !== false) {
+         while ( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) {
             Log::info("remove ip existe try again");
             \SSH::into('checkpoint')->run($ssh_command, function($line){
                Log::info($line.PHP_EOL);
@@ -612,9 +616,9 @@ class LayersController extends Controller
             $evaluate = $this->output;
          }
 
-         sleep(3);
+         sleep(2);
 
-         $ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a delrip -o '.$object_name.' -r '. $old_range;
+         $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$old_ip_initial." ".$old_ip_last."'";
          \SSH::into('checkpoint')->run($ssh_command2, function($line2){
             Log::info($line2.PHP_EOL);
             $this->output = $line2.PHP_EOL;
@@ -623,9 +627,9 @@ class LayersController extends Controller
          $evaluate = $this->output;
          Log::info("1120 ". $evaluate);
 
-         sleep(3);
+         sleep(2);
 
-         while(stripos($evaluate, "try again") !== false) {
+         while( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) {
             Log::info("2 remove ip existe try again");
             \SSH::into('checkpoint')->run($ssh_command2, function($line2){
                Log::info($line2.PHP_EOL);
@@ -635,7 +639,53 @@ class LayersController extends Controller
             $evaluate = $this->output;
          }
 
-         sleep(3);
+         sleep(2);
+
+			$ssh_command3 = "tscpgw_api -g '172.16.3.116' -a delrip -o ".$object_name." -r '".$old_ip_initial." ".$old_ip_last."'";
+         \SSH::into('checkpoint')->run($ssh_command3, function($line2){
+            Log::info($line2.PHP_EOL);
+            $this->output = $line2.PHP_EOL;
+         });
+
+         $evaluate = $this->output;
+         Log::info("1120 ". $evaluate);
+
+         sleep(2);
+
+         while( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) {
+            Log::info("2 remove ip existe try again");
+            \SSH::into('checkpoint')->run($ssh_command3, function($line2){
+               Log::info($line2.PHP_EOL);
+               $this->output = $line2.PHP_EOL;
+            });
+
+            $evaluate = $this->output;
+         }
+
+         sleep(2);
+
+			$ssh_command4 = "tscpgw_api -g '172.16.3.117' -a delrip -o ".$object_name." -r '".$old_ip_initial." ".$old_ip_last."'";
+         \SSH::into('checkpoint')->run($ssh_command4, function($line2){
+            Log::info($line2.PHP_EOL);
+            $this->output = $line2.PHP_EOL;
+         });
+
+         $evaluate = $this->output;
+         Log::info("1120 ". $evaluate);
+
+         sleep(2);
+
+         while( (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) {
+            Log::info("2 remove ip existe try again");
+            \SSH::into('checkpoint')->run($ssh_command4, function($line2){
+               Log::info($line2.PHP_EOL);
+               $this->output = $line2.PHP_EOL;
+            });
+
+            $evaluate = $this->output;
+         }
+
+         sleep(2);
 
          $object_list = DB::connection('checkpoint')->select('SELECT * FROM ip_object_list WHERE ip_initial="'.$old_ip_initial.'" AND ip_last="'.$old_ip_last.'"');
          $object_list = json_decode(json_encode($object_list), true);
@@ -648,8 +698,12 @@ class LayersController extends Controller
 
          if($bd_ips_obj){
 
-            $ssh_command = 'tscpgw_api -g "172.16.3.112" -a delrip -o '.$object_name.' -r '. $new_range;
-            $ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a delrip -o '.$object_name.' -r '. $new_range;
+				Log::info('bd_ips_obj');
+
+				$ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$object_name." -r '".$new_ip_initial." ".$new_ip_last."'";
+				$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$object_name." -r '".$new_ip_initial." ".$new_ip_last."'";
+				$ssh_command3 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$object_name." -r '".$new_ip_initial." ".$new_ip_last."'";
+				$ssh_command4 = "tscpgw_api -g '172.16.3.117' -a addrip -o ".$object_name." -r '".$new_ip_initial." ".$new_ip_last."'";
 
             //Ejecuto los comandos para crear los 2 rangos nuevos
             \SSH::into('checkpoint')->run($ssh_command, function($line){
@@ -657,7 +711,7 @@ class LayersController extends Controller
                $this->output = $line.PHP_EOL;
             });
 
-            sleep(3);
+            sleep(2);
 
             $evaluate = $this->output;
             while(stripos($evaluate, "try again") !== false) {
@@ -669,7 +723,7 @@ class LayersController extends Controller
                $evaluate = $this->output;
             }
 
-            sleep(3);
+            sleep(2);
 
             //Ejecuto los comandos para crear los 2 rangos nuevos
             \SSH::into('checkpoint')->run($ssh_command2, function($line2){
@@ -677,7 +731,7 @@ class LayersController extends Controller
                $this->output = $line2.PHP_EOL;
             });
 
-            sleep(3);
+            sleep(2);
 
             $evaluate = $this->output;
             while(stripos($evaluate, "try again") !== false) {
@@ -689,7 +743,47 @@ class LayersController extends Controller
                $evaluate = $this->output;
             }
 
-            sleep(3);
+            sleep(2);
+
+				//Ejecuto los comandos para crear los 2 rangos nuevos
+            \SSH::into('checkpoint')->run($ssh_command3, function($line2){
+               Log::info($line2.PHP_EOL);
+               $this->output = $line2.PHP_EOL;
+            });
+
+            sleep(2);
+
+            $evaluate = $this->output;
+            while(stripos($evaluate, "try again") !== false) {
+               Log::info("existe try again layer 113");
+               \SSH::into('checkpoint')->run($ssh_command3, function($line2){
+                  Log::info($line2.PHP_EOL);
+                  $this->output = $line2.PHP_EOL;
+               });
+               $evaluate = $this->output;
+            }
+
+            sleep(2);
+
+				//Ejecuto los comandos para crear los 2 rangos nuevos
+            \SSH::into('checkpoint')->run($ssh_command4, function($line2){
+               Log::info($line2.PHP_EOL);
+               $this->output = $line2.PHP_EOL;
+            });
+
+            sleep(2);
+
+            $evaluate = $this->output;
+            while(stripos($evaluate, "try again") !== false) {
+               Log::info("existe try again layer 113");
+               \SSH::into('checkpoint')->run($ssh_command4, function($line2){
+                  Log::info($line2.PHP_EOL);
+                  $this->output = $line2.PHP_EOL;
+               });
+               $evaluate = $this->output;
+            }
+
+            sleep(2);
 
             return response()->json([
 					'success' => [
@@ -698,6 +792,7 @@ class LayersController extends Controller
 					]
 				]);
          }else{
+				Log::info('NO bd_ips_obj');
             return response()->json([
                'error' => [
                   'message' => "Datos actualizados en base local pero no en checkpoint",
@@ -706,6 +801,7 @@ class LayersController extends Controller
             ]);
          }
       }else{
+			Log::info('NO ip_object');
          return response()->json([
             'error' => [
                'message' => "No se pudo editar la lista",

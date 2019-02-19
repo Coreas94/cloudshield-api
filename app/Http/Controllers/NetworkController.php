@@ -634,6 +634,9 @@ class NetworkController extends Controller{
                $delete = FwRuleException::where('id', $id_rule)->delete();
 
                if($delete){
+
+                  $del_obj = RulesExceptionObjects::where('rule_id', '=', $id_rule)->delete();
+
                   return response()->json([
                      'success' => [
                         'message' => 'Threat Exception Deleted',

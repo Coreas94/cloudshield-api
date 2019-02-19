@@ -1163,7 +1163,7 @@ class CheckPointFunctionController extends Controller
          $curl = curl_init();
 
 			curl_setopt_array($curl, array(
-				CURLOPT_URL => "https://172.16.3.118/web_api/add-threat-rule",
+				CURLOPT_URL => "https://172.16.3.118/web_api/delete-threat-exception",
 				CURLOPT_RETURNTRANSFER => true,
 				CURLOPT_ENCODING => "",
 				CURLOPT_MAXREDIRS => 10,
@@ -1172,7 +1172,7 @@ class CheckPointFunctionController extends Controller
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
 				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\", \r\n \"layer\" : \"CLUSTER-IP-REPUTATION\" \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$name_rule\", \r\n \"exception-group-name\" : \"Global Exceptions\" \r\n}",
 				CURLOPT_HTTPHEADER => array(
 					"cache-control: no-cache",
 					"content-type: application/json",
