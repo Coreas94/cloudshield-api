@@ -59,7 +59,7 @@ class UserController extends Controller
 		    	$user->email = $request['email_user'];
 	    		$user->password = Hash::make($request['password_user']);
 		    	$user->phone = $request['phone_user'];
-		    	$user->company_id = 1;
+		    	$user->company_id = $request['company_id'];
 				$user->active = 1;
 				$user->api_token = str_random(40); //our api token
 		    	$user->save();

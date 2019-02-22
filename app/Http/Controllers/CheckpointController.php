@@ -329,7 +329,6 @@ class CheckpointController extends Controller
       $current_time = Carbon::now()->toDateTimeString();
 
       $userLog = JWTAuth::toUser($request['token']);
-      Log::info($userLog);
       $api_token = $userLog['api_token'];
       $company_id = $userLog['company_id'];
       $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
@@ -344,7 +343,7 @@ class CheckpointController extends Controller
       if(File::exists($path)){
          $data_exist = json_decode(file_get_contents($path), true);
          Log::info($data_exist);
-      } else {
+      }else{
          Log::info("NO EXISTE FILE");
          $arreglo = array("success" => "", "error" => "", "info" => 0);
 
@@ -353,6 +352,7 @@ class CheckpointController extends Controller
       }
 
       $validateCmd = new ValidateCommandController;
+      $emailCtrl = new EmailController;
 
  		$object_id = $request['object_id'];
       $evaluate = "";
@@ -369,10 +369,13 @@ class CheckpointController extends Controller
       $total_ips = count($request['ips']);
       $flag = 1;
       $dataSet = [];
+      $array_ip = [];
 
       foreach ($request['ips'] as $value) {
          $ip_initial = $value['ip_initial'];
          $ip_last = $value['ip_last'];
+
+         array_push($array_ip, $ip_initial.'-'.$ip_last);
 
          $dataSet[] = [
             'ip_initial'  => $ip_initial,
@@ -382,6 +385,8 @@ class CheckpointController extends Controller
             'created_at' => $current_time,
             'updated_at' => $current_time,
          ];
+
+         $data_email = array("name_object" => $object_name, "name_company" => $name_company, "type_ssh" => "add_ip_object", "ips" => $array_ip);
 
          $validateAdddyo = $validateCmd->validateAssignIpObject($object_name, $ip_initial, $ip_last, $total_ips, $flag);
 
@@ -426,9 +431,13 @@ class CheckpointController extends Controller
       Artisan::call('checkpoint:resendData');
 
  		if($addr_obj){
-			$bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
+         $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
 
 			if($bd_ips_check){
+
+            //Mando la instrucción para enviar el email anunciando el nuevo rango
+            $emailCtrl->sendEmailSSHRange($data_email);
+
   				return response()->json([
   					'success' => [
   						'message' => "¡IP guardada exitosamente!",
@@ -438,7 +447,7 @@ class CheckpointController extends Controller
 			}else{
   				return response()->json([
   					'error' => [
-  						'message' => 'error al guardar la IP',
+  						'message' => 'Error al guardar la IP',
   						'status_code' => 20
   					]
   				]);
@@ -446,7 +455,7 @@ class CheckpointController extends Controller
  		}else{
 			return response()->json([
 				'error' => [
-					'message' => 'error al guardar la IP',
+					'message' => 'Error al guardar la IP',
 					'status_code' => 20
 				]
 			]);
@@ -1100,6 +1109,7 @@ class CheckpointController extends Controller
       Log::info("llega al createDynamic");
       $checkpoint2 = new CheckPointFunctionController;
       $validateCmd = new ValidateCommandController;
+      $emailCtrl = new EmailController;
 
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
@@ -1118,9 +1128,12 @@ class CheckpointController extends Controller
  			$company_data2 = json_decode(json_encode($company_data), true);
  			$tag = $company_data2[0]['tag'];
          $token_company = $company_data2[0]['token_company'];
+         $name_company = $company_data2[0]['name'];
 
          $userLog = JWTAuth::toUser($request['token']);
          $api_token = $userLog['api_token'];
+
+         $data_email = array("name_object" => $new_object_name, "name_company" => $name_company, "type_ssh" => "add_object");
 
          $curl = curl_init();
 
@@ -1199,6 +1212,9 @@ class CheckpointController extends Controller
 					$object_new->editable = 1;
 
 					$object_new->save();
+
+               //Mando la instrucción para enviar el email anunciando la creación de objeto
+               $emailCtrl->sendEmailSSHObj($data_email);
 
 					if($object_new->id){
 						Log::info("Se creó el objeto checkpoint");
@@ -1643,11 +1659,24 @@ class CheckpointController extends Controller
 
    public function removeObject(Request $request){
 
+      $userLog = JWTAuth::toUser($request['token']);
+
       $checkpoint2 = new CheckPointFunctionController;
       $validateCmd = new ValidateCommandController;
+      $emailCtrl = new EmailController;
+
       $evaluate = "";
  		$object_id = $request['object_id'];
  		$object_name = $request['object_name'];
+
+      $company_id = $userLog['company_id'];
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+      $tag = $company_data2[0]['tag'];
+      $token_company = $company_data2[0]['token_company'];
+      $name_company = $company_data2[0]['name'];
+
+      $data_email = array("name_object" => $object_name, "name_company" => $name_company, "type_ssh" => "remove_object");
 
  		if(Session::has('sid_session'))
  			$sid = Session::get('sid_session');
@@ -1719,6 +1748,8 @@ class CheckpointController extends Controller
 
  							$delete_adds = DB::table('fw_address_objects')->where('object_id', '=', $object_id)->delete();
 
+                     $emailCtrl->sendEmailSSHObj($data_email);
+
  							$obj_checkpoint_db = DB::connection('checkpoint')->select('SELECT * FROM object_list WHERE name="'.$object_name.'" ');
  							$object_id_bd = json_decode(json_encode($obj_checkpoint_db), true);
 
@@ -1777,8 +1808,10 @@ class CheckpointController extends Controller
 
    public function removeIpObject(Request $request){
       Log::info($request);
+      //die();
       $evaluate = "";
       $validateCmd = new ValidateCommandController;
+      $emailCtrl = new EmailController;
 
       $userLog = JWTAuth::toUser($request['token']);
       $api_token = $userLog['api_token'];
@@ -1800,6 +1833,7 @@ class CheckpointController extends Controller
       $type_address_id = 7;//Pertenece a rango de ip para checkpoint
 
       $evaluate;
+      $array_ip = [];
 
       //EVALUAR ARCHIVO JSON
       $path = storage_path() ."/app/".$name_company."/".$token_company.".json";
@@ -1821,6 +1855,9 @@ class CheckpointController extends Controller
 
          $address = DB::table('fw_address_objects')->where('id', $address_id)->get();
          $address = json_decode(json_encode($address), true);
+
+         array_push($array_ip, $ip_initial.'-'.$ip_last);
+         $data_email = array("name_object" => $object_name, "name_company" => $name_company, "type_ssh" => "remove_ip_object", "ips" => $array_ip);
 
          if($type_remove == 1){//Elimina el rango completo
 
@@ -1861,6 +1898,8 @@ class CheckpointController extends Controller
 
                   //$delete_add_ch = DB::connection('checkpoint')->delete("DELETE ip_object_list SET ip_initial='".$request['new_ip_initial']."', ip_last='".$request['new_ip_last']."' WHERE object_id=".$object_id);
                   if($delete_add){
+                     $emailCtrl->sendEmailSSHRange($data_email);
+
                      return response()->json([
                         'success' => [
                            'data' => 'Rango de ips eliminado',
@@ -2004,6 +2043,9 @@ class CheckpointController extends Controller
                            $insert = DB::table('fw_address_objects')->insert($arr_addr);
 
                            if($insert){
+
+                              $emailCtrl->sendEmailSSHRange($data_email);
+
                               return response()->json([
                                  'success' => [
                                     'data' => "Rango eliminado correctamente",
@@ -2051,6 +2093,8 @@ class CheckpointController extends Controller
                      $delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
                      if($delete_add){
+                        $emailCtrl->sendEmailSSHRange($data_email);
+
                         return response()->json([
                            'success' => [
                               'data' => "Rango eliminado correctamente",
@@ -2118,6 +2162,9 @@ class CheckpointController extends Controller
                   $delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
                   if($delete_add){
+
+                     $emailCtrl->sendEmailSSHRange($data_email);
+
                      return response()->json([
                         'success' => [
                            'message' => 'Se eliminó correctamente',
@@ -2251,6 +2298,7 @@ class CheckpointController extends Controller
                            $insert = DB::table('fw_address_objects')->insert($arr_addr);
 
                            if($insert){
+                              $emailCtrl->sendEmailSSHRange($data_email);
                               return response()->json([
                                  'success' => [
                                     'data' => "IP eliminada correctamente",
@@ -2841,7 +2889,10 @@ class CheckpointController extends Controller
     				if($role_user != "superadmin"){
     					foreach ($data as $key => $value) {
     						if($value['tag'] == $tag){
+                        Log::info("es igual el tag ".$value['tag']);
     							array_push($data2, $value);
+    						}else{
+    						   Log::info("No es igual el tag ".$value['tag']);
     						}
     						$i2++;
     					}

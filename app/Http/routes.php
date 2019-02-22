@@ -15,6 +15,12 @@ Route::get('/', function () {
    return view('welcome');
 });
 
+Route::get('email', function () {
+   return view('email.pruebaemail');
+});
+
+//Route::get('email', 'Controller@pruebaEmail');
+
 Route::get('prueba', 'ValidateCommandController@resendDataTemp');
 Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');

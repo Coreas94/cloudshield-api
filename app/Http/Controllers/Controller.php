@@ -31,6 +31,10 @@ class Controller extends BaseController
 {
    use AuthorizesRequests, AuthorizesResources, DispatchesJobs, ValidatesRequests;
 
+   public function pruebaEmail(){
+      return view('email.pruebaemail');
+   }
+
    public function prueba2(Request $request){
 
       /*$log = new HistoricalData;
@@ -54,16 +58,16 @@ class Controller extends BaseController
       Session::put('data_tmp2', $array_data);
 
       \Artisan::call('checkpoint:resendData');*/
-      $new_object_name = 'Object29Nov';
+      $new_object_name = 'Object19Febrero';
       //$ip_initial = '198.198.198.5';
       //$ip_last = '198.198.198.5';
-      $ip_initial = '105.105.1.11';
-      $ip_last = '105.105.1.11';
+      $ip_initial = '170.5.11.5';
+      $ip_last = '170.5.12.0';
 
       // $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
       //$ssh_command2 = "tscpgw_api -g '172.16.3.116' -a count -o ".$new_object_name;
       #$ssh_command2 = "tscpgw_api -g '172.16.3.113' -a ranges -o ".$new_object_name;
-      $ssh_command2 = "tscpgw_api -g '172.16.3.117' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command2 = "tscpgw_api -g '172.16.3.112' -a search -o ".$new_object_name." -r '".$ip_initial." ".$ip_last."'";
 
       //$ssh_command2 = 'tscpgw_api -g "172.16.3.112" -a adddyo -o '.$new_object_name;
       //$ssh_command2 = 'tscpgw_api -g 172.16.3.116 -a searchobj -o '.$new_object_name;

@@ -71,7 +71,7 @@ class AccessController extends Controller{
 
 	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
 		Log::info($request);
-		return response()->json([
+		/*return response()->json([
 			'success' => [
 				//'tag_company' => $tag,
 				'message' => 'respuesta test',
@@ -79,7 +79,7 @@ class AccessController extends Controller{
 			]
 		]);
 
-		die();
+		die();*/
 
 		$checkpoint2 = new CheckPointFunctionController;
 		$network = new NetworkController;
