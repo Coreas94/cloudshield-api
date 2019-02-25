@@ -1107,6 +1107,7 @@ class CheckpointController extends Controller
 
    public function createDynamicObject(Request $request){
       Log::info("llega al createDynamic");
+
       $checkpoint2 = new CheckPointFunctionController;
       $validateCmd = new ValidateCommandController;
       $emailCtrl = new EmailController;
@@ -1134,6 +1135,9 @@ class CheckpointController extends Controller
          $api_token = $userLog['api_token'];
 
          $data_email = array("name_object" => $new_object_name, "name_company" => $name_company, "type_ssh" => "add_object");
+
+         $emailCtrl->sendEmailSSHObj($data_email);
+         die();
 
          $curl = curl_init();
 
