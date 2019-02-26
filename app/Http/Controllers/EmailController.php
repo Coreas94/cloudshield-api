@@ -134,6 +134,10 @@
          $title = 'CloudShield - Alert Remove Range IP Object';
          $msg = "Se informa que la empresa: ".$data['name_company']." modificó el siguiente objeto dinámico: ".$data['name_object'];
          $data2 = "Ya que se eliminaron los siguientes rangos de IPs: ".implode(", ", $data['ips']);
+
+      }elseif($data['type_ssh'] == "new_company") {
+         $title = 'CloudShield - Alert New Company';
+         $msg = "Se informa que se ha creado una nueva compañía con el nombre: ".$data['name_company'];
       }
 
       Mail::send('email.alertssh', ['title' => $title, 'data' => $msg, "data2" => $data2], function ($message){

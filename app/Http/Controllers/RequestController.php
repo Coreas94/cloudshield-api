@@ -199,21 +199,20 @@ class RequestController extends Controller{
       $user = JWTAuth::toUser($request['token']);
       Log::info($user);
 
-      $company_id = $user['company_id'];
       $request_user_id = $user['id'];
       $object_id = $request['object_id'];
       $type_request = $request['type_request'];
       $user_name = $user['name'].' '.$user['lastname'];
       $array_ip = [];
 
-      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
-      $company_data2 = json_decode(json_encode($company_data), true);
-
-      $name_company = $company_data2[0]['name'];
-
       $request_id = $request['id_request'];
       $request_data = RequestIp::where('id', '=', $request_id)->get();
       $request_data = $request_data->toArray();
+
+      $company_data = DB::table('fw_companies')->where('id', $request_data[0]['company_id'])->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
 
       foreach($request_data as $key => $row){
          array_push($array_ip, $row['ip_initial'].'-'.$row['ip_last']);
@@ -234,7 +233,7 @@ class RequestController extends Controller{
             $request_upd->save();
 
             $title = 'CloudShield - Alert Request';
-            $data = "Se informa que se aceptó la solicitud del usuario: ".$user_name." perteneciente a la empresa: ".$name_company;
+            $data = "Se informa que se aceptó la solicitud de la empresa: ".$name_company;
             $data2 = "Para agregar las siguientes IPs: ".implode(", ", $array_ip);
 
             Mail::send('email.alert_request', ['title' => $title, 'data' => $data, "data2" => $data2], function ($message){
@@ -270,14 +269,14 @@ class RequestController extends Controller{
       $user_name = $user['name'].' '.$user['lastname'];
       $array_ip = [];
 
-      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
-      $company_data2 = json_decode(json_encode($company_data), true);
-
-      $name_company = $company_data2[0]['name'];
-
       $request_id = $request['id_request'];
       $request_data = RequestIp::where('id', '=', $request_id)->get();
       $request_data = $request_data->toArray();
+
+      $company_data = DB::table('fw_companies')->where('id', $request_data[0]['company_id'])->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
 
       foreach($request_data as $key => $row){
          array_push($array_ip, $row['ip_initial'].'-'.$row['ip_last']);
@@ -288,7 +287,7 @@ class RequestController extends Controller{
       $request_upd->save();
 
       $title = 'CloudShield - Alert Request';
-      $data = "Se informa que se rechazó la solicitud del usuario: ".$user_name." perteneciente a la empresa: ".$name_company;
+      $data = "Se informa que se rechazó la solicitud de la empresa: ".$name_company;
       $data2 = "Para agregar las siguientes IPs: ".implode(", ", $array_ip);
 
       Mail::send('email.alert_request', ['title' => $title, 'data' => $data, "data2" => $data2], function ($message){

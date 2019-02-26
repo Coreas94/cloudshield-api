@@ -277,8 +277,12 @@ class CheckpointController extends Controller
          if($this->typeResponseCurl){
             $response = json_decode($this->output, true);
             Log::info($response);
-     			foreach($response['tasks'] as $row)
-     				$percentage = $row['progress-percentage'];
+            if(isset($response['tasks'])){
+               foreach($response['tasks'] as $row)
+        				$percentage = $row['progress-percentage'];
+            }else{
+               return "error";
+            }
          }
   		}
   		return $response;
@@ -1064,36 +1068,41 @@ class CheckpointController extends Controller
  			$task = $resp['task-id'];
  			sleep(2);
  			$result_task = $this->showTask($task, $sid);
- 			$array_tasks = [];
- 			$i = 0;
 
- 			foreach ($result_task['tasks'] as $key => $value) {
-            if(isset($value['task_details'])){
-               foreach ($value['task-details'] as $key2 => $value2) {
-    					foreach($value2['changes'] as $row){
-    						$array_tasks[$i] = array_filter($row['operations']);
-    						$i++;
-    					}
+         if($result_task == "error"){
+            return "error";
+         }else{
+            $array_tasks = [];
+    			$i = 0;
+
+    			foreach ($result_task['tasks'] as $key => $value) {
+               if(isset($value['task_details'])){
+                  foreach ($value['task-details'] as $key2 => $value2) {
+       					foreach($value2['changes'] as $row){
+       						$array_tasks[$i] = array_filter($row['operations']);
+       						$i++;
+       					}
+       				}
+               }else{
+                  return "error task details";
+               }
+    			}
+
+    			$i = 0;
+    			$info_changes = [];
+    			foreach ($array_tasks as $key => $value) {
+    				foreach ($value as $key2 => $value2) {
+    					$info_changes[$i]['type_change'] = $key2;
+    					$info_changes[$i]['data'] = $value2;
+
+    					$i++;
     				}
-            }else{
-               return "error task details";
-            }
- 			}
+    			}
 
- 			$i = 0;
- 			$info_changes = [];
- 			foreach ($array_tasks as $key => $value) {
- 				foreach ($value as $key2 => $value2) {
- 					$info_changes[$i]['type_change'] = $key2;
- 					$info_changes[$i]['data'] = $value2;
+    			$result_changes = $this->evaluateChanges($info_changes);
 
- 					$i++;
- 				}
- 			}
-
- 			$result_changes = $this->evaluateChanges($info_changes);
-
- 			return "success";
+    			return "success";
+         }
  			//return $array_tasks;
  		}elseif(isset($resp['code'])){
  			Log::info($resp['message']);
@@ -2142,7 +2151,7 @@ class CheckpointController extends Controller
                //Mando a eliminar el rango de ips al checkpoint
                $validateDelrip = $validateCmd->validateRemoveIpObject($object_name, $add_initial, $add_last, $total_ips, $flag);
 
-               array_push($arreglo_data, $validateAdddyo);
+               array_push($arreglo_data, $validateDelrip);
 
                if(!empty($data_exist)){
                   foreach ($data_exist as $value) {

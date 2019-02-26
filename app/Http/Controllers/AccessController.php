@@ -23,6 +23,7 @@ use App\FwObject;
 use App\Http\Controllers\CheckPointFunctionController;
 use App\BlockedIp;
 use App\WhitelistCompany;
+use App\Http\Controllers\EmailController;
 
 use JWTAuth;
 
@@ -83,6 +84,7 @@ class AccessController extends Controller{
 
 		$checkpoint2 = new CheckPointFunctionController;
 		$network = new NetworkController;
+		$emailCtrl = new EmailController;
 
 		$v = Validator::make($request->all(), [
    		"name_new_company" => "required",
@@ -370,7 +372,13 @@ class AccessController extends Controller{
 											}
 								      }
 
+										$data_email = array("name_company" => $name_company, "type_ssh" => "new_company");
+
 										if($response_mk == 1){
+
+											//Mando la instrucción para enviar el email anunciando la creación de objeto
+						               $emailCtrl->sendEmailSSHObj($data_email);
+
 											return response()->json([
 												'success' => [
 													'tag_company' => $tag,
