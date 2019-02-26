@@ -1136,8 +1136,8 @@ class CheckpointController extends Controller
 
          $data_email = array("name_object" => $new_object_name, "name_company" => $name_company, "type_ssh" => "add_object");
 
-         $emailCtrl->sendEmailSSHObj($data_email);
-         die();
+         #$emailCtrl->sendEmailSSHObj($data_email);
+         #die();
 
          $curl = curl_init();
 
