@@ -1,5 +1,5 @@
 <DataRequest custId="0" dbId="14896750" end="0" entityVersion="1" id="14896750" issueCustId="3" type="Query">
-   <Name>checkpoint-medium</Name>
+   <Name>paloalto</Name>
    <Description/>
    <CustomerScope groupByEachCustomer="false">
       <Include all="true"/>
@@ -11,7 +11,7 @@
    </SelectClause>
    <PatternClause window="0">
       <SubPattern id="14896800" name="">
-         <SingleEvtConstr>parserName = "CheckpointParser" AND ipsConfidence = "High" OR ipsConfidence = "Medium-High" OR ipsSeverity = "Medium" OR ipsSeverity = "Critical"</SingleEvtConstr>
+         <SingleEvtConstr>parserName = "PaloAltoParser"</SingleEvtConstr>
       </SubPattern>
    </PatternClause>
    <userRoles>

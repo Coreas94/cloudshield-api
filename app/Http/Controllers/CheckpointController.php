@@ -2503,35 +2503,39 @@ class CheckpointController extends Controller
   			$position = $request['position'];
   			$rule_change = $request['name_change'];
 
-         Control::curl("172.16.3.114")
-         ->is("set-access-rule")
-         ->config([
-            'name' => $rule_change,
-            'layer' => 'Network',
-            'new-position' => [
-               $position => $name_rule
-            ]
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $error;
-            $this->typeResponseCurl = 0;
-         });
+         $curl = curl_init();
 
-         Log::info("INFO move RUle 114");
-         Log::info($this->output);
+         curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://172.16.3.114/web_api/set-access-rule",
+          	CURLOPT_RETURNTRANSFER => true,
+          	CURLOPT_ENCODING => "",
+          	CURLOPT_MAXREDIRS => 10,
+          	CURLOPT_TIMEOUT => 30,
+          	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          	CURLOPT_SSL_VERIFYPEER => false,
+          	CURLOPT_SSL_VERIFYHOST => false,
+          	CURLOPT_CUSTOMREQUEST => "POST",
+          	CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"$rule_change\", \r\n \"layer\" : \"Network\", \r\n \"new-position\" : {\r\n \"$position\" : \"$name_rule\"} \r\n}",
+          	CURLOPT_HTTPHEADER => array(
+          		"cache-control: no-cache",
+          		"content-type: application/json",
+          		"X-chkp-sid: ".$sid
+            ),
+         ));
 
-  			if(!$this->typeResponseCurl){
-  				return response()->json([
-  					'error' => [
-  						'message' => $this->output,
-  						'status_code' => 20
-  					]
-  				]);
-  			}else{
+         $response = curl_exec($curl);
+         $err = curl_error($curl);
+
+         curl_close($curl);
+
+         if($err){
+            return response()->json([
+            	'error' => [
+            		'message' => $this->output,
+            		'status_code' => 20
+            	]
+            ]);
+         }else{
 
   				$result = json_decode($this->output, true);
 

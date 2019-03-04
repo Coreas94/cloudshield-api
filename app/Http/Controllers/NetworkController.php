@@ -1436,7 +1436,6 @@ class NetworkController extends Controller{
  		]);
    }
 
-
    public function exceptiontest(Request $request){
 
       $checkpoint = new CheckpointController;

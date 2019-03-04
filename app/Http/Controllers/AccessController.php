@@ -78,9 +78,9 @@ class AccessController extends Controller{
 				'message' => 'respuesta test',
 				'status_code' => 200
 			]
-		]);
+		]);*/
 
-		die();*/
+		die();
 
 		$checkpoint2 = new CheckPointFunctionController;
 		$network = new NetworkController;
@@ -304,73 +304,76 @@ class AccessController extends Controller{
 							     			$ip_last_mk = '1.1.1.1';
 							         }
 
-										//Obtengo el token del mitrotik
-										$curl = curl_init();
-
-										curl_setopt_array($curl, array(
-								        	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
-								        	CURLOPT_RETURNTRANSFER => true,
-								        	CURLOPT_ENCODING => "",
-								        	CURLOPT_MAXREDIRS => 10,
-								        	CURLOPT_TIMEOUT => 30,
-								        	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-											CURLOPT_SSL_VERIFYPEER => false,
-											CURLOPT_SSL_VERIFYHOST => false,
-								        	CURLOPT_CUSTOMREQUEST => "POST",
-								        	CURLOPT_HTTPHEADER => array(
-								          	"cache-control: no-cache"
-								        	),
-								      ));
-
-								      $response = curl_exec($curl);
-								      $err = curl_error($curl);
-
-								      curl_close($curl);
-
-								      if ($err) {
-								        Log::info("cURL Error #:" . $err);
-										  $response_mk = 0;
-								      }else{
-								         $result = json_decode($response, true);
-								         Log::info($result['token']);
-
-											//AQUI MANDO A CREAR USER AL MIKROTIK
+										//AQUI VALIDARÉ SI SE CREARÁ USUARIO MIKROTIK
+										if($user_mikrotik == true){
+											//Obtengo el token del mitrotik
 											$curl = curl_init();
 
 											curl_setopt_array($curl, array(
-											  	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/User?token=".$result['token'],
-											  	CURLOPT_RETURNTRANSFER => true,
-											  	CURLOPT_ENCODING => "",
-											  	CURLOPT_MAXREDIRS => 10,
-											  	CURLOPT_TIMEOUT => 30,
-											  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-											  	CURLOPT_CUSTOMREQUEST => "POST",
-											  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$company->id."&group_id=1",
-											  	CURLOPT_HTTPHEADER => array(
-											    	"cache-control: no-cache",
-											    	"content-type: application/x-www-form-urlencoded"
-											  	),
-											));
+									        	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
+									        	CURLOPT_RETURNTRANSFER => true,
+									        	CURLOPT_ENCODING => "",
+									        	CURLOPT_MAXREDIRS => 10,
+									        	CURLOPT_TIMEOUT => 30,
+									        	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+												CURLOPT_SSL_VERIFYPEER => false,
+												CURLOPT_SSL_VERIFYHOST => false,
+									        	CURLOPT_CUSTOMREQUEST => "POST",
+									        	CURLOPT_HTTPHEADER => array(
+									          	"cache-control: no-cache"
+									        	),
+									      ));
 
-											$response = curl_exec($curl);
-											$err = curl_error($curl);
+									      $response = curl_exec($curl);
+									      $err = curl_error($curl);
 
-											curl_close($curl);
+									      curl_close($curl);
 
-											if ($err) {
-											  	Log::info("cURL Error #:" . $err);
-												$response_mk = 0;
-											} else {
-											  	$resultmk = json_decode($response, true);
-												if(isset($resultmk['code']) && $resultmk['code'] == 200){
-													Log::info($resultmk);
-													$response_mk = 1;
-												}else{
-													Log::info($resultmk);
+									      if ($err) {
+									        Log::info("cURL Error #:" . $err);
+											  $response_mk = 0;
+									      }else{
+									         $result = json_decode($response, true);
+									         Log::info($result['token']);
+
+												//AQUI MANDO A CREAR USER AL MIKROTIK
+												$curl = curl_init();
+
+												curl_setopt_array($curl, array(
+												  	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/User?token=".$result['token'],
+												  	CURLOPT_RETURNTRANSFER => true,
+												  	CURLOPT_ENCODING => "",
+												  	CURLOPT_MAXREDIRS => 10,
+												  	CURLOPT_TIMEOUT => 30,
+												  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+												  	CURLOPT_CUSTOMREQUEST => "POST",
+												  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$company->id."&group_id=1",
+												  	CURLOPT_HTTPHEADER => array(
+												    	"cache-control: no-cache",
+												    	"content-type: application/x-www-form-urlencoded"
+												  	),
+												));
+
+												$response = curl_exec($curl);
+												$err = curl_error($curl);
+
+												curl_close($curl);
+
+												if ($err) {
+												  	Log::info("cURL Error #:" . $err);
 													$response_mk = 0;
+												} else {
+												  	$resultmk = json_decode($response, true);
+													if(isset($resultmk['code']) && $resultmk['code'] == 200){
+														Log::info($resultmk);
+														$response_mk = 1;
+													}else{
+														Log::info($resultmk);
+														$response_mk = 0;
+													}
 												}
-											}
-								      }
+									      }
+										}
 
 										$data_email = array("name_company" => $name_company, "type_ssh" => "new_company");
 
@@ -491,7 +494,6 @@ class AccessController extends Controller{
 			$company->description = $description;
 
 			if($company->save()){
-
 				return response()->json([
 	            'success' => [
 	               'company_id' => $company->id,
@@ -500,7 +502,6 @@ class AccessController extends Controller{
 	            ]
 	         ]);
 			}else{
-
 				return response()->json([
 	            'error' => [
 	               'message' => 'company not updated',
@@ -607,7 +608,6 @@ class AccessController extends Controller{
 					]
 				]);
 			}
-
 		}
 		catch (GuzzleHttp\Exception\ClientException $e) {
 			$response = $e->getResponse();

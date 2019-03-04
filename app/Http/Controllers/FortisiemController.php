@@ -156,7 +156,6 @@ class FortisiemController extends Controller
 
       // $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->orderBy('receive_time', 'desc')->take(5000)->get();
       $logs = LogsData::orderBy('receive_time', 'desc')->take(5000)->get();
-      //Log::info($logs);
 
       if(count($logs) > 0){
          return response()->json([
@@ -309,7 +308,6 @@ class FortisiemController extends Controller
       }
    }
 
-
    public function runAutomaticLogs(){
       $dt = \Carbon\Carbon::now();
       $fecha_fin = $dt->timestamp;
@@ -347,14 +345,55 @@ class FortisiemController extends Controller
                $ips->updated_at = $dt;
                $ips->save();
             }
-
          }else{
             return "No records found";
          }
       }
    }
 
+   public function runPaloAltoLogs(){
 
+      $dt = \Carbon\Carbon::now();
+      $fecha_fin = $dt->timestamp;
+      $fecha_inicio = $dt->subMinutes(10);
+      $fecha_inicio = $fecha_inicio->timestamp;
 
+      $process = new Process("python ".app_path()."/api_py/getPAData.py ".app_path()."/api_py/paloalto_data.xml ".$fecha_inicio.' '. $fecha_fin);
+      $process->run();
+
+      if(!$process->isSuccessful()){
+         Log::info("is error");
+         throw new ProcessFailedException($process);
+      }
+
+      $result = json_decode($process->getOutput(), true);
+      Log::info("trae: ". count($result));
+      Log::info($result);
+
+      $array2 = array_unique($result, SORT_REGULAR);
+
+      foreach ($array2 as $key => $value) {
+         $array = json_decode($value, true);
+
+         if(!empty($array) && isset($array['srcIpAddr']) && $array['srcIpAddr'] != "no-exist"){
+            // $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
+
+            /*$ip_exist = ThreatIps::where('ip', '=', $array['srcIpAddr'])->first();
+            if ($ip_exist === null) {
+               $ips = new ThreatIps;
+               $ips->ip = $array['srcIpAddr'];
+               $ips->object_name = 'soc-5g-block';
+               //$ips->receive_time = $format_date;
+               $ips->status = 0;
+               $ips->created_at = $dt;
+               $ips->updated_at = $dt;
+               $ips->save();
+            }*/
+
+         }else{
+            return "No records found";
+         }
+      }
+   }
 
 }
