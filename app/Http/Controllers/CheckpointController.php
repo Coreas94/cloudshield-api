@@ -2488,6 +2488,7 @@ class CheckpointController extends Controller
    }
 
    public function moveRule(Request $request){
+      Log::info("se mueve regla");
       Log::info($request);
 
       $checkpoint2 = new CheckPointFunctionController;
