@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Artisan;
 use App\HistoricalData;
+use GeoIP as GeoIP;
 
 class Controller extends BaseController
 {
@@ -33,6 +34,12 @@ class Controller extends BaseController
 
    public function pruebaEmail(){
       return view('email.pruebaemail');
+   }
+
+   public function getIp(){
+      $test = GeoIP::getLocation('114.67.89.77');
+      $prueba = $test->toArray();
+      return $prueba;
    }
 
    public function prueba2(Request $request){

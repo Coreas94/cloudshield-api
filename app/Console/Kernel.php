@@ -40,5 +40,7 @@ class Kernel extends ConsoleKernel
 
       $schedule->command('fortisiem:automaticThreatSave')->cron('*/12 * * * *');
 
+      //$schedule->command('fortisiem:automaticPALogs')->cron('*/14 * * * *');
+
    }
 }

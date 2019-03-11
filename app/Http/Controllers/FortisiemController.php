@@ -26,6 +26,7 @@ use IPTools\Network;
 use IPTools\IP;
 use App\LogsData;
 use App\ThreatIps;
+use GeoIP as GeoIP;
 
 use JWTAuth;
 
@@ -97,8 +98,6 @@ class FortisiemController extends Controller
 
       foreach ($result as $key => $value) {
          $array = json_decode($value, true);
-         // Log::info("ARRAAAAY");
-         // Log::info($array);
 
          $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
          $test = explode("[rule_name]=", $array['rawEventMsg']);
@@ -113,7 +112,61 @@ class FortisiemController extends Controller
             }
          }
 
+         if(strpos($rule_name, 'THREATSTOP') !== false){
+            $rule_name_sust = "IP REPUTATION";
+         }
+
          if( (isset($array['srcIpAddr']) && $array['srcIpAddr'] != "no-exist") && (isset($array['destIpAddr']) && $array['destIpAddr'] != "no-exist") ){
+
+            if(isset($array['srcGeoCountry']) &&  $array['srcGeoCountry'] != "no-exist"){
+               $srcCountry = $array['srcGeoCountry'];
+            }else{
+               $geo = GeoIP::getLocation($array['srcIpAddr']);
+               $geo = $geo->toArray();
+               $srcCountry = $geo['country'];
+               $src_city = $geo['city'];
+            }
+
+            if(isset($array['srcGeoLatitude']) && $array['srcGeoLatitude'] != "no-exist"){
+               $srcLat = $array['srcGeoLatitude'];
+            }else{
+               $geo = GeoIP::getLocation($array['srcIpAddr']);
+               $geo = $geo->toArray();
+               $srcLat = $geo['lat'];
+            }
+
+            if(isset($array['srcGeoLongitude']) && $array['srcGeoLongitude'] != "no-exist"){
+               $srcLong = $array['srcGeoLongitude'];
+            }else{
+               $geo = GeoIP::getLocation($array['srcIpAddr']);
+               $geo = $geo->toArray();
+               $srcLong = $geo['lon'];
+            }
+
+            if(isset($array['destGeoCountry']) && $array['destGeoCountry'] != "no-exist"){
+               $dstCountry = $array['destGeoCountry'];
+            }else{
+               $geo = GeoIP::getLocation($array['destIpAddr']);
+               $geo = $geo->toArray();
+               $dstCountry = $geo['country'];
+               $dst_city = $geo['city'];
+            }
+
+            if(isset($array['destGeoLatitude']) && $array['destGeoLatitude'] != "no-exist"){
+               $dstLat = $array['destGeoLatitude'];
+            }else{
+               $geo = GeoIP::getLocation($array['destIpAddr']);
+               $geo = $geo->toArray();
+               $dstLat = $geo['lat'];
+            }
+
+            if(isset($array['destGeoLongitude']) && $array['destGeoLongitude'] != "no-exist"){
+               $dstLong = $array['destGeoLongitude'];
+            }else{
+               $geo = GeoIP::getLocation($array['destIpAddr']);
+               $geo = $geo->toArray();
+               $dstLong = $geo['lon'];
+            }
 
             $log = new LogsData;
             $log->receive_time = $format_date;
@@ -121,17 +174,20 @@ class FortisiemController extends Controller
             $log->event_name = $array['eventName'];
             $log->src_ip = isset($array['srcIpAddr']) ? $array['srcIpAddr'] : 'undefined';
             $log->severity_category = isset($array['eventSeverityCat']) ? $array['eventSeverityCat'] : 'undefined';
-            $log->src_country = isset($array['srcGeoCountry']) ? $array['srcGeoCountry'] : 'undefined';
-            $log->src_latitude = isset($array['srcGeoLatitude']) ? $array['srcGeoLatitude'] : 'undefined';
-            $log->src_longitude = isset($array['srcGeoLongitude']) ? $array['srcGeoLongitude'] : 'undefined';
+            $log->src_country = $srcCountry;
+            $log->src_latitude = $srcLat;
+            $log->src_longitude = $srcLong;
+            $log->src_city = isset($src_city) ? $src_city : 'undefined';
             $log->dst_ip = isset($array['destIpAddr']) ? $array['destIpAddr'] : 'undefined';
-            $log->dst_country = isset($array['destGeoCountry']) ? $array['destGeoCountry'] : 'undefined';
-            $log->dst_latitude = isset($array['destGeoLatitude']) ? $array['destGeoLatitude'] : 'undefined';
-            $log->dst_longitude = isset($array['destGeoLongitude']) ? $array['destGeoLongitude'] : 'undefined';
+            $log->dst_country = $dstCountry;
+            $log->dst_latitude = $dstLat;
+            $log->dst_longitude = $dstLong;
+            $log->dst_city = isset($dst_city) ? $dst_city : 'undefined';
             $log->rule_name = $rule_name;
             $log->event_log = $array['rawEventMsg'];
             $log->relaying_ip = $array['relayDevIpAddr'];
             $log->date_initial = $array['phRecvTime'];
+            $log->rule_name_sust = isset($rule_name_sust) ? $rule_name_sust : $rule_name;
             $log->save();
          }
       }
@@ -149,13 +205,14 @@ class FortisiemController extends Controller
       $new_array_ip = [];
       foreach($ranges_ip as $val){
          $range = Range::parse($val['ip_initial'].'-'.$val['ip_last']);
-         foreach($range as $ip) {
+         foreach($range as $ip){
          	array_push($new_array_ip, (string)$ip);
          }
       }
 
       // $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->orderBy('receive_time', 'desc')->take(5000)->get();
       $logs = LogsData::orderBy('receive_time', 'desc')->take(5000)->get();
+      Log::info($logs);
 
       if(count($logs) > 0){
          return response()->json([
@@ -231,7 +288,6 @@ class FortisiemController extends Controller
             $initial_date = date ('Y-m-d H:i:s', $nuevafecha);
 
             break;
-
          case '3':
             $initial = $request['initial'];
             $last = $request['last'];
@@ -323,7 +379,7 @@ class FortisiemController extends Controller
       }
 
       $result = json_decode($process->getOutput(), true);
-      Log::info("trae: ". count($result));
+      Log::info("trae checkpoint: ". count($result));
       Log::info($result);
 
       $array2 = array_unique($result, SORT_REGULAR);
@@ -338,7 +394,7 @@ class FortisiemController extends Controller
             if ($ip_exist === null) {
                $ips = new ThreatIps;
                $ips->ip = $array['srcIpAddr'];
-               $ips->object_name = 'soc-5g-block';
+               $ips->object_name = 'checkpoint-block';
                //$ips->receive_time = $format_date;
                $ips->status = 0;
                $ips->created_at = $dt;
@@ -367,7 +423,7 @@ class FortisiemController extends Controller
       }
 
       $result = json_decode($process->getOutput(), true);
-      Log::info("trae: ". count($result));
+      Log::info("trae palo alto: ". count($result));
       Log::info($result);
 
       $array2 = array_unique($result, SORT_REGULAR);
@@ -389,7 +445,6 @@ class FortisiemController extends Controller
                $ips->updated_at = $dt;
                $ips->save();
             }*/
-
          }else{
             return "No records found";
          }

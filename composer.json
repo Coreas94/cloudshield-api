@@ -18,7 +18,8 @@
         "cviebrock/laravel-elasticsearch": "^2.0",
         "codemash/laravel-socket": "^1.0",
         "laravelcollective/bus": "^5.2.0",
-        "sentry/sentry-laravel": "0.8.*"
+        "sentry/sentry-laravel": "0.8.*",
+        "torann/geoip": "^1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

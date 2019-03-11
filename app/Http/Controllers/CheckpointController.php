@@ -231,7 +231,6 @@ class CheckpointController extends Controller
                      //return "success";
                   else
                      $textResp = "error";
-                     //return "error";
                }
 
                if($textResp == "success" && $installCh2 == "success"){
@@ -556,7 +555,7 @@ class CheckpointController extends Controller
    				CURLOPT_SSL_VERIFYHOST => false,
    				CURLOPT_CUSTOMREQUEST => "POST",
    				//CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n  \r\n  \"position\" : {\r\n    \"below\" : \"DATACENTER\"} \r\n}",
-   				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n, \"position\" : {\r\n \"below\" : \"DATACENTER NETWORKS\"} \r\n }",
+   				CURLOPT_POSTFIELDS => "{\r\n  \"layer\" : \"Network\",\r\n  \r\n \"name\" : \"$name_section\"\r\n, \"position\" : {\r\n \"below\" : \"SOC 5G DROP OUTGOING\"} \r\n }",
    				CURLOPT_HTTPHEADER => array(
    					"cache-control: no-cache",
    					"content-type: application/json",
@@ -642,7 +641,7 @@ class CheckpointController extends Controller
 			  	CURLOPT_CUSTOMREQUEST => "POST",
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => false,
-				CURLOPT_POSTFIELDS => "{\r\n \"uid\" : \"$uid_rule\",\r\n \"layer\" : \"Network\",\r\n  \"$field_change\" : $data_field2 \r\n}",
+				CURLOPT_POSTFIELDS => "{\r\n \"uid\" : \"$uid_rule\",\r\n \"layer\" : \"Network\", \r\n \"$field_change\" : $data_field2 \r\n}",
 			  	CURLOPT_HTTPHEADER => array(
 			    	"cache-control: no-cache",
 			    	"content-type: application/json",

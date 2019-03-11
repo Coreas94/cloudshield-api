@@ -80,7 +80,7 @@ class AccessController extends Controller{
 			]
 		]);*/
 
-		die();
+		//die();
 
 		$checkpoint2 = new CheckPointFunctionController;
 		$network = new NetworkController;
@@ -126,6 +126,7 @@ class AccessController extends Controller{
 	    	$description = isset($request['description_new_company']) ? $request['description_new_company'] : "";
 			$token = $request['token'];
 			$ips_assigned[] = $request['assigned_ips'];
+			$user_mikrotik = $request['user_mikrotik'];
 
 			$whitelist_ip = $request['whitelist_ip'];
 
@@ -310,7 +311,7 @@ class AccessController extends Controller{
 											$curl = curl_init();
 
 											curl_setopt_array($curl, array(
-									        	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
+									        	CURLOPT_URL => "http://172.16.28.62/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
 									        	CURLOPT_RETURNTRANSFER => true,
 									        	CURLOPT_ENCODING => "",
 									        	CURLOPT_MAXREDIRS => 10,
@@ -340,7 +341,7 @@ class AccessController extends Controller{
 												$curl = curl_init();
 
 												curl_setopt_array($curl, array(
-												  	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/User?token=".$result['token'],
+												  	CURLOPT_URL => "http://172.16.28.62/MIkrotik/public/User?token=".$result['token'],
 												  	CURLOPT_RETURNTRANSFER => true,
 												  	CURLOPT_ENCODING => "",
 												  	CURLOPT_MAXREDIRS => 10,
@@ -375,7 +376,7 @@ class AccessController extends Controller{
 									      }
 										}
 
-										$data_email = array("name_company" => $name_company, "type_ssh" => "new_company");
+										$data_email = array("name_company" => $name, "type_ssh" => "new_company");
 
 										if($response_mk == 1){
 

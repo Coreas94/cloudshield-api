@@ -155,6 +155,7 @@ return [
         Codemash\Socket\SocketServiceProvider::class,
         Collective\Bus\BusServiceProvider::class,
         'Sentry\SentryLaravel\SentryLaravelServiceProvider',
+        \Torann\GeoIP\GeoIPServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -215,6 +216,7 @@ return [
         'Elasticsearch' => Cviebrock\LaravelElasticsearch\Facade::class,
         'Socket' => Codemash\Socket\Facades\Socket::class,
         'Sentry' => 'Sentry\SentryLaravel\SentryFacade',
+        'GeoIP' => \Torann\GeoIP\Facades\GeoIP::class,
     ],
 
 ];

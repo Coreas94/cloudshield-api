@@ -111,6 +111,10 @@
          //$msg
       }elseif($data['type_ssh'] == "remove_ip_object") {
          $title = 'CloudShield - Alert Remove Range IP Object';
+      
+      }elseif($data['type_ssh'] == "new_company"){
+         $title = 'CloudShield - Alert New Company Added';
+         $msg = "Se informa que se agregó la empresa: ".$data['name_company'];
       }
 
       Mail::send('email.alertssh', ['title' => $title, 'data' => $msg], function ($message){

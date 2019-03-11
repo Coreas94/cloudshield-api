@@ -15,16 +15,13 @@ Route::get('/', function () {
    return view('welcome');
 });
 
-Route::get('email', function () {
-   return view('email.pruebaemail');
-});
-
-//Route::get('email', 'Controller@pruebaEmail');
-
+/***************RUTAS DE PRUEBA****************/
 Route::get('prueba', 'ValidateCommandController@resendDataTemp');
 Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
+Route::get('getip', 'Controller@getIp');
+/*******************************/
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
 Route::get('descarga', 'NetworkController@getDownload');
@@ -181,6 +178,12 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_ip_list_soc_allow', 'LayersController@getIpsListSocAllow');
          Route::post('/remove_ip_list', 'LayersController@removeIpList');
          Route::post('/edit_ip_list', 'LayersController@editIps');
+      });
+
+      Route::group(['prefix' => 'paloalto'], function(){
+
+         Route::post('/save_address_object', 'PaloAltoController@addAddressObject');
+
       });
 
       Route::get('errors/sendEmailAlarm', 'CheckpointController@sendEmailAlarm');

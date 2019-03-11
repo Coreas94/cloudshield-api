@@ -23,6 +23,7 @@ return array(
     'f0906e6318348a765ffb6eb24e0d0938' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/helpers.php',
     '58571171fd5812e6e447dce228f52f4d' => $vendorDir . '/laravel/framework/src/Illuminate/Support/helpers.php',
     '37a3dc5111fe8f707ab4c132ef1dbc62' => $vendorDir . '/guzzlehttp/guzzle/src/functions_include.php',
+    '1e298922c3e2134d42dcdb03e6d5f55a' => $vendorDir . '/torann/geoip/src/helpers.php',
     '5ed5ebacc8a061f188929029a0a50caa' => $baseDir . '/app/Helpers/dataLogs.php',
     '9827ccb7268d996e920d694c2b4f598d' => $baseDir . '/app/Helpers/getIpsByCompany.php',
     'aae54bab3ae5901e43abbee2226452b7' => $baseDir . '/app/Helpers/dataCheckpoint.php',
