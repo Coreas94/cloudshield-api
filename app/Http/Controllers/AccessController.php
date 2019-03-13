@@ -313,7 +313,7 @@ class AccessController extends Controller{
 											$curl = curl_init();
 
 											curl_setopt_array($curl, array(
-									        	CURLOPT_URL => "http://172.16.28.62/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
+									        	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
 									        	CURLOPT_RETURNTRANSFER => true,
 									        	CURLOPT_ENCODING => "",
 									        	CURLOPT_MAXREDIRS => 10,
@@ -343,7 +343,7 @@ class AccessController extends Controller{
 												$curl = curl_init();
 
 												curl_setopt_array($curl, array(
-												  	CURLOPT_URL => "http://172.16.28.62/MIkrotik/public/User?token=".$result['token'],
+												  	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/User?token=".$result['token'],
 												  	CURLOPT_RETURNTRANSFER => true,
 												  	CURLOPT_ENCODING => "",
 												  	CURLOPT_MAXREDIRS => 10,
