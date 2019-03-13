@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Http\Controllers\FortisiemController;
+use Illuminate\Support\Facades\Log;
 
 class automaticPALogs extends Command
 {
@@ -11,14 +13,14 @@ class automaticPALogs extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'fortisiem:automaticPALogs';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Automatic logs palo alto';
 
     /**
      * Create a new command instance.
@@ -35,8 +37,9 @@ class automaticPALogs extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(FortisiemController $fortisiem)
     {
-        //
+        Log::info("Llega a palo alto automatic");
+        $fortisiem->runPaloAltoLogs();
     }
 }

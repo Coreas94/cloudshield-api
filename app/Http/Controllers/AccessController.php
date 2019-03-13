@@ -178,6 +178,8 @@ class AccessController extends Controller{
 					$company->save();
 
 					if($company->id){
+						$companyid = $company->id;
+
 						$dataArray = array(
 							"name" => $name,
 							"tag" => $tag,
@@ -348,7 +350,7 @@ class AccessController extends Controller{
 												  	CURLOPT_TIMEOUT => 30,
 												  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 												  	CURLOPT_CUSTOMREQUEST => "POST",
-												  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$company->id."&group_id=1",
+												  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$companyid."&group_id=1",
 												  	CURLOPT_HTTPHEADER => array(
 												    	"cache-control: no-cache",
 												    	"content-type: application/x-www-form-urlencoded"
