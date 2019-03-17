@@ -1225,8 +1225,8 @@ class CheckpointController extends Controller
 
 					$object_new->save();
 
-               //Mando la instrucción para enviar el email anunciando la creación de objeto
-               $emailCtrl->sendEmailSSHObj($data_email);
+           //Mando la instrucción para enviar el email anunciando la creación de objeto
+           $emailCtrl->sendEmailSSHObj($data_email);
 
 					if($object_new->id){
 						Log::info("Se creó el objeto checkpoint");
