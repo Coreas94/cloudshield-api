@@ -380,7 +380,7 @@ class AccessController extends Controller{
 
 										$data_email = array("name_company" => $name, "type_ssh" => "new_company");
 
-										if($response_mk == 1){
+										if(isset($response_mk) && ($response_mk == 1)){
 
 											//Mando la instrucción para enviar el email anunciando la creación de objeto
 						               $emailCtrl->sendEmailSSHObj($data_email);
