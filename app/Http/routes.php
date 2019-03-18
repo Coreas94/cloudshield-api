@@ -182,7 +182,7 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
       Route::group(['prefix' => 'paloalto'], function(){
 
-         Route::post('/save_address_object', 'PaloAltoController@addAddressObject');
+        Route::post('/save_address_object', 'PaloAltoController@addAddressObject');
 
       });
 

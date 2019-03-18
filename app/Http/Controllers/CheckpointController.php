@@ -2052,7 +2052,8 @@ class CheckpointController extends Controller
                            Log::info($arr_addr);
 
                            //inserto en la base los nuevos rangos
-                           $insert = DB::table('fw_address_objects')->insert($arr_addr);
+                           //$insert = DB::table('fw_address_objects')->insert($arr_addr);
+                           $insert = 1;
 
                            if($insert){
 
@@ -2307,8 +2308,8 @@ class CheckpointController extends Controller
                            Log::info($arr_addr);
 
                            //inserto en la base los nuevos rangos
-                           $insert = DB::table('fw_address_objects')->insert($arr_addr);
-
+                           //$insert = DB::table('fw_address_objects')->insert($arr_addr);
+                           $insert = 1;
                            if($insert){
                               $emailCtrl->sendEmailSSHRange($data_email);
                               return response()->json([
