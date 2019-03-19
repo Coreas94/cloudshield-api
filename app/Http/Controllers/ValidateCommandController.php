@@ -238,7 +238,7 @@ class ValidateCommandController extends Controller{
          Log::info("No existe el objeto en el 112");
       }
 
-		sleep(2);
+	    sleep(2);
 
       $flag = 0;
       $flag2 = 0;
@@ -248,21 +248,21 @@ class ValidateCommandController extends Controller{
       if($exist_object113 == 1){
 
          \SSH::into('checkpoint')->run($ssh_command2, function($line2){
-   			Log::info($line2.PHP_EOL);
-   			$evaluate = $line2.PHP_EOL;
-   		});
+       			Log::info($line2.PHP_EOL);
+       			$evaluate = $line2.PHP_EOL;
+   		   });
 
          $evaluate = $this->output;
 
-   		while ( ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
-            if($flag >= 2) break;
-            $flag++;
-   			Log::info("1 existe try again 113");
-   			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
-   				Log::info($line2.PHP_EOL);
-   				$evaluate = $line2.PHP_EOL;
-   			});
-   		}
+     		while ( ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
+              if($flag >= 2) break;
+              $flag++;
+     			    Log::info("1 existe try again 113");
+     			    \SSH::into('checkpoint')->run($ssh_command2, function($line2){
+         				Log::info($line2.PHP_EOL);
+         				$evaluate = $line2.PHP_EOL;
+     			    });
+     		}
 
          sleep(3);
 
@@ -326,21 +326,21 @@ class ValidateCommandController extends Controller{
       Log::info("exist object 116 ".$exist_object116);
       if($exist_object116 == 1){
 
-         \SSH::into('checkpoint')->run($ssh_command3, function($line3){
+      \SSH::into('checkpoint')->run($ssh_command3, function($line3){
    			Log::info($line3.PHP_EOL);
    			$evaluate = $line3.PHP_EOL;
    		});
 
          $evaluate = $this->output;
 
-   		while ( ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
-            if($flag >= 2) break;
-            $flag++;
-   			Log::info("1 existe try again 116");
-   			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
-   				Log::info($line3.PHP_EOL);
-   				$evaluate = $line3.PHP_EOL;
-   			});
+	    while ( ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
+          if($flag >= 2) break;
+          $flag++;
+ 			    Log::info("1 existe try again 116");
+ 			    \SSH::into('checkpoint')->run($ssh_command3, function($line3){
+     				Log::info($line3.PHP_EOL);
+     				$evaluate = $line3.PHP_EOL;
+     			});
    		}
 
          Log::info("flag 116");
@@ -410,11 +410,11 @@ class ValidateCommandController extends Controller{
    			$evaluate = $line4.PHP_EOL;
    		});
 
-         $evaluate = $this->output;
+      $evaluate = $this->output;
 
    		while ( ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
-            if($flag >= 2) break;
-            $flag++;
+        if($flag >= 2) break;
+        $flag++;
    			Log::info("1 existe try again 117");
    			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
    				Log::info($line4.PHP_EOL);

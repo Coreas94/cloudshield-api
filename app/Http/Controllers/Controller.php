@@ -37,9 +37,16 @@ class Controller extends BaseController
    }
 
    public function getIp(){
-      $test = GeoIP::getLocation('114.67.89.77');
-      $prueba = $test->toArray();
-      return $prueba;
+      //\Storage::makeDirectory('pruebaCarpeta', 777);
+
+      //chmod("pruebaCarpeta", 0777);
+      //\Storage::put('Otraprueba22'.'/'."jjj".'.json', "holaaa");
+
+      //$test = \Storage::get('Otraprueba'.'/'."jjj".'.json');
+      //return $test;
+      $data_exist = json_decode(file_get_contents(storage_path() .'/app/Otraprueba/jjj'.'.json'), true);
+      return $data_exist;
+      //Log::info($data_exist);
    }
 
    public function prueba2(Request $request){

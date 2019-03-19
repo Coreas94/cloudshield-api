@@ -316,10 +316,10 @@ class CheckpointController extends Controller
          }
       }
 
- 		return response()->json([
- 			'data' => $testarray,
- 			'object_id' => $object_id
- 		]);
+   		return response()->json([
+   			'data' => $testarray,
+   			'object_id' => $object_id
+   		]);
    }
 
    public function assignIpObject(Request $request){
@@ -357,17 +357,17 @@ class CheckpointController extends Controller
       $validateCmd = new ValidateCommandController;
       $emailCtrl = new EmailController;
 
- 		$object_id = $request['object_id'];
+      $object_id = $request['object_id'];
       $evaluate = "";
 
- 		$object = DB::table('fw_objects')->where('id', $object_id)->get();
- 		$object = json_decode(json_encode($object), true);
+		$object = DB::table('fw_objects')->where('id', $object_id)->get();
+		$object = json_decode(json_encode($object), true);
 
- 		$object_name = $object[0]['name'];
- 		#$ip_initial = $request['ip_initial'];
- 		#$ip_last = $request['ip_last'];
+		$object_name = $object[0]['name'];
+		#$ip_initial = $request['ip_initial'];
+		#$ip_last = $request['ip_last'];
 
-	   $type_address_id = 7;//Pertenece a rango de ip para checkpoint
+      $type_address_id = 7;//Pertenece a rango de ip para checkpoint
 
       $total_ips = count($request['ips']);
       $flag = 1;
@@ -424,45 +424,45 @@ class CheckpointController extends Controller
       $addr_obj = AddressObject::insert($dataSet);
 
       /*$addr_obj = new AddressObject;
- 		$addr_obj->ip_initial = $ip_initial;
- 		$addr_obj->ip_last = $ip_last;
- 		$addr_obj->object_id = $object_id;
- 		$addr_obj->type_address_id = $type_address_id;
- 		$addr_obj->save();*/
+      $addr_obj->ip_initial = $ip_initial;
+      $addr_obj->ip_last = $ip_last;
+      $addr_obj->object_id = $object_id;
+      $addr_obj->type_address_id = $type_address_id;
+      $addr_obj->save();*/
 
       //Artisan::call('checkpoint:resendData', ['token' => $request['token']]);
       Artisan::call('checkpoint:resendData');
 
- 		if($addr_obj){
+		if($addr_obj){
          $bd_ips_check = DB::connection('checkpoint')->table('ip_object_list')->insert(['object_id' => $object_id, 'ip_initial' => $ip_initial, 'ip_last' => $ip_last, 'created_at' =>  \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]);
 
-			if($bd_ips_check){
+  			if($bd_ips_check){
 
             //Mando la instrucción para enviar el email anunciando el nuevo rango
             $emailCtrl->sendEmailSSHRange($data_email);
 
-  				return response()->json([
-  					'success' => [
-  						'message' => "¡IP guardada exitosamente!",
-  						'status_code' => 200
-  					]
-  				]);
-			}else{
-  				return response()->json([
-  					'error' => [
-  						'message' => 'Error al guardar la IP',
-  						'status_code' => 20
-  					]
-  				]);
-			}
- 		}else{
-			return response()->json([
-				'error' => [
-					'message' => 'Error al guardar la IP',
-					'status_code' => 20
-				]
-			]);
- 		}
+            return response()->json([
+            	'success' => [
+            		'message' => "¡IP guardada exitosamente!",
+            		'status_code' => 200
+            	]
+            ]);
+  			}else{
+            return response()->json([
+            	'error' => [
+            		'message' => 'Error al guardar la IP',
+            		'status_code' => 20
+            	]
+            ]);
+  			}
+		}else{
+  			return response()->json([
+  				'error' => [
+  					'message' => 'Error al guardar la IP',
+  					'status_code' => 20
+  				]
+  			]);
+		}
   	}
 
    public function orderObjectsBD(){
@@ -513,17 +513,17 @@ class CheckpointController extends Controller
 
 				$insert = DB::table('fw_objects')->insert($arr);
 				if($insert) return response()->json([
-  						'success' => [
-  							'data' => "Success",
-  							'status_code' => 200
-  						]
-  					]);
+					'success' => [
+						'data' => "Success",
+						'status_code' => 200
+					]
+				]);
 				else return response()->json([
-						'error' => [
-							'message' => 'error al guardar los objetos',
-							'status_code' => 20
-						]
-					]);
+					'error' => [
+						'message' => 'error al guardar los objetos',
+						'status_code' => 20
+					]
+				]);
  			}
  		}else return response()->json([
 			'error' => [
@@ -1138,18 +1138,18 @@ class CheckpointController extends Controller
  			$company_data = DB::table('fw_companies')->where('id', $company_id)->get();
  			$company_data2 = json_decode(json_encode($company_data), true);
  			$tag = $company_data2[0]['tag'];
-       $token_company = $company_data2[0]['token_company'];
-       $name_company = $company_data2[0]['name'];
+         $token_company = $company_data2[0]['token_company'];
+         $name_company = $company_data2[0]['name'];
 
-       $userLog = JWTAuth::toUser($request['token']);
-       $api_token = $userLog['api_token'];
+         $userLog = JWTAuth::toUser($request['token']);
+         $api_token = $userLog['api_token'];
 
-       $data_email = array("name_object" => $new_object_name, "name_company" => $name_company, "type_ssh" => "add_object");
+         $data_email = array("name_object" => $new_object_name, "name_company" => $name_company, "type_ssh" => "add_object");
 
-       #$emailCtrl->sendEmailSSHObj($data_email);
-       #die();
+         #$emailCtrl->sendEmailSSHObj($data_email);
+         #die();
 
-       $curl = curl_init();
+         $curl = curl_init();
 
 			curl_setopt_array($curl, array(
 				CURLOPT_URL => "https://172.16.3.114/web_api/add-dynamic-object",
@@ -1227,8 +1227,8 @@ class CheckpointController extends Controller
 
 					$object_new->save();
 
-           //Mando la instrucción para enviar el email anunciando la creación de objeto
-           $emailCtrl->sendEmailSSHObj($data_email);
+               //Mando la instrucción para enviar el email anunciando la creación de objeto
+               $emailCtrl->sendEmailSSHObj($data_email);
 
 					if($object_new->id){
 						Log::info("Se creó el objeto checkpoint");
@@ -1458,8 +1458,8 @@ class CheckpointController extends Controller
                   $complement_name = $name[0].' '.$name[1];
                }
 
-  				     $value['short_name'] = $complement_name;
-      				 array_push($list_obj, $value);
+               $value['short_name'] = $complement_name;
+               array_push($list_obj, $value);
             }
          }
  		}
@@ -2205,7 +2205,6 @@ class CheckpointController extends Controller
                         ]);
                      }
                   }
-
 
                 }
             }
