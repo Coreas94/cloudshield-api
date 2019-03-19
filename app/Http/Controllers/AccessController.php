@@ -87,316 +87,324 @@ class AccessController extends Controller{
 		$emailCtrl = new EmailController;
 
 		$v = Validator::make($request->all(), [
-   		"name_new_company" => "required",
+   			"name_new_company" => "required",
       	"address_new_company" => "required",
       	"email_new_company" => "required|email",
-			"phone_new_company" => "required|numeric",
+				"phone_new_company" => "required|numeric",
 
-			"name_new_user" => "required",
-			"new_username" => "required",
-			"email_new_user" => "required|email",
-			"phone_new_user" => "required|numeric",
-			"password_new_user" => "required|min:4",
+				"name_new_user" => "required",
+				"new_username" => "required",
+				"email_new_user" => "required|email",
+				"phone_new_user" => "required|numeric",
+				"password_new_user" => "required|min:4",
     	]);
 
      	if($v->fails()){
-			return response()->json([
-			 	'error' => [
-				 	'data' => $v->errors(),
-				 	'status_code' => 20
-			 	]
-			]);
+				return response()->json([
+				 	'error' => [
+					 	'data' => $v->errors(),
+					 	'status_code' => 20
+				 	]
+				]);
     	}else{
 
-			$token_company = "";
-			$length = 10;
-			$codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			$codeAlphabet.= "abcdefghijklmnopqrstuvwxyz";
-			$codeAlphabet.= "0123456789";
-			$max = strlen($codeAlphabet); // edited
+				$token_company = "";
+				$length = 10;
+				$codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+				$codeAlphabet.= "abcdefghijklmnopqrstuvwxyz";
+				$codeAlphabet.= "0123456789";
+				$max = strlen($codeAlphabet); // edited
 
-			for ($i=0; $i < $length; $i++) {
-			  $token_company .= $codeAlphabet[random_int(0, $max-1)];
-			}
+				for ($i=0; $i < $length; $i++) {
+				  $token_company .= $codeAlphabet[random_int(0, $max-1)];
+				}
 
 	    	$name = $request['name_new_company'];
 	    	$address = $request['address_new_company'];
 	    	$email = $request['email_new_company'];
 	    	$phone = $request['phone_new_company'];
 	    	$description = isset($request['description_new_company']) ? $request['description_new_company'] : "";
-			$token = $request['token'];
-			$ips_assigned[] = $request['assigned_ips'];
-			$user_mikrotik = $request['user_mikrotik'];
+				$token = $request['token'];
+				$ips_assigned[] = $request['assigned_ips'];
+				$user_mikrotik = $request['user_mikrotik'];
 
-			$whitelist_ip = $request['whitelist_ip'];
+				$whitelist_ip = $request['whitelist_ip'];
 
-			foreach($ips_assigned as $value){
-				$ip_initial_mk = $value['ip_init'];
-				$ip_last_mk = $value['ip_last'];
-			}
+				foreach($ips_assigned as $value){
+					$ip_initial_mk = $value['ip_init'];
+					$ip_last_mk = $value['ip_last'];
+				}
 
 	    	$words = explode(" ", $name);
-			$acronym = "";
+				$acronym = "";
 
-			foreach ($words as $w) {
-			  	$acronym .= $w[0];
-			}
+				foreach ($words as $w) {
+				  	$acronym .= $w[0];
+				}
 
-			$random = rand(100, 999);
-			$random2 = rand(0,99);
+				$random = rand(100, 999);
+				$random2 = rand(0,99);
 	    	$account = '000'.$random;
 	    	$tag = $acronym.''.$random;
-			$tag_mk = $tag.''.$random2;
-			$country_id = $request['country_new_company'];
+				$tag_mk = $tag.''.$random2;
+				$country_id = $request['country_new_company'];
 
-			/*Mandaré a guardar el tag cuando se crea la compañía*/
-			try{
-				$client = new \GuzzleHttp\Client();
-				$data = $client->post("https://172.16.3.150/api?key=LUFRPT00eHE5UExyWEIrbnY3eEZ0SmRXMGVhcForVmc9bHphSCs4VGFSMk5QOS9CQnJkK1R1QT09&type=config&action=set&xpath=/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/tag/entry[@name='".$tag."']&element=<comments>Tag de la compañía: ".$name."</comments>", ["verify" => false]);
-				$response = $data->getBody()->getContents();
+				/*Mandaré a guardar el tag cuando se crea la compañía*/
+				try{
+					$client = new \GuzzleHttp\Client();
+					$data = $client->post("https://172.16.3.150/api?key=LUFRPT00eHE5UExyWEIrbnY3eEZ0SmRXMGVhcForVmc9bHphSCs4VGFSMk5QOS9CQnJkK1R1QT09&type=config&action=set&xpath=/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/tag/entry[@name='".$tag."']&element=<comments>Tag de la compañía: ".$name."</comments>", ["verify" => false]);
+					$response = $data->getBody()->getContents();
 
-				$xml = new \SimpleXMLElement($response);
-				$code = $xml['code'];
+					$xml = new \SimpleXMLElement($response);
+					$code = $xml['code'];
 
-				$tagCheck = $checkpoint->createTag($tag);
-				sleep(2);
+					$tagCheck = $checkpoint->createTag($tag);
+					sleep(2);
 
-				$createtag2 = $checkpoint2->createTag2($tag);
-				sleep(2);
+					$createtag2 = $checkpoint2->createTag2($tag);
+					sleep(2);
 
-				if(($code == 19 || $code == 20) && $tagCheck == "success"){
-					$company = new Company;
-					$company->name = $name;
-					$company->address = $address;
-					$company->email = $email;
-					$company->phone = $phone;
-					$company->description = $description;
-					$company->account = $account;
-					$company->tag = $tag;
-					$company->country_id = $country_id;
-					$company->token_company = $token_company;
-					$company->save();
+					if(($code == 19 || $code == 20) && $tagCheck == "success"){
+						$company = new Company;
+						$company->name = $name;
+						$company->address = $address;
+						$company->email = $email;
+						$company->phone = $phone;
+						$company->description = $description;
+						$company->account = $account;
+						$company->tag = $tag;
+						$company->country_id = $country_id;
+						$company->token_company = $token_company;
+						$company->save();
 
-					if($company->id){
-						$companyid = $company->id;
+						if($company->id){
+							$companyid = $company->id;
 
-						$dataArray = array(
-							"name" => $name,
-							"tag" => $tag,
-							"company_id" => $company->id,
-							"token" => $token
-						);
+							$dataArray = array(
+								"name" => $name,
+								"tag" => $tag,
+								"company_id" => $company->id,
+								"token" => $token
+							);
 
-						$data_user = array(
-							"name" => $request['name_new_user'],
-							"username" => $request['new_username'],
-							"email" => $request['email_new_user'],
-							"password" => $request['password_new_user'],
-							"phone" => $request['phone_new_user'],
-							"company_id" => $company->id
-						);
+							$data_user = array(
+								"name" => $request['name_new_user'],
+								"username" => $request['new_username'],
+								"email" => $request['email_new_user'],
+								"password" => $request['password_new_user'],
+								"phone" => $request['phone_new_user'],
+								"company_id" => $company->id
+							);
 
-						//GUARDAR IP WHITELIST POR DEFECTO DEL CLIENTE
-						$whitelist = new WhitelistCompany;
-						$whitelist->ip_allow = $whitelist_ip;
-						$whitelist->company_id = $company->id;
-						$whitelist->save();
+							//GUARDAR IP WHITELIST POR DEFECTO DEL CLIENTE
+							$whitelist = new WhitelistCompany;
+							$whitelist->ip_allow = $whitelist_ip;
+							$whitelist->company_id = $company->id;
+							$whitelist->save();
 
-						//AQUI MANDO A CREAR LOS OBJETOS AL CHECKPOINT
-						$object = $firewall->createObjectsCh($dataArray, $checkpoint, $ips_assigned);
-						sleep(2);
-
-						//AQUI MANDARÉ A CREAR LOS GROUPS
-						$group = $network->createGroup($request['token']);
-
-						Log::info($object);
-
-						if($object == "success"){
-							//Create section FOR RULES
-							$section = $checkpoint->createSections($tag, $company->id);
+							//AQUI MANDO A CREAR LOS OBJETOS AL CHECKPOINT
+							$object = $firewall->createObjectsCh($dataArray, $checkpoint, $ips_assigned);
 							sleep(2);
-							$section2 = $checkpoint2->createSections2($tag, $company->id);
-							sleep(2);
-							Log::info($section);
 
-							if($section != "error"){
+							//AQUI MANDARÉ A CREAR LOS GROUPS
+							$group = $network->createGroup($request['token']);
 
-								$arrayRule = array(
-									0 => array(
-										'name' => "WHITELIST-INCOMING",
-										'section' => $section[1],
-										'source' => "CUST-".$tag."-WHITELIST-INCOMING",
-										'destination' => "CUST-".$tag."-IP-ADDRESS",
-										'vpn' => "Any",
-										'action' => "Accept",
-										'company_id' => $company->id,
-										'tag' => $tag,
-										'section_id' => $section[0]
-									),
-									1 => array(
-										'name' => "WHITELIST-OUTGOING",
-										'section' => $section[1],
-										'source' => "CUST-".$tag."-IP-ADDRESS",
-										'destination' => "CUST-".$tag."-WHITELIST-OUTGOING",
-										'vpn' => "Any",
-										'action' => "Accept",
-										'company_id' => $company->id,
-										'tag' => $tag,
-										'section_id' => $section[0]
-									),
-									2 => array(
-										'name' => "BLACKLIST-INCOMING",
-										'section' => $section[1],
-										'source' => "CUST-".$tag."-BLACKLIST-INCOMING",
-										'destination' => "CUST-".$tag."-IP-ADDRESS",
-										'vpn' => "Any",
-										'action' => "Drop",
-										'company_id' => $company->id,
-										'tag' => $tag,
-										'section_id' => $section[0]
-									),
-									3 => array(
-										'name' => "BLACKLIST-OUTGOING",
-										'section' => $section[1],
-										'source' => "CUST-".$tag."-IP-ADDRESS",
-										'destination' => "CUST-".$tag."-BLACKLIST-OUTGOING",
-										'vpn' => "Any",
-										"action" => "Drop",
-										'company_id' => $company->id,
-										'tag' => $tag,
-										'section_id' => $section[0]
-									)
-								);
+							Log::info($object);
 
-								$i = 0;
-								$arr = [];
+							if($object == "success"){
+								//Create section FOR RULES
+								$section = $checkpoint->createSections($tag, $company->id);
+								sleep(2);
+								$section2 = $checkpoint2->createSections2($tag, $company->id);
+								sleep(2);
+								Log::info($section);
 
-								foreach($arrayRule as $row){
-									//Create rules
-									sleep(3);
-									$rules = $checkpoint->addRules($row);
+								if($section != "error"){
 
-									//Agrego las reglas en el checkpoint 118
-									$rules2 = $checkpoint2->addRules2($row);
+									$arrayRule = array(
+										0 => array(
+											'name' => "WHITELIST-INCOMING",
+											'section' => $section[1],
+											'source' => "CUST-".$tag."-WHITELIST-INCOMING",
+											'destination' => "CUST-".$tag."-IP-ADDRESS",
+											'vpn' => "Any",
+											'action' => "Accept",
+											'company_id' => $company->id,
+											'tag' => $tag,
+											'section_id' => $section[0]
+										),
+										1 => array(
+											'name' => "WHITELIST-OUTGOING",
+											'section' => $section[1],
+											'source' => "CUST-".$tag."-IP-ADDRESS",
+											'destination' => "CUST-".$tag."-WHITELIST-OUTGOING",
+											'vpn' => "Any",
+											'action' => "Accept",
+											'company_id' => $company->id,
+											'tag' => $tag,
+											'section_id' => $section[0]
+										),
+										2 => array(
+											'name' => "BLACKLIST-INCOMING",
+											'section' => $section[1],
+											'source' => "CUST-".$tag."-BLACKLIST-INCOMING",
+											'destination' => "CUST-".$tag."-IP-ADDRESS",
+											'vpn' => "Any",
+											'action' => "Drop",
+											'company_id' => $company->id,
+											'tag' => $tag,
+											'section_id' => $section[0]
+										),
+										3 => array(
+											'name' => "BLACKLIST-OUTGOING",
+											'section' => $section[1],
+											'source' => "CUST-".$tag."-IP-ADDRESS",
+											'destination' => "CUST-".$tag."-BLACKLIST-OUTGOING",
+											'vpn' => "Any",
+											"action" => "Drop",
+											'company_id' => $company->id,
+											'tag' => $tag,
+											'section_id' => $section[0]
+										)
+									);
 
-									Log::info($rules);
-									Log::info("regla creada SIGUIENTE");
-									Log::info($row);
+									$i = 0;
+									$arr = [];
 
-									$arr[$i] = $rules;
-									$i++;
-								}
+									foreach($arrayRule as $row){
+										//Create rules
+										sleep(3);
+										$rules = $checkpoint->addRules($row);
 
-								if(!in_array("error", $arr)){
-									//Log::info("Objetos creados exitosamente");
-									#$install = $checkpoint->installPolicy();
+										//Agrego las reglas en el checkpoint 118
+										$rules2 = $checkpoint2->addRules2($row);
 
-									#if($install == "success"){
-									sleep(3);
-									$user = $this->createUserCompany($data_user);
+										Log::info($rules);
+										Log::info("regla creada SIGUIENTE");
+										Log::info($row);
 
-									if($user == "success"){
-										//Log::info("Se instalaron los cambios");
-										if(isset($ips_assigned)){
+										$arr[$i] = $rules;
+										$i++;
+									}
+
+									if(!in_array("error", $arr)){
+										//Log::info("Objetos creados exitosamente");
+										#$install = $checkpoint->installPolicy();
+
+										#if($install == "success"){
+										sleep(3);
+										$user = $this->createUserCompany($data_user);
+
+										if($user == "success"){
+											//Log::info("Se instalaron los cambios");
+											if(isset($ips_assigned)){
 							            foreach($ips_assigned as $value){
-							      			$ip_initial_mk = $value['ip_init'];
-							      			$ip_last_mk = $value['ip_last'];
+								      			$ip_initial_mk = $value['ip_init'];
+								      			$ip_last_mk = $value['ip_last'];
 							            }
-							         }else{
+						         	}else{
 							            $ip_initial_mk = '1.1.1.1';
-							     			$ip_last_mk = '1.1.1.1';
-							         }
+							     				$ip_last_mk = '1.1.1.1';
+						         	}
 
-										//AQUI VALIDARÉ SI SE CREARÁ USUARIO MIKROTIK
-										if($user_mikrotik == true){
-											//Obtengo el token del mitrotik
-											$curl = curl_init();
-
-											curl_setopt_array($curl, array(
-									        	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
-									        	CURLOPT_RETURNTRANSFER => true,
-									        	CURLOPT_ENCODING => "",
-									        	CURLOPT_MAXREDIRS => 10,
-									        	CURLOPT_TIMEOUT => 30,
-									        	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-												CURLOPT_SSL_VERIFYPEER => false,
-												CURLOPT_SSL_VERIFYHOST => false,
-									        	CURLOPT_CUSTOMREQUEST => "POST",
-									        	CURLOPT_HTTPHEADER => array(
-									          	"cache-control: no-cache"
-									        	),
-									      ));
-
-									      $response = curl_exec($curl);
-									      $err = curl_error($curl);
-
-									      curl_close($curl);
-
-									      if ($err) {
-									        Log::info("cURL Error #:" . $err);
-											  $response_mk = 0;
-									      }else{
-									         $result = json_decode($response, true);
-									         Log::info($result['token']);
-
-												//AQUI MANDO A CREAR USER AL MIKROTIK
+											//AQUI VALIDARÉ SI SE CREARÁ USUARIO MIKROTIK
+											if($user_mikrotik == true){
+												//Obtengo el token del mitrotik
 												$curl = curl_init();
 
 												curl_setopt_array($curl, array(
-												  	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/User?token=".$result['token'],
-												  	CURLOPT_RETURNTRANSFER => true,
-												  	CURLOPT_ENCODING => "",
-												  	CURLOPT_MAXREDIRS => 10,
-												  	CURLOPT_TIMEOUT => 30,
-												  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-												  	CURLOPT_CUSTOMREQUEST => "POST",
-												  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$companyid."&group_id=1",
-												  	CURLOPT_HTTPHEADER => array(
-												    	"cache-control: no-cache",
-												    	"content-type: application/x-www-form-urlencoded"
-												  	),
-												));
+										        	CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/Sign?email=kr12%40red4g.net&password=123456",
+										        	CURLOPT_RETURNTRANSFER => true,
+										        	CURLOPT_ENCODING => "",
+										        	CURLOPT_MAXREDIRS => 10,
+										        	CURLOPT_TIMEOUT => 30,
+										        	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+															CURLOPT_SSL_VERIFYPEER => false,
+															CURLOPT_SSL_VERIFYHOST => false,
+										        	CURLOPT_CUSTOMREQUEST => "POST",
+										        	CURLOPT_HTTPHEADER => array(
+										          	"cache-control: no-cache"
+										        	),
+										      ));
 
-												$response = curl_exec($curl);
-												$err = curl_error($curl);
+										      $response = curl_exec($curl);
+										      $err = curl_error($curl);
 
-												curl_close($curl);
+										      curl_close($curl);
 
-												if ($err) {
-												  	Log::info("cURL Error #:" . $err);
-													$response_mk = 0;
-												} else {
-												  	$resultmk = json_decode($response, true);
-													if(isset($resultmk['code']) && $resultmk['code'] == 200){
-														Log::info($resultmk);
-														$response_mk = 1;
-													}else{
-														Log::info($resultmk);
-														$response_mk = 0;
-													}
-												}
-									      }
-										}
+										      if ($err) {
+										        Log::info("cURL Error #:" . $err);
+												  	$response_mk = 0;
+										      }else{
+										         	$result = json_decode($response, true);
+										         	Log::info($result['token']);
 
-										$data_email = array("name_company" => $name, "type_ssh" => "new_company");
+															//AQUI MANDO A CREAR USER AL MIKROTIK
+															$curl = curl_init();
 
-										if(isset($response_mk) && ($response_mk == 1)){
+															curl_setopt_array($curl, array(
+														  		CURLOPT_URL => "http://172.16.3.35/MIkrotik/public/User?token=".$result['token'],
+															  	CURLOPT_RETURNTRANSFER => true,
+															  	CURLOPT_ENCODING => "",
+															  	CURLOPT_MAXREDIRS => 10,
+															  	CURLOPT_TIMEOUT => 30,
+															  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+															  	CURLOPT_CUSTOMREQUEST => "POST",
+															  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$companyid."&group_id=1",
+															  	CURLOPT_HTTPHEADER => array(
+													    			"cache-control: no-cache",
+															    	"content-type: application/x-www-form-urlencoded"
+															  	),
+															));
 
-											//Mando la instrucción para enviar el email anunciando la creación de objeto
-						               $emailCtrl->sendEmailSSHObj($data_email);
+															$response = curl_exec($curl);
+															$err = curl_error($curl);
 
-											return response()->json([
-												'success' => [
-													'tag_company' => $tag,
-													'message' => 'Compañía, objetos y usuario creados exitosamente',
-													'status_code' => 200
-												]
-											]);
+															curl_close($curl);
+
+															if ($err) {
+														  	Log::info("cURL Error #:" . $err);
+																$response_mk = 0;
+															} else {
+														  		$resultmk = json_decode($response, true);
+																	if(isset($resultmk['code']) && $resultmk['code'] == 200){
+																			Log::info($resultmk);
+																			$response_mk = 1;
+																	}else{
+																		Log::info($resultmk);
+																		$response_mk = 0;
+																	}
+															}
+									      	}
+											}
+
+											$data_email = array("name_company" => $name, "type_ssh" => "new_company");
+
+											if(isset($response_mk) && ($response_mk == 1)){
+
+												//Mando la instrucción para enviar el email anunciando la creación de objeto
+				               	$emailCtrl->sendEmailSSHObj($data_email);
+
+												return response()->json([
+													'success' => [
+														'tag_company' => $tag,
+														'message' => 'Compañía, objetos y usuario creados exitosamente',
+														'status_code' => 200
+													]
+												]);
+											}else{
+												return response()->json([
+													'success' => [
+														'tag_company' => $tag,
+														'message' => 'Compañía, objetos y usuario creados exitosamente menos en Mikrotik',
+														'status_code' => 200
+													]
+												]);
+											}
 										}else{
 											return response()->json([
 												'success' => [
-													'tag_company' => $tag,
-													'message' => 'Compañía, objetos y usuario creados exitosamente menos en Mikrotik',
+													'message' => 'Se creó la compañía y objetos pero no el usuario',
 													'status_code' => 200
 												]
 											]);
@@ -404,71 +412,63 @@ class AccessController extends Controller{
 									}else{
 										return response()->json([
 											'success' => [
-												'message' => 'Se creó la compañía y objetos pero no el usuario',
+												'message' => 'Se creó la compañía pero no los objetos',
 												'status_code' => 200
 											]
 										]);
 									}
 								}else{
 									return response()->json([
-										'success' => [
-											'message' => 'Se creó la compañía pero no los objetos',
-											'status_code' => 200
+										'error' => [
+											'message' => 'error al crear la sección para las reglas',
+											'status_code' => 20
 										]
 									]);
 								}
 							}else{
 								return response()->json([
-									'error' => [
-										'message' => 'error al crear la sección para las reglas',
-										'status_code' => 20
+									'success' => [
+										'message' => 'Se creó la compañía pero no los objetos',
+										'status_code' => 200
 									]
 								]);
 							}
 						}else{
 							return response()->json([
-								'success' => [
-									'message' => 'Se creó la compañía pero no los objetos',
-									'status_code' => 200
+								'error' => [
+									'message' => 'Company not saved in bd',
+									'status_code' => 20
 								]
 							]);
 						}
 					}else{
+						Log::info("TAG NO CREADO");
 						return response()->json([
-							'error' => [
-								'message' => 'Company not saved in bd',
-								'status_code' => 20
-							]
-						]);
+			            'error' => [
+			               'message' => 'Company not created',
+			               'status_code' => 20
+			            ]
+			         ]);
 					}
-				}else{
-					Log::info("TAG NO CREADO");
+				}
+				catch (GuzzleHttp\Exception\ClientException $e) {
+					$response = $e->getResponse();
+					$responseBodyAsString = $response->getBody()->getContents();
+
 					return response()->json([
-		            'error' => [
-		               'message' => 'Company not created',
-		               'status_code' => 20
-		            ]
-		         ]);
+						'error' => [
+							'message' => $responseBodyAsString,
+							'status_code' => 20
+						]
+					]);
 				}
 			}
-			catch (GuzzleHttp\Exception\ClientException $e) {
-				$response = $e->getResponse();
-				$responseBodyAsString = $response->getBody()->getContents();
-
-				return response()->json([
-					'error' => [
-						'message' => $responseBodyAsString,
-						'status_code' => 20
-					]
-				]);
-			}
-		}
 	}
 
 	public function updateCompany(Request $request){
 
-		$v = Validator::make($request->all(), [
-   		"name_company" => "required",
+			$v = Validator::make($request->all(), [
+   			"name_company" => "required",
       	"address_company" => "required",
       	"email_company" => "required|email",
       	"phone_company" => "required",
@@ -476,14 +476,14 @@ class AccessController extends Controller{
 
      	if($v->fails()){
 			return response()->json([
-            'error' => [
-               'data' => $v->errors(),
-               'status_code' => 20
-            ]
-         ]);
+          'error' => [
+             'data' => $v->errors(),
+             'status_code' => 20
+          ]
+       ]);
     	}else{
-			$id = $request['id'];
-	    	$name = $request['name_company'];
+				$id = $request['id'];
+    		$name = $request['name_company'];
 	    	$address = $request['address_company'];
 	    	$email = $request['email_company'];
 	    	$phone = $request['phone_company'];
@@ -491,26 +491,26 @@ class AccessController extends Controller{
 
 	    	$company = Company::find($id);
 	    	$company->name = $name;
-			$company->address = $address;
-			$company->email = $email;
-			$company->phone = $phone;
-			$company->description = $description;
+				$company->address = $address;
+				$company->email = $email;
+				$company->phone = $phone;
+				$company->description = $description;
 
-			if($company->save()){
-				return response()->json([
-	            'success' => [
-	               'company_id' => $company->id,
-	               'message' => 'company updated',
-	               'status_code' => 200
-	            ]
-	         ]);
+				if($company->save()){
+					return response()->json([
+            'success' => [
+               'company_id' => $company->id,
+               'message' => 'company updated',
+               'status_code' => 200
+            ]
+         ]);
 			}else{
 				return response()->json([
-	            'error' => [
-	               'message' => 'company not updated',
-	               'status_code' => 20
-	            ]
-	         ]);
+            'error' => [
+               'message' => 'company not updated',
+               'status_code' => 20
+            ]
+         ]);
 			}
 		}
 	}
@@ -555,7 +555,7 @@ class AccessController extends Controller{
 
 		return response()->json([
     		"company" => $company,
-			'user' => $users
+				"user" => $users
 		]);
 	}
 
@@ -643,11 +643,11 @@ class AccessController extends Controller{
 
 		if($company){
 			return response()->json([
-            'success' => [
-               'message' => 'Datos de compañía eliminados',
-               'status_code' => 200
-            ]
-         ]);
+          'success' => [
+             'message' => 'Datos de compañía eliminados',
+             'status_code' => 200
+          ]
+       ]);
 		}else{
 			$type = "error";
 			$update_rule = Company::where('id', $id)
@@ -656,12 +656,12 @@ class AccessController extends Controller{
 			$emailCtrl->sendEmailCompany($name, $type);
 
 			return response()->json([
-            'error' => [
-               'message' => 'Compañía no pudo ser eliminada',
-               'status_code' => 20
-            ]
-         ]);
-		}
+          'error' => [
+             'message' => 'Compañía no pudo ser eliminada',
+             'status_code' => 20
+          ]
+       ]);
+		 }
  	}
 
 	public function getIpsBlocked(Request $request){
@@ -694,7 +694,7 @@ class AccessController extends Controller{
                'status_code' => 20
             ]
          ]);
-		}
+		 }
 	}
 
 }

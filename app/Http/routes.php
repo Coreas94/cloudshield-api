@@ -28,6 +28,8 @@ Route::get('descarga', 'NetworkController@getDownload');
 
 Route::get('change_errors', 'Controller@changeErrorData');
 
+Route::get('742702db6ff118593a47aff3c1ef0090', 'Auth\AuthController@newWhitelistIp');
+
 Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
    Route::post('/block_ip', 'Auth\AuthController@blockAttemps');

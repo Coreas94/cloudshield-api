@@ -190,7 +190,7 @@ class AuthController extends Controller
 
 				$user = new User;
 				$user->name = $name_sep[0];
-            $user->lastname = $name_sep[1];
+        $user->lastname = $name_sep[1];
 				$user->username = $request['username_new_user'];
 				$user->email = $request['email_new_user'];
 				$user->password = Hash::make($request['password_new_user']);
@@ -203,10 +203,10 @@ class AuthController extends Controller
 				if($user->api_token){
 
 					if($user->id){
-	               $id = DB::table('role_user')->insertGetId(
-	                  ['user_id' => $user->id, 'role_id' => $request['role_new_user']]
-	               );
-	            }
+             $id = DB::table('role_user')->insertGetId(
+                ['user_id' => $user->id, 'role_id' => $request['role_new_user']]
+             );
+          }
 
 					return response()->json([
 						'success' => [
@@ -219,7 +219,7 @@ class AuthController extends Controller
 				//Session::flash("user_success", "¡User created successfully!");
 			}catch(Exception $e){
 				// do task when error
-				Log::info($e->getMessage());
+		    Log::info($e->getMessage());
 				Session::flash("errorUser", "¡Error, User not created!");
 				return response()->json([
 					'error' => [
@@ -231,4 +231,34 @@ class AuthController extends Controller
 			//return redirect("user/user_index");
 		}
 	}
+
+  public function newWhitelistIp(Request $request){
+
+    $ip = $request['ip'];
+    $company = 1;
+
+    $new_whitelist = new WhitelistCompany;
+    $new_whitelist->ip_allow = $ip;
+    $new_whitelist->company_id = $company;
+    $new_whitelist->save();
+
+    if($new_whitelist){
+      return response()->json([
+         'success' => [
+            'message' => 'IP agregada con exito',
+            'status_code' => 200
+         ]
+      ]);
+    }else{
+      return response()->json([
+         'error' => [
+            'message' => 'No se pudo agregar la IP',
+            'status_code' => 20
+         ]
+      ]);
+    }
+
+  }
+
+
 }
