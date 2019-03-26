@@ -100,8 +100,15 @@ class CheckPointFunctionController extends Controller
 		}else{
 			$result = json_decode($response, true);
 			#log::info($result);
-         $sid = $result['sid'];
-         Session::put('sid_session_2', $sid);
+
+         if(isset($result['sid'])){
+            $sid = $result['sid'];
+            Session::put('sid_session_2', $sid);
+         }else{
+            $sid = "empty";
+            Session::put('sid_session_2', $sid);
+         }
+
          return $sid;
 		}
    }
@@ -204,7 +211,7 @@ class CheckPointFunctionController extends Controller
          $sid = Session::get('sid_session_2');
       else $sid = $this->getLastSession();
 
-      if($sid){
+      if($sid && $sid != "empty"){
          Control::curl("172.16.3.118")
          ->is('install-policy')
          ->config([
@@ -249,33 +256,40 @@ class CheckPointFunctionController extends Controller
 
    public function showTask($task_id){
   		$percentage = 0;
-  		if(Session::has('sid_session_2'))
-  			$sid = Session::get('sid_session_2');
-  		else $sid = $this->getLastSession();
+  		if(Session::has('sid_session_2')){
+         $sid = Session::get('sid_session_2');
+      }else{
+         $sid = $this->getLastSession();
+      }
 
-      $response = "";
-  		while($percentage != 100) {
-         Control::curl("172.16.3.118")
-         ->is('show-task')
-         ->config([
-            'task-id' => $task_id
-         ])
-         ->sid($sid)
-         ->eCurl(function($response){
-            $this->output = $response;
-            $this->typeResponseCurl = 1;
-         }, function($error){
-            $this->output = $error;
-            $this->typeResponseCurl = 0;
-         });
+      if($sid && $sid != "empty"){
 
-         if($this->typeResponseCurl){
-            $response = json_decode($this->output, true);
-     			foreach($response['tasks'] as $row)
-     				$percentage = $row['progress-percentage'];
-         }
-  		}
-  		return $response;
+         $response = "";
+     		while($percentage != 100) {
+            Control::curl("172.16.3.118")
+            ->is('show-task')
+            ->config([
+               'task-id' => $task_id
+            ])
+            ->sid($sid)
+            ->eCurl(function($response){
+               $this->output = $response;
+               $this->typeResponseCurl = 1;
+            }, function($error){
+               $this->output = $error;
+               $this->typeResponseCurl = 0;
+            });
+
+            if($this->typeResponseCurl){
+               $response = json_decode($this->output, true);
+        			foreach($response['tasks'] as $row)
+        				$percentage = $row['progress-percentage'];
+            }
+     		}
+     		return $response;
+      }else{
+         return "error";
+      }
   	}
 
    public function createSections2($tag, $company_id){
@@ -288,7 +302,7 @@ class CheckPointFunctionController extends Controller
          $sid = $this->getLastSession();
       }
 
-      if($sid){
+      if($sid && $sid != "empty"){
          $name_section = 'CUST-'.$tag;
          #$rule_name = $request['rule_name'];
          $curl = curl_init();
@@ -346,7 +360,7 @@ class CheckPointFunctionController extends Controller
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 			$uid_rule = $request['uid_rule'];
          $name_rule = $request['name_rule'];
 			$field_change = $request['field_change'];
@@ -420,7 +434,7 @@ class CheckPointFunctionController extends Controller
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 			$uid_rule = $request['uid'];
          $name_rule = $request['name'];
 			$status = $request['enabled'];
@@ -466,7 +480,7 @@ class CheckPointFunctionController extends Controller
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 
          $uid_rule = $request['uid'];
          $name_rule = $request['name'];
@@ -513,7 +527,7 @@ class CheckPointFunctionController extends Controller
          $sid = Session::get('sid_session_2');
       else $sid = $this->getLastSession();
 
-      if($sid){
+      if($sid && $sid != "empty"){
          Log::info("Existe sid en obj 118");
          $evaluate;
          $server_ch = 1; //Es el id del checkpoint
@@ -581,7 +595,7 @@ class CheckPointFunctionController extends Controller
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
-      if($sid){
+      if($sid && $sid != "empty"){
 
          $curl = curl_init();
 
@@ -640,7 +654,7 @@ class CheckPointFunctionController extends Controller
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
-      if($sid){
+      if($sid && $sid != "empty"){
 
          $curl = curl_init();
 			curl_setopt_array($curl, array(
@@ -686,7 +700,7 @@ class CheckPointFunctionController extends Controller
    		$sid = Session::get('sid_session_2');
    	else $sid = $this->getLastSession();
 
-  		if($sid){
+  		if($sid && $sid != "empty"){
 
   			$uid_rule = $request['uid'];
   			$name_rule = $request['name'];
@@ -750,7 +764,7 @@ class CheckPointFunctionController extends Controller
  			$sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 
  			$section = $data['section'];
  			$rule_name = $data['name'];
@@ -814,7 +828,7 @@ class CheckPointFunctionController extends Controller
 			$sid = Session::get('sid_session_2');
   		else $sid = $this->getLastSession();
 
-  		if($sid){
+  		if($sid && $sid != "empty"){
 
          $server_ch = 1; //Es el id del checkpoint
   			$new_object_name = $data['object_name'];
@@ -890,7 +904,7 @@ class CheckPointFunctionController extends Controller
  		else
          $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
          Log::info("existe sid addNewRule2");
  			$rule_name = $request['name'];
  			$src = $request['source'];
@@ -982,7 +996,7 @@ class CheckPointFunctionController extends Controller
          $sid = Session::get('sid_session_2');
       else $sid = $this->getLastSession();
 
-      if($sid){
+      if($sid && $sid != "empty"){
 
          $user = JWTAuth::toUser($token);
          $company_id = $user['company_id'];
@@ -1046,7 +1060,7 @@ class CheckPointFunctionController extends Controller
          $sid = Session::get('sid_session_2');
       else $sid = $this->getLastSession();
 
-      if($sid){
+      if($sid && $sid != "empty"){
 
          $user = JWTAuth::toUser($token);
 
@@ -1109,7 +1123,7 @@ class CheckPointFunctionController extends Controller
       if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 
          $name = $data['name'];
          $rule_position = "top";
@@ -1158,7 +1172,7 @@ class CheckPointFunctionController extends Controller
       if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 
          $curl = curl_init();
 
@@ -1201,7 +1215,7 @@ class CheckPointFunctionController extends Controller
       if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 
          $curl = curl_init();
 
@@ -1244,7 +1258,7 @@ class CheckPointFunctionController extends Controller
    	if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
    	else $sid = $this->getLastSession();
 
-      if($sid){
+      if($sid && $sid != "empty"){
 
          $user = JWTAuth::toUser($data['token']);
          $company_id = $user['company_id'];
@@ -1322,7 +1336,7 @@ class CheckPointFunctionController extends Controller
       if(Session::has('sid_session_2')) $sid = Session::get('sid_session_2');
  		else $sid = $this->getLastSession();
 
- 		if($sid){
+ 		if($sid && $sid != "empty"){
 
          $type = $data['type'];
          $postfield = $data['postfield'];

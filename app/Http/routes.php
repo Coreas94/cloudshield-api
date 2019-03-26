@@ -183,9 +183,23 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
       });
 
       Route::group(['prefix' => 'paloalto'], function(){
-
         Route::post('/save_address_object', 'PaloAltoController@addAddressObject');
+      });
 
+      Route::group(['prefix' => 'payment'], function(){
+         Route::post('/decode', 'PaymentController@decoder');
+      });
+
+      Route::group(['prefix' => 'plans'], function(){
+         Route::post('/new_plan', 'PlanController@createPlan');
+
+         Route::post('/edit_plan', 'PlanController@editPlan');
+
+         Route::post('/remove_plan', 'PlanController@removePlan');
+
+         Route::get('/get_plans', 'PlanController@getPlans');
+
+         Route::get('/get_services', 'PlanController@getServices');
       });
 
       Route::get('errors/sendEmailAlarm', 'CheckpointController@sendEmailAlarm');

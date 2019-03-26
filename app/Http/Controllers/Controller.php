@@ -120,8 +120,8 @@ class Controller extends BaseController
       curl_close($curl);
 
       if ($err) {
-       Log::info("cURL Error #:" . $err);
-       $response_mk = 0;
+         Log::info("cURL Error #:" . $err);
+         $response_mk = 0;
       } else {
          $result = json_decode($response, true);
          Log::info($result);
@@ -130,7 +130,6 @@ class Controller extends BaseController
    }
 
    public function getErrorData(){
-
       $datos = HistoricalData::where('status', '=', 0)->delete();
 
       Log::info($datos);
@@ -153,9 +152,14 @@ class Controller extends BaseController
       $log->token_company = 'ninguno';
       $log->save();
 
-
-
       Log::info(count($datos));
    }
 
+
+   public function insertUserPayment(Request $request){
+
+      $cust_pay = new CustomerPayment;
+      $cust_pay->customer_name = "name";
+
+   }
 }
