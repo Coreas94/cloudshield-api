@@ -7,6 +7,8 @@ use Validator;
 use App\Http\Controllers\Controller;
 use App\BlockedIp;
 use App\WhitelistCompany;
+use App\Plans;
+use App\CompanyPlan;
 
 use Hash;
 use App\Http\Requests;
@@ -146,16 +148,49 @@ class AuthController extends Controller
         		}
 
         		$user = JWTAuth::toUser($token);
+            $company_id = $user['company_id'];
         		$role_user = $user->roles->first()->name;
 
-        		return response()->json([
-        			'success' => [
-        				'api_token' => $token,
-        				'role_user' => $role_user,
-        				'message' => 'Login successful',
-        				'status_code' => 200
-        			]
-        		]);
+            $plan_status = CompanyPlan::where('company_id', '=', $company_id)->pluck('status_plan_id');
+
+            switch ($plan_status) {
+               case '[1]':
+                  return response()->json([
+                     'success' => [
+                        'api_token' => $token,
+                        'role_user' => $role_user,
+                        'message' => 'Login successful',
+                        'status_plan' => 'active',
+                        'status_code' => 200
+                     ]
+                  ]);
+                  break;
+               case '[2]':
+                  return response()->json([
+                     'success' => [
+                        'api_token' => $token,
+                        'role_user' => $role_user,
+                        'message' => 'Login successful',
+                        'status_plan' => 'inactive',
+                        'status_code' => 200
+                     ]
+                  ]);
+                  break;
+               case '[3]':
+                  return response()->json([
+                     'success' => [
+                        'api_token' => $token,
+                        'role_user' => $role_user,
+                        'message' => 'Login successful',
+                        'status_plan' => 'suspended',
+                        'status_code' => 200
+                     ]
+                  ]);
+                  break;
+               default:
+                  // code...
+                  break;
+            }
          }
       }else{
          return response()->json([
@@ -190,7 +225,7 @@ class AuthController extends Controller
 
 				$user = new User;
 				$user->name = $name_sep[0];
-        $user->lastname = $name_sep[1];
+            $user->lastname = $name_sep[1];
 				$user->username = $request['username_new_user'];
 				$user->email = $request['email_new_user'];
 				$user->password = Hash::make($request['password_new_user']);
@@ -202,11 +237,11 @@ class AuthController extends Controller
 
 				if($user->api_token){
 
-					if($user->id){
-             $id = DB::table('role_user')->insertGetId(
-                ['user_id' => $user->id, 'role_id' => $request['role_new_user']]
-             );
-          }
+               if($user->id){
+                  $id = DB::table('role_user')->insertGetId(
+                     ['user_id' => $user->id, 'role_id' => $request['role_new_user']]
+                  );
+               }
 
 					return response()->json([
 						'success' => [
@@ -232,33 +267,32 @@ class AuthController extends Controller
 		}
 	}
 
-  public function newWhitelistIp(Request $request){
+   public function newWhitelistIp(Request $request){
 
-    $ip = $request['ip'];
-    $company = 1;
+      $ip = $request['ip'];
+      $company = 1;
 
-    $new_whitelist = new WhitelistCompany;
-    $new_whitelist->ip_allow = $ip;
-    $new_whitelist->company_id = $company;
-    $new_whitelist->save();
+      $new_whitelist = new WhitelistCompany;
+      $new_whitelist->ip_allow = $ip;
+      $new_whitelist->company_id = $company;
+      $new_whitelist->save();
 
-    if($new_whitelist){
-      return response()->json([
-         'success' => [
-            'message' => 'IP agregada con exito',
-            'status_code' => 200
-         ]
-      ]);
-    }else{
-      return response()->json([
-         'error' => [
-            'message' => 'No se pudo agregar la IP',
-            'status_code' => 20
-         ]
-      ]);
-    }
-
-  }
+      if($new_whitelist){
+         return response()->json([
+            'success' => [
+               'message' => 'IP agregada con exito',
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+            'error' => [
+               'message' => 'No se pudo agregar la IP',
+               'status_code' => 20
+            ]
+         ]);
+      }
+   }
 
 
 }

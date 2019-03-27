@@ -316,10 +316,10 @@ class CheckpointController extends Controller
          }
       }
 
-   		return response()->json([
-   			'data' => $testarray,
-   			'object_id' => $object_id
-   		]);
+      return response()->json([
+      	'data' => $testarray,
+      	'object_id' => $object_id
+      ]);
    }
 
    public function assignIpObject(Request $request){
@@ -508,8 +508,8 @@ class CheckpointController extends Controller
 					$arr[$i]['company_id'] = 0;
 					$arr[$i]['created_at'] = \Carbon\Carbon::now();
 					$arr[$i]['updated_at'] = \Carbon\Carbon::now();
-					$i++;
-				}
+               $i++;
+            }
 
 				$insert = DB::table('fw_objects')->insert($arr);
 				if($insert) return response()->json([
@@ -522,14 +522,14 @@ class CheckpointController extends Controller
 					'error' => [
 						'message' => 'error al guardar los objetos',
 						'status_code' => 20
-					]
+               ]
 				]);
  			}
  		}else return response()->json([
 			'error' => [
 				'message' => 'error con la sesión al checkpoint',
 				'status_code' => 20
-			]
+         ]
 	   ]);
   	}
 
@@ -699,57 +699,57 @@ class CheckpointController extends Controller
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
 
-    		if($sid){
-    			foreach ($array_post as $value) {
-               Control::curl("172.16.3.114")
-               ->is($value)
-               ->config([
-                  'limit' => 50,
-                  'offset' => 0,
-                  'details-level' => 'standard'
-               ])
-               ->sid($sid)
-               ->eCurl(function($response){
-                  $this->output = $response;
-                  $this->typeResponseCurl = 1;
-               }, function($error){
-                  $this->output = $response;
-                  $this->typeResponseCurl = 0;
-               });
+ 		if($sid){
+ 			foreach ($array_post as $value) {
+            Control::curl("172.16.3.114")
+            ->is($value)
+            ->config([
+               'limit' => 50,
+               'offset' => 0,
+               'details-level' => 'standard'
+            ])
+            ->sid($sid)
+            ->eCurl(function($response){
+               $this->output = $response;
+               $this->typeResponseCurl = 1;
+            }, function($error){
+               $this->output = $response;
+               $this->typeResponseCurl = 0;
+            });
 
-   				if (!$this->typeResponseCurl) {
-   				    return $this->output;
-   				} else {
-     					$result = json_decode($this->output, true);
-     				  $data[$i] = $result['objects'];
-   				}
-   				$i++;
-    			}
+				if (!$this->typeResponseCurl) {
+				    return $this->output;
+				} else {
+  					$result = json_decode($this->output, true);
+  				  $data[$i] = $result['objects'];
+				}
+				$i++;
+ 			}
 
-    			foreach ($data as $val) {
-    				foreach($val as $valor){
+ 			foreach ($data as $val) {
+ 				foreach($val as $valor){
 
-    					$srv = new ServicesCheckpoint;
-    					$srv->name = $valor['name'];
-    					$srv->uid = $valor['uid'];
-    					$srv->type = $valor['type'];
-    					$srv->port = isset($valor['port']) ? $valor['port'] : 'N/A';
-    					$srv->save();
-    				}
-    			}
+ 					$srv = new ServicesCheckpoint;
+ 					$srv->name = $valor['name'];
+ 					$srv->uid = $valor['uid'];
+ 					$srv->type = $valor['type'];
+ 					$srv->port = isset($valor['port']) ? $valor['port'] : 'N/A';
+ 					$srv->save();
+ 				}
+ 			}
 
-    			return response()->json([
-    				'success' => [
-    					'message' => "Servicios y aplicaciones guardadas correctamente",
-    					'status_code' => 200
-    				]
-    			]);
-    		} else return response()->json([
-				'error' => [
-					'message' => "No existe sesión con el checkpoint",
-					'status_code' => 20
-				]
-			]);
+ 			return response()->json([
+ 				'success' => [
+ 					'message' => "Servicios y aplicaciones guardadas correctamente",
+ 					'status_code' => 200
+ 				]
+ 			]);
+ 		}else return response()->json([
+			'error' => [
+				'message' => "No existe sesión con el checkpoint",
+				'status_code' => 20
+			]
+		]);
    }
 
    public function getServicesCheckpoint(Request $request){
@@ -1116,7 +1116,6 @@ class CheckpointController extends Controller
    public function createDynamicObject(Request $request){
       Log::info("llega al createDynamic");
       Log::info($request);
-      //die();
 
       $checkpoint2 = new CheckPointFunctionController;
       $validateCmd = new ValidateCommandController;
@@ -2456,7 +2455,7 @@ class CheckpointController extends Controller
  			$sid = Session::get('sid_session');
  		else $sid = $this->getLastSession();
 
-    if($sid){
+      if($sid){
 
         $curl = curl_init();
         curl_setopt_array($curl, array(

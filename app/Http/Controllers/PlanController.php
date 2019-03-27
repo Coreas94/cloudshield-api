@@ -17,16 +17,51 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Plans;
 use App\CompanyPlan;
 use App\ServicesPlans;
+use App\DetailPlan;
+use Carbon\Carbon;
 
 class PlanController extends Controller{
 
    public function getPlans(Request $request){
 
+      $planes = [];
+      $services = [];
+      $all = [];
+
       $plans = Plans::all();
 
+      foreach($plans as $val){
+
+         $planes['id'] = $val['id'];
+         $planes['name'] = $val['name'];
+         $planes['description'] = $val['description'];
+         $planes['price'] = $val['price'];
+         $planes['duration'] = $val['duration'];
+         $planes['editable'] = $val['editable'];
+         $planes['created_at'] = $val['created_at']->toDateTimeString();
+         $planes['updated_at'] = $val['updated_at']->toDateTimeString();
+
+         $services_all = ServicesPlans::join('detail_plan', 'services_plans.id', '=', 'detail_plan.id_service')
+            ->where('detail_plan.plan_id', '=', $val['id'])
+            ->select('services_plans.id as id_service', 'services_plans.name_service', 'detail_plan.plan_id')
+            ->get();
+
+
+         foreach ($services_all as $row) {
+            Log::info($row);
+            if($row['plan_id'] == $val['id']){
+               array_push($services, $row);
+            }
+         }
+
+         $planes['services'] = $services;
+
+         array_push($all, $planes);
+
+      }
 
       return response()->json([
-         'plans' => $plans,
+         'plans' => $all,
          'status_code' => 200
       ]);
    }
@@ -46,7 +81,8 @@ class PlanController extends Controller{
       $description = $request['description'];
       $price = $request['price'];
       $duration = $request['duration_plan'];
-      $company_id = $request['company_id'];
+      $dataServices = [];
+      $current_time = Carbon::now()->toDateTimeString();
 
       $plan = new Plans;
       $plan->name = $name;
@@ -57,11 +93,26 @@ class PlanController extends Controller{
 
       if($plan->id){
 
+         if(isset($request['services'])){
+            foreach($request['services'] as $row){
+               $dataServices[] = [
+                  'id_service' => $row['id'],
+                  'plan_id' => $plan->id,
+                  'created_at' => $current_time,
+                  'updated_at' => $current_time,
+               ];
+            }
+
+            $srv = DetailPlan::insert($dataServices);
+         }
+
          if(isset($request['company_id'])){
+            $company_id = $request['company_id'];
             //Asigno el plan a una compañía en especifico
             $company_plan = new CompanyPlan;
             $company_plan->plan_id = $plan->id;
             $company_plan->automatic_payment = 1;
+            $company_plan->company_id = $company_id;
             $company_plan->status_plan_id = 1; //Significa que está activo
             $company_plan->save();
 
@@ -112,6 +163,7 @@ class PlanController extends Controller{
       $plan->duration = $duration;
 
       if($plan->save()){
+
          return response()->json([
             'success' => [
                'plan_id' => $plan->id,
