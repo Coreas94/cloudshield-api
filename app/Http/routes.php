@@ -20,7 +20,7 @@ Route::get('prueba', 'ValidateCommandController@resendDataTemp');
 Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
-Route::get('getip', 'Controller@getIp');
+Route::get('otra', 'Controller@getIp');
 /*******************************/
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
@@ -34,7 +34,7 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
    Route::post('/block_ip', 'Auth\AuthController@blockAttemps');
 
-   Route::group(['middleware' => ['jwt-auth']], function(){
+   Route::group(['middleware' => ['jwt-auth', 'plans']], function(){
 
       Route::get('/get_ip_blocked', 'AccessController@getIpsBlocked');
       Route::post('/unlock_ip', 'AccessController@deleteIpBlocked');

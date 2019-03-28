@@ -18,6 +18,12 @@ use Datatables;
 use App\User;
 use Hash;
 
+use App\Company;
+use App\CompanyPlan;
+use App\Plans;
+use App\DetailPlan;
+use App\ServicesPlans;
+
 use JWTAuth;
 
 class UserController extends Controller
@@ -279,7 +285,21 @@ class UserController extends Controller
 				return response()->json(['user_deleted']);
 			}else{
 				// the token is valid and we have found the user via the sub claim
-				return response()->json(compact('user'));
+				$company_id = $user['company_id'];
+
+				$plan = Plans::join('company_plan', 'plans.id', '=', 'company_plan.plan_id')
+		            ->where('company_plan.company_id', '=', $company_id)
+		            ->get();
+
+		      foreach($plan as $val){
+		         $services = ServicesPlans::join('detail_plan', 'services_plans.id', '=', 'detail_plan.id_service')
+		            ->where('detail_plan.plan_id', '=', $val['id'])
+		            ->select('services_plans.id as id_service', 'services_plans.name_service', 'detail_plan.plan_id')
+		            ->get();
+		      }
+
+
+				return response()->json(compact('user', 'services'));
 			}
 
    	}

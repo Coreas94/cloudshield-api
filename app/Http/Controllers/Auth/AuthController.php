@@ -208,7 +208,7 @@ class AuthController extends Controller
       Log::info($request);
 
 		$v = Validator::make($request->all(), [
-			'name_new_user' => 'required',
+			"name_new_user" => "required",
 			"username_new_user" => "required",
 			"email_new_user" => "required|email",
 			"phone_new_user" => "required|numeric",
@@ -254,7 +254,7 @@ class AuthController extends Controller
 				//Session::flash("user_success", "¡User created successfully!");
 			}catch(Exception $e){
 				// do task when error
-		    Log::info($e->getMessage());
+            Log::info($e->getMessage());
 				Session::flash("errorUser", "¡Error, User not created!");
 				return response()->json([
 					'error' => [

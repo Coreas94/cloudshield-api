@@ -13,19 +13,21 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection; // to generate collections.
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Datatables;
+
 use App\Company;
 use App\User;
 use App\FwAccessRule;
-use Hash;
 use App\FwSectionAccess;
 use App\FwObject;
-use App\Http\Controllers\CheckPointFunctionController;
 use App\BlockedIp;
 use App\WhitelistCompany;
+use App\CompanyPlan;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\CheckPointFunctionController;
 
 use JWTAuth;
+use Datatables;
+use Hash;
 
 class AccessController extends Controller{
 
@@ -34,7 +36,7 @@ class AccessController extends Controller{
 		$userLog = JWTAuth::toUser($request['token']);
 	  	$role_user = $userLog->roles->first()->name;
 
-     	if($role_user == "superadmin"){
+     	if($role_user == "superadmin" || $role_user == "ventas"){
         	$companies = DB::table('fw_companies')->where('deleted_at', NULL)->get();
      	}else{
         	$companies = DB::table('fw_companies')->where('deleted_at', NULL)->where('id', $userLog['company_id'])->get();
@@ -195,6 +197,14 @@ class AccessController extends Controller{
 							"phone" => $request['phone_new_user'],
 							"company_id" => $company->id
 						);
+
+						//ASIGNAR UN PLAN A UNA COMPAÑÍA
+						$company_plan = new CompanyPlan;
+		            $company_plan->plan_id = $request['plan_id'];
+		            $company_plan->automatic_payment = 1;
+		            $company_plan->company_id = $companyid;
+		            $company_plan->status_plan_id = 1;//Significa que está activo
+		            $company_plan->save();
 
 						//GUARDAR IP WHITELIST POR DEFECTO DEL CLIENTE
 						$whitelist = new WhitelistCompany;

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 use App\Plans;
 use App\CompanyPlan;
+use App\Company;
 use App\ServicesPlans;
 use App\DetailPlan;
 use Carbon\Carbon;
@@ -46,18 +47,9 @@ class PlanController extends Controller{
             ->select('services_plans.id as id_service', 'services_plans.name_service', 'detail_plan.plan_id')
             ->get();
 
-
-         foreach ($services_all as $row) {
-            Log::info($row);
-            if($row['plan_id'] == $val['id']){
-               array_push($services, $row);
-            }
-         }
-
-         $planes['services'] = $services;
+         $planes['services'] = $services_all;
 
          array_push($all, $planes);
-
       }
 
       return response()->json([
@@ -76,6 +68,7 @@ class PlanController extends Controller{
    }
 
    public function createPlan(Request $request){
+      Log::info($request);
 
       $name = $request['name'];
       $description = $request['description'];
@@ -99,7 +92,7 @@ class PlanController extends Controller{
                   'id_service' => $row['id'],
                   'plan_id' => $plan->id,
                   'created_at' => $current_time,
-                  'updated_at' => $current_time,
+                  'updated_at' => $current_time
                ];
             }
 
@@ -150,10 +143,11 @@ class PlanController extends Controller{
    }
 
    public function editPlan(Request $request){
+      Log::info($request);
 
       $plan_id = $request['plan_id'];
       $name = $request['name'];
-      $description = $request['description'];
+      $description = isset($request['description']) ? $request['description'] : "Null";
       $price = $request['price'];
       $duration = $request['duration_plan'];
 
@@ -185,7 +179,7 @@ class PlanController extends Controller{
 
       $plan_id = $request['plan_id'];
 
-      $plan = Company::find($id);
+      $plan = Plans::find($id);
 		$plan->delete();
 
 		if($plan){

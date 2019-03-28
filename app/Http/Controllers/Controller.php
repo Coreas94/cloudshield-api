@@ -28,6 +28,12 @@ use Artisan;
 use App\HistoricalData;
 use GeoIP as GeoIP;
 
+use App\Company;
+use App\CompanyPlan;
+use App\Plans;
+use App\DetailPlan;
+use App\ServicesPlans;
+
 class Controller extends BaseController
 {
    use AuthorizesRequests, AuthorizesResources, DispatchesJobs, ValidatesRequests;
@@ -37,6 +43,7 @@ class Controller extends BaseController
    }
 
    public function getIp(){
+
       //\Storage::makeDirectory('pruebaCarpeta', 777);
 
       //chmod("pruebaCarpeta", 0777);
@@ -44,8 +51,8 @@ class Controller extends BaseController
 
       //$test = \Storage::get('Otraprueba'.'/'."jjj".'.json');
       //return $test;
-      $data_exist = json_decode(file_get_contents(storage_path() .'/app/Otraprueba/jjj'.'.json'), true);
-      return $data_exist;
+      /*$data_exist = json_decode(file_get_contents(storage_path() .'/app/Otraprueba/jjj'.'.json'), true);
+      return $data_exist;*/
       //Log::info($data_exist);
    }
 

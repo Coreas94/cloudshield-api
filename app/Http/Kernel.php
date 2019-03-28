@@ -36,6 +36,10 @@ class Kernel extends HttpKernel
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         ],
+
+        'plans' => [
+            \App\Http\Middleware\VerifyPlanCompany::class,
+        ],
     ];
 
     /**
