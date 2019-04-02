@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 use App\Plans;
 use App\CompanyPlan;
+use App\CustomerPayment;
 
 class PaymentController extends Controller{
 
@@ -31,11 +32,19 @@ class PaymentController extends Controller{
       return 2 - $n;
    }
 
-   public function decoder(Request $request){
+   function hiddenString($str){
+      $start = 0;
+      $end = 4;
+      $len = strlen($str);
+      return substr($str, 0, $start) . str_repeat('*', $len - ($start + $end)) . substr($str, $len - $end, $end);
+   }
 
-      $DATA = $request['data'];
+   public function decoder($data){
 
-      $content = base64_decode(explode('@', str_replace('#', '', $DATA))[1]);
+      //$data = $request['data'];
+      Log::info($data);
+
+      $content = base64_decode(explode('@', str_replace('#', '', $data))[1]);
       $normalized = [[1,3,5,7],[9,11,13,15],[2,4,6,8],[10,12,14,16]];
       $blob = json_decode($content);
 
@@ -80,13 +89,66 @@ class PaymentController extends Controller{
       $edate = base64_decode($ed);
       $tcard = base64_decode($tc);
 
-      print "${response} <br>";   // ORIGINAL CREDIT CARD
+      $response2 =$this->hiddenString($response);
+      $resp = [];
+      $resp = array(
+         "secure_code" => $ccv,
+         "credit_exp" => $edate,
+         "card_brand" => $tcard
+      );
+
+      return $resp;
+
+      print "${response2} <br>";   // ORIGINAL CREDIT CARD
       print "${ccv} <br>";        // CCV
       print "${edate} <br>";      // EXPIRATION DATE
       print "${tcard} <br>";      // TYPE CARD
    }
 
+   public function saveDataPayment($request){
 
+      Log::info($request);
 
+      //die();
+
+      $credit_name = $request['credit_name'];
+      $customer_phone = $request['customer_phone'];
+      $address = $request['address'];
+      $country = $request['country'];
+      $data_card = $request['data'];
+      $company_id = $request['company_id'];
+      $status = 1;
+
+      $decode = $this->decoder($data_card);
+
+      $credit_card = $data_card;
+      $secure_code = $decode['secure_code'];
+      $type_card = $decode['card_brand'];
+      $exp = $decode['credit_exp'];
+
+      $expiration = explode("/",$exp);
+
+      $exp_month = $expiration[0];
+      $exp_year = $expiration[1];
+
+      $payment = new CustomerPayment;
+      $payment->customer_phone = $customer_phone;
+      $payment->credit_name = $credit_name;
+      $payment->address = $address;
+      $payment->country = $country;
+      $payment->company_id = $company_id;
+      $payment->credit_card = $credit_card;
+      $payment->secure_code = $secure_code;
+      $payment->credit_expmonth = $exp_month;
+      $payment->credit_expyear = $exp_year;
+      $payment->card_brand = $type_card;
+      $payment->save();
+
+      if($payment->id){
+         return "success";
+      }else{
+         return "error";
+      }
+   }
 
 }

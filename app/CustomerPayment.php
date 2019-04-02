@@ -9,6 +9,6 @@ class CustomerPayment extends Model
 {
    use SoftDeletes;
 
-   protected $table = "customer_payments";
+   protected $table = "customer_payment";
    protected $dates = ['deleted_at'];
 }

@@ -298,7 +298,6 @@ class UserController extends Controller
 		            ->get();
 		      }
 
-
 				return response()->json(compact('user', 'services'));
 			}
 

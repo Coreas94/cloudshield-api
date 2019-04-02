@@ -24,6 +24,9 @@ use App\WhitelistCompany;
 use App\CompanyPlan;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\CheckPointFunctionController;
+use App\Http\Controllers\PaymentController;
+
+use App\CustomerPayment;
 
 use JWTAuth;
 use Datatables;
@@ -72,8 +75,9 @@ class AccessController extends Controller{
 	 	]);
 	}
 
-	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall){
+	public function addCompany(Request $request, CheckpointController $checkpoint, FireWallController $firewall, PaymentController $paymentCtrl){
 		Log::info($request);
+
 		/*return response()->json([
 			'success' => [
 				//'tag_company' => $tag,
@@ -82,11 +86,12 @@ class AccessController extends Controller{
 			]
 		]);*/
 
-		//die();
+		// die();
 
 		$checkpoint2 = new CheckPointFunctionController;
 		$network = new NetworkController;
 		$emailCtrl = new EmailController;
+		$paymentCtrl = new PaymentController;
 
 		$v = Validator::make($request->all(), [
 			"name_new_company" => "required",
@@ -395,6 +400,19 @@ class AccessController extends Controller{
 											//Mando la instrucción para enviar el email anunciando la creación de objeto
 				               		$emailCtrl->sendEmailSSHObj($data_email);
 
+											if($request['credit_status'] == 1){
+												$payment_data = array(
+													"company_id" => $companyid,//$paymentCtrl
+													"data" => $request['data'],
+													"credit_name" => $request['credit_name'],
+													"customer_phone" => $phone,
+													"address" => $address,
+													"country" => $country_id
+												);
+
+												$paymentCtrl->saveDataPayment($payment_data);
+											}
+
 											return response()->json([
 												'success' => [
 													'tag_company' => $tag,
@@ -403,14 +421,15 @@ class AccessController extends Controller{
 												]
 											]);
 										}else{
-												return response()->json([
-													'success' => [
-														'tag_company' => $tag,
-														'message' => 'Compañía, objetos y usuario creados exitosamente menos en Mikrotik',
-														'status_code' => 200
-													]
-												]);
-											}
+
+											return response()->json([
+												'success' => [
+													'tag_company' => $tag,
+													'message' => 'Compañía, objetos y usuario creados exitosamente menos en Mikrotik',
+													'status_code' => 200
+												]
+											]);
+										}
 									}else{
 										return response()->json([
 											'success' => [

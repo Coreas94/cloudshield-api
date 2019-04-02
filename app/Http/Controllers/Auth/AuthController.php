@@ -9,6 +9,7 @@ use App\BlockedIp;
 use App\WhitelistCompany;
 use App\Plans;
 use App\CompanyPlan;
+use App\CustomerPayment;
 
 use Hash;
 use App\Http\Requests;
@@ -147,49 +148,94 @@ class AuthController extends Controller
         			]);
         		}
 
-        		$user = JWTAuth::toUser($token);
-            $company_id = $user['company_id'];
-        		$role_user = $user->roles->first()->name;
+            $user_val = User::where('email', '=', $input['email'])->get();
 
-            $plan_status = CompanyPlan::where('company_id', '=', $company_id)->pluck('status_plan_id');
+            foreach($user_val as $row){
+               if(is_null($row['deleted_at'])){
 
-            switch ($plan_status) {
-               case '[1]':
+                  $user = JWTAuth::toUser($token);
+                  $company_id = $user['company_id'];
+              		$role_user = $user->roles->first()->name;
+
+                  $plan_status = CompanyPlan::where('company_id', '=', $company_id)->pluck('status_plan_id');
+                  $payment_data = CustomerPayment::where('company_id', '=', $company_id)->count();
+
+                  if($payment_data == 0){
+
+                     if($company_id == 1){
+                        return response()->json([
+                           'success' => [
+                              'api_token' => $token,
+                              'role_user' => $role_user,
+                              'message' => 'Login successful',
+                              'payment_data' => '1',
+                              'status_code' => 200
+                           ]
+                        ]);
+                     }else{
+                        return response()->json([
+                           'success' => [
+                              'api_token' => $token,
+                              'role_user' => $role_user,
+                              'message' => 'Login successful',
+                              'payment_data' => '0',
+                              'status_code' => 200
+                           ]
+                        ]);
+                     }
+                  }else{
+
+                     switch ($plan_status) {
+                        case '[1]':
+                           return response()->json([
+                              'success' => [
+                                 'api_token' => $token,
+                                 'role_user' => $role_user,
+                                 'message' => 'Login successful',
+                                 'status_plan' => 'active',
+                                 'payment_data' => '1',
+                                 'status_code' => 200
+                              ]
+                           ]);
+                           break;
+                        case '[2]':
+                           return response()->json([
+                              'success' => [
+                                 'api_token' => $token,
+                                 'role_user' => $role_user,
+                                 'message' => 'Login successful',
+                                 'status_plan' => 'inactive',
+                                 'payment_data' => '1',
+                                 'status_code' => 200
+                              ]
+                           ]);
+                           break;
+                        case '[3]':
+                           return response()->json([
+                              'success' => [
+                                 'api_token' => $token,
+                                 'role_user' => $role_user,
+                                 'message' => 'Login successful',
+                                 'status_plan' => 'suspended',
+                                 'payment_data' => '1',
+                                 'status_code' => 200
+                              ]
+                           ]);
+                           break;
+                        default:
+                           // code...
+                           break;
+                        }
+                  }
+
+               }else{
                   return response()->json([
-                     'success' => [
-                        'api_token' => $token,
-                        'role_user' => $role_user,
-                        'message' => 'Login successful',
-                        'status_plan' => 'active',
-                        'status_code' => 200
-                     ]
-                  ]);
-                  break;
-               case '[2]':
-                  return response()->json([
-                     'success' => [
-                        'api_token' => $token,
-                        'role_user' => $role_user,
-                        'message' => 'Login successful',
-                        'status_plan' => 'inactive',
-                        'status_code' => 200
-                     ]
-                  ]);
-                  break;
-               case '[3]':
-                  return response()->json([
-                     'success' => [
-                        'api_token' => $token,
-                        'role_user' => $role_user,
-                        'message' => 'Login successful',
-                        'status_plan' => 'suspended',
-                        'status_code' => 200
-                     ]
-                  ]);
-                  break;
-               default:
-                  // code...
-                  break;
+           				'error' => [
+           					'message' => 'Usuario desactivado, contacte al administrador.',
+           					'status_code' => 20
+           				]
+           			]);
+               }
             }
          }
       }else{

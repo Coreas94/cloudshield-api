@@ -34,6 +34,7 @@ class VerifyPlanCompany
             foreach($plan as $row){
                $status = $row['status_plan_id'];
             }
+
             if($status == 1){
                return $next($request);
             }else{
