@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection; // to generate collections.
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Crypt;
 
 use App\Plans;
 use App\CompanyPlan;
@@ -105,11 +106,8 @@ class PaymentController extends Controller{
       print "${tcard} <br>";      // TYPE CARD
    }
 
-   public function saveDataPayment($request){
-
+   public function saveDataPayment(Request $request){
       Log::info($request);
-
-      //die();
 
       $credit_name = $request['credit_name'];
       $customer_phone = $request['customer_phone'];
@@ -127,7 +125,8 @@ class PaymentController extends Controller{
       $exp = $decode['credit_exp'];
 
       $expiration = explode("/",$exp);
-
+      Log::info("EXPIRATION ");
+      Log::info($expiration);
       $exp_month = $expiration[0];
       $exp_year = $expiration[1];
 

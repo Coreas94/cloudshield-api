@@ -100,12 +100,21 @@ class PlanController extends Controller{
          }
 
          if(isset($request['company_id'])){
+            $dt = \Carbon\Carbon::now();
             $company_id = $request['company_id'];
+
+            if($duration == "yearly"){
+               $expiration = $dt->addYear();
+            }else{
+               $expiration = $dt->addMonth();
+            }
+
             //Asigno el plan a una compañía en especifico
             $company_plan = new CompanyPlan;
             $company_plan->plan_id = $plan->id;
             $company_plan->automatic_payment = 1;
             $company_plan->company_id = $company_id;
+            $company_plan->expiration_date = $expiration;
             $company_plan->status_plan_id = 1; //Significa que está activo
             $company_plan->save();
 
@@ -197,6 +206,44 @@ class PlanController extends Controller{
 	          ]
 	       ]);
 		 }
+   }
+
+   public function assignPlanCompany(Request $request){
+
+      $dt = \Carbon\Carbon::now();
+      $company_id = $request['company_id'];
+      $plan_id = $request['plan_id'];
+
+      if($duration == "yearly"){
+         $expiration = $dt->addYear();
+      }else{
+         $expiration = $dt->addMonth();
+      }
+
+      //Asigno el plan a una compañía en especifico
+      $company_plan = new CompanyPlan;
+      $company_plan->plan_id = $plan_id;
+      $company_plan->automatic_payment = 1;
+      $company_plan->company_id = $company_id;
+      $company_plan->expiration_date = $expiration;
+      $company_plan->status_plan_id = 1; //Significa que está activo
+      $company_plan->save();
+
+      if($company_plan->id){
+         return response()->json([
+            'success' => [
+               'data' => "Plan asignado a la empresa con éxito",
+               'status_code' => 200
+            ]
+         ]);
+      }else{
+         return response()->json([
+            'error' => [
+               'message' => 'El plan no pudo ser asignado.',
+               'status_code' => 20
+            ]
+         ]);
+      }
    }
 
 }

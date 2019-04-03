@@ -3,3 +3,5 @@
 Homestead.yaml
 Homestead.json
 nohup.out
+/app/api_py/Server.pyc
+/app/api_py/GetMonitoredOrganizations.pyc
