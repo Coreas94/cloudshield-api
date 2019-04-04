@@ -150,4 +150,10 @@ class PaymentController extends Controller{
       }
    }
 
+   public function getDataPayment(Request $request){
+
+
+
+   }
+
 }

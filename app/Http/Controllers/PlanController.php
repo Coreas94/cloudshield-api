@@ -166,7 +166,6 @@ class PlanController extends Controller{
       $plan->duration = $duration;
 
       if($plan->save()){
-
          return response()->json([
             'success' => [
                'plan_id' => $plan->id,
@@ -208,7 +207,7 @@ class PlanController extends Controller{
 		 }
    }
 
-   public function assignPlanCompany(Request $request){
+   public function assignPlanCompany($company_id, $plan_id){
 
       $dt = \Carbon\Carbon::now();
       $company_id = $request['company_id'];
@@ -230,19 +229,9 @@ class PlanController extends Controller{
       $company_plan->save();
 
       if($company_plan->id){
-         return response()->json([
-            'success' => [
-               'data' => "Plan asignado a la empresa con éxito",
-               'status_code' => 200
-            ]
-         ]);
+         return "success";
       }else{
-         return response()->json([
-            'error' => [
-               'message' => 'El plan no pudo ser asignado.',
-               'status_code' => 20
-            ]
-         ]);
+         return "error";
       }
    }
 

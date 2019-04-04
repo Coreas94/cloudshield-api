@@ -25,6 +25,7 @@ use App\CompanyPlan;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\CheckPointFunctionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PlanController;
 
 use App\CustomerPayment;
 
@@ -52,6 +53,18 @@ class AccessController extends Controller{
 		$company_data2 = json_decode($company_data, true);
 
 		foreach ($company_data2 as $key => $value) {
+
+			$plan_company = CompanyPlan::join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->where('company_plan.company_id', '=', $value['id'])
+            ->select('company_plan.status_plan_id as status_id', 'plans.name', 'plans.price', 'plans.id as plan_id')
+            ->get();
+
+			if(count($plan_company) == 0){
+				$array_company[$i]['plan_company'] = "Sin plan";
+			}else{
+				$array_company[$i]['plan_company'] = $plan_company;
+			}
+
 			$array_company[$i]['id'] = $value['id'];
 			$array_company[$i]['account'] = $value['account'];
 			$array_company[$i]['text'] = $value['name'];
@@ -92,6 +105,7 @@ class AccessController extends Controller{
 		$network = new NetworkController;
 		$emailCtrl = new EmailController;
 		$paymentCtrl = new PaymentController;
+		$planCtrl = new PlanController;
 
 		$v = Validator::make($request->all(), [
 			"name_new_company" => "required",
@@ -401,6 +415,7 @@ class AccessController extends Controller{
 				               		$emailCtrl->sendEmailSSHObj($data_email);
 
 											if($request['credit_status'] == 1){
+												$plan_id = $request['plan_id'];
 												$payment_data = array(
 													"company_id" => $companyid,//$paymentCtrl
 													"data" => $request['data'],
@@ -411,17 +426,29 @@ class AccessController extends Controller{
 												);
 
 												$paymentCtrl->saveDataPayment($payment_data);
+
+												//Asignar un plan a la compañía
+												$planAssign = $planCtrl->assignPlanCompany($companyid, $plan_id);
 											}
 
-											return response()->json([
-												'success' => [
-													'tag_company' => $tag,
-													'message' => 'Compañía, objetos y usuario creados exitosamente',
-													'status_code' => 200
-												]
-											]);
+											if($planAssign == "success"){
+												return response()->json([
+													'success' => [
+														'tag_company' => $tag,
+														'message' => 'Compañía creada exitosamente y se le asignó un plan.',
+														'status_code' => 200
+													]
+												]);
+											}else{
+												return response()->json([
+													'success' => [
+														'tag_company' => $tag,
+														'message' => 'Se creó la compañía pero no se asingó el plan',
+														'status_code' => 200
+													]
+												]);
+											}
 										}else{
-
 											return response()->json([
 												'success' => [
 													'tag_company' => $tag,
