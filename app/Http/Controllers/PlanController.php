@@ -214,9 +214,11 @@ class PlanController extends Controller{
       $plan_id = $request['plan_id'];
 
       if($duration == "yearly"){
-         $expiration = $dt->addYear();
+         $date_exp = $dt->addYear();
+         $expiration = $date_exp->toDateString();
       }else{
-         $expiration = $dt->addMonth();
+         $date_exp = $dt->addMonth();
+         $expiration = $date_exp->toDateString();
       }
 
       //Asigno el plan a una compañía en especifico

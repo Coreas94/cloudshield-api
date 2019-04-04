@@ -190,6 +190,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/decode', 'PaymentController@decoder');
 
          Route::post('/save', 'PaymentController@saveDataPayment');
+
+         Route::get('/get_payment', 'PaymentController@getAutomaticPayment');
       });
 
       Route::group(['prefix' => 'plans'], function(){

@@ -85,12 +85,12 @@ class PaymentController extends Controller{
       $val_2 = join(array_slice($nOrder, 8, 4));
       $val_3 = join(array_slice($nOrder, 12, 4));
 
-      $response = $val_0.$val_1.$val_2.$val_3;
+      $card_number = $val_0.$val_1.$val_2.$val_3;
       $ccv = $this->func_x3($sc);
       $edate = base64_decode($ed);
       $tcard = base64_decode($tc);
 
-      $response2 =$this->hiddenString($response);
+      $response2 =$this->hiddenString($card_number);
       $resp = [];
       $resp = array(
          "secure_code" => $ccv,
@@ -150,9 +150,20 @@ class PaymentController extends Controller{
       }
    }
 
-   public function getDataPayment(Request $request){
+   public function getAutomaticPayment(Request $request){
+      $dt = \Carbon\Carbon::now();
+      $now = $dt->toDateString();
 
+      $data_payment = CompanyPlan::where('automatic_payment', '=', 1)->where('expiration_date', '=', $now)->get();
 
+      if(count($data_payment > 0)){
+         foreach($data_payment as $row){
+            $payment = $this->makePayment($row['company_id']);
+         }
+      }
+   }
+
+   public function makePayment($company_id){
 
    }
 
