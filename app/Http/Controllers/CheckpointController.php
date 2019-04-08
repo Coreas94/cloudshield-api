@@ -2126,7 +2126,6 @@ class CheckpointController extends Controller
 
                               //inserto en la base los nuevos rangos
                               $insert = DB::table('fw_address_objects')->insert($arr_addr);
-                              #$insert = 1;
 
                               if($insert){
 

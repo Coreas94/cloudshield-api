@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
      Commands\AutomaticThreat::class,
      Commands\AutomaticThreatSave::class,
      Commands\automaticPALogs::class,
+     Commands\AutomaticPayment::class,
    ];
 
    /**
@@ -39,9 +40,12 @@ class Kernel extends ConsoleKernel
 
       $schedule->command('fortisiem:automaticThreat')->cron('*/10 * * * *');
 
-      $schedule->command('fortisiem:automaticThreatSave')->cron('*/12 * * * *');
+      $schedule->command('fortisiem:automaticThreatSave')->cron('*/11 * * * *');
 
       $schedule->command('fortisiem:automaticPALogs')->cron('*/3 * * * *');
+
+      //$schedule->command('payment:automaticPayment')->cron('0 */12 * * *');
+
 
    }
 }

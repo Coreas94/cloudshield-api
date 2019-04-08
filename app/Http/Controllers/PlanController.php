@@ -207,11 +207,11 @@ class PlanController extends Controller{
 		 }
    }
 
-   public function assignPlanCompany($company_id, $plan_id){
+   public function assignPlanCompany($company_id, $plan_id, $automatic_payment){
 
       $dt = \Carbon\Carbon::now();
-      $company_id = $request['company_id'];
-      $plan_id = $request['plan_id'];
+      // $company_id = $request['company_id'];
+      // $plan_id = $request['plan_id'];
 
       if($duration == "yearly"){
          $date_exp = $dt->addYear();
@@ -224,7 +224,7 @@ class PlanController extends Controller{
       //Asigno el plan a una compañía en especifico
       $company_plan = new CompanyPlan;
       $company_plan->plan_id = $plan_id;
-      $company_plan->automatic_payment = 1;
+      $company_plan->automatic_payment = $automatic_payment;
       $company_plan->company_id = $company_id;
       $company_plan->expiration_date = $expiration;
       $company_plan->status_plan_id = 1; //Significa que está activo

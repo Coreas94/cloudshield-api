@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Crypt;
 use App\Plans;
 use App\CompanyPlan;
 use App\CustomerPayment;
+use App\Invoice;
+use JWTAuth;
 
 class PaymentController extends Controller{
 
@@ -41,9 +43,6 @@ class PaymentController extends Controller{
    }
 
    public function decoder($data){
-
-      //$data = $request['data'];
-      Log::info($data);
 
       $content = base64_decode(explode('@', str_replace('#', '', $data))[1]);
       $normalized = [[1,3,5,7],[9,11,13,15],[2,4,6,8],[10,12,14,16]];
@@ -158,13 +157,158 @@ class PaymentController extends Controller{
 
       if(count($data_payment > 0)){
          foreach($data_payment as $row){
-            $payment = $this->makePayment($row['company_id']);
+            $payment = $this->makePayment($row['company_id'], $row['plan_id']);
          }
       }
    }
 
-   public function makePayment($company_id){
+   public function makePayment(){
+
+      $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+      $code_invoice = substr(str_shuffle($permitted_chars), 0, 10);
+
+      $client = new \GuzzleHttp\Client();
+      $response = $client->request('POST', 'https://api-payments.red4g.net/api/auth/login', [
+         'form_params' => [
+            'email' => 'cloud.shield@red5g.com',
+            'password' => 'DjE!dRe1Hx1M8L',
+         ]
+      ]);
+
+      $response = $response->getBody()->getContents();
+      $result = json_decode($response, true);
+
+      if(isset($result['access_token'])){
+
+         $token = $result['access_token'];
+         $data = CustomerPayment::join('company_plan', 'customer_payment.company_id', '=', 'company_plan.company_id')
+            ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->where('customer_payment.company_id', '=', 21)
+            ->select('customer_payment.*', 'plans.price', 'plans.id as plan_id')
+            ->get();
+
+         foreach($data as $value){
+
+            $customer_id = $value['id'];
+            $company_id = $value['company_id'];
+            $total = $value['price'];
+            $plan_id = $value['plan_id'];
+
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request('POST', 'https://api-payments.red4g.net/api/cloudshield/card/debit', [
+               'form_params' => [
+                  'card' => $value['credit_card'],
+                  'amount' => $total,
+               ],
+               'headers' => [
+                   'Authorization' => 'Bearer '. $token,
+                   'Accept'        => 'application/json',
+               ]
+            ]);
+
+            $response = $response->getBody()->getContents();
+            $result = json_decode($response, true);
+            $arr_invoice = [];
+
+            if($result['code'] == 400){
+               return $result['message'];
+
+            }elseif($result['code'] == 200){
+               $status_transaction = $result['data']['status'];
+
+               if($status_transaction == "APPROVED"){
+                  $arr_invoice = array(
+                     0 => array(
+                        'customer_id' => $customer_id,
+                        'company_id' => $company_id,
+                        'invoice_code' => $code_invoice,
+                        'total' => $total,
+                        'authorization_number' => $result['data']['referenceid'],
+                        'payment_method_id' => 1,
+                        'credit_charge' => 0,
+                        'extra_charges' =>0,
+                        'plan_id' => $plan_id,
+                        'status_transaction' => $status_transaction,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                     )
+                  );
+               }else{
+                  $message = $result['data']['error'];
+                  $arr_invoice = array(
+                     0 => array(
+                        'customer_id' => $customer_id,
+                        'company_id' => $company_id,
+                        'invoice_code' => $code_invoice,
+                        'total' => $total,
+                        'payment_method_id' => 1,
+                        'credit_charge' => 0,
+                        'extra_charges' =>0,
+                        'plan_id' => $plan_id,
+                        'status_transaction' => $status_transaction,
+                        'message' => $message,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                     )
+                  );
+               }
+
+               $insert = DB::table('invoice')->insert($arr_invoice);
+
+               if($insert){
+                  return response()->json([
+                     'success' => [
+                        'data' => "Se creó la factura",
+                        'status_code' => 200
+                     ]
+                  ]);
+               }else{
+                  return response()->json([
+                     'error' => [
+                        'message' => 'No se creó la factura',
+                        'status_code' => 20
+                     ]
+                  ]);
+               }
+
+            }
+         }
+      }
+   }
+
+   public function getInvoices(Request $request){
+
+      $userLog = JWTAuth::toUser($request['token']);
+	  	$role_user = $userLog->roles->first()->name;
+
+     	if($role_user == "superadmin" || $role_user == "ventas"){
+         $company_id = $request['company_id'];
+
+         $invoice = Invoice::join('company_plan', 'invoice.company_id', '=', 'company_plan.company_id')
+            ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->where('invoice.company_id', '=', $company_id)
+            ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name')
+            ->get();
+     	}else{
+         $company_id = $userLog['company_id'];
+        	$invoice = Invoice::join('company_plan', 'invoice.company_id', '=', 'company_plan.company_id')
+            ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->where('invoice.company_id', '=', $company_id)
+            ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name')
+            ->get();
+     	}
+
+      if(count($invoice) > 0){
+         return response()->json([
+            'data' => $invoice
+         ]);
+      }else{
+         return response()->json([
+            'data' => "No data"
+         ]);
+      }
 
    }
+
 
 }

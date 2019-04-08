@@ -56,7 +56,7 @@ class AccessController extends Controller{
 
 			$plan_company = CompanyPlan::join('plans', 'company_plan.plan_id', '=', 'plans.id')
             ->where('company_plan.company_id', '=', $value['id'])
-            ->select('company_plan.status_plan_id as status_id', 'plans.name', 'plans.price', 'plans.id as plan_id')
+            ->select('company_plan.status_plan_id as status_id', 'plans.name', 'plans.price', 'plans.id as plan_id', 'company_plan.automatic_payment')
             ->get();
 
 			if(count($plan_company) == 0){
@@ -416,6 +416,7 @@ class AccessController extends Controller{
 
 											if($request['credit_status'] == 1){
 												$plan_id = $request['plan_id'];
+												$automatic_payment = $request['payment'];
 												$payment_data = array(
 													"company_id" => $companyid,//$paymentCtrl
 													"data" => $request['data'],
@@ -428,7 +429,7 @@ class AccessController extends Controller{
 												$paymentCtrl->saveDataPayment($payment_data);
 
 												//Asignar un plan a la compañía
-												$planAssign = $planCtrl->assignPlanCompany($companyid, $plan_id);
+												$planAssign = $planCtrl->assignPlanCompany($companyid, $plan_id, $automatic_payment);
 											}
 
 											if($planAssign == "success"){
