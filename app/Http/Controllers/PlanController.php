@@ -192,11 +192,11 @@ class PlanController extends Controller{
 
 		if($plan){
 			return response()->json([
-          'success' => [
-             'message' => 'Plan eliminado correctamente.',
-             'status_code' => 200
-          ]
-       ]);
+             'success' => [
+                'message' => 'Plan eliminado correctamente.',
+                'status_code' => 200
+             ]
+         ]);
 		}else{
 			return response()->json([
 	          'error' => [
@@ -207,7 +207,7 @@ class PlanController extends Controller{
 		 }
    }
 
-   public function assignPlanCompany($company_id, $plan_id, $automatic_payment){
+   public function assignPlanCompany($company_id, $plan_id, $automatic_payment, $duration){
 
       $dt = \Carbon\Carbon::now();
       // $company_id = $request['company_id'];
@@ -235,6 +235,57 @@ class PlanController extends Controller{
       }else{
          return "error";
       }
+   }
+
+   public function assignManualPlanCompany(Request $request){
+
+      $dt = \Carbon\Carbon::now();
+      $company_id = $request['company_id'];
+      $plan_id = $request['plan_id'];
+      $automatic_payment = $request['payment_automatic'];
+      $duration = $request['duration'];
+
+      if($duration == "yearly"){
+         $date_exp = $dt->addYear();
+         $expiration = $date_exp->toDateString();
+      }else{
+         $date_exp = $dt->addMonth();
+         $expiration = $date_exp->toDateString();
+      }
+
+      $exist = CompanyPlan::where('company_id', '=', $company_id)->count();
+
+      if($exist == 0){
+         //Asigno el plan a una compañía en especifico
+         $company_plan = new CompanyPlan;
+         $company_plan->plan_id = $plan_id;
+         $company_plan->automatic_payment = $automatic_payment;
+         $company_plan->company_id = $company_id;
+         $company_plan->expiration_date = $expiration;
+         $company_plan->status_plan_id = 1; //Significa que está activo
+         $company_plan->save();
+
+      }else{
+         $company_plan = DB::table('company_plan')
+            ->where('company_id', '=', $company_id)
+            ->update(['plan_id' => $plan_id, 'expiration_date' => $expiration]);
+      }
+
+      if($company_plan){
+         return response()->json([
+             'success' => [
+                'message' => 'Plan asignado correctamente.',
+                'status_code' => 200
+             ]
+         ]);
+      }else{
+         return response()->json([
+	          'error' => [
+	             'message' => 'El plan no pudo ser asignado.',
+	             'status_code' => 20
+	          ]
+	       ]);
+       }
    }
 
 }

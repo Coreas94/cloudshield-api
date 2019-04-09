@@ -416,7 +416,9 @@ class AccessController extends Controller{
 
 											if($request['credit_status'] == 1){
 												$plan_id = $request['plan_id'];
-												$automatic_payment = $request['payment'];
+												$automatic_payment = $request['automatic'];
+												$duration_plan = $request['duration'];
+
 												$payment_data = array(
 													"company_id" => $companyid,//$paymentCtrl
 													"data" => $request['data'],
@@ -426,10 +428,12 @@ class AccessController extends Controller{
 													"country" => $country_id
 												);
 
-												$paymentCtrl->saveDataPayment($payment_data);
+												$savePayment = $paymentCtrl->saveDataPayment($payment_data);
+
+												Log::info($savePayment);
 
 												//Asignar un plan a la compañía
-												$planAssign = $planCtrl->assignPlanCompany($companyid, $plan_id, $automatic_payment);
+												$planAssign = $planCtrl->assignPlanCompany($companyid, $plan_id, $automatic_payment, $duration_plan);
 											}
 
 											if($planAssign == "success"){

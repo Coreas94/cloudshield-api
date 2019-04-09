@@ -216,90 +216,96 @@ class UserController extends Controller
             Session::flash("errorUser", trans('user.user_not_created'));
 	     	}
          	return redirect("user/user_index");
-      	}
-   	}
+		}
+	}
 
-   	public function destroy(Request $request){
-      	$id = $request['id_user'];
-      	$user = User::find($id);
-      	$user->delete();
+	public function destroy(Request $request){
+   	$id = $request['id_user'];
+   	$user = User::find($id);
+   	$user->delete();
 
-      	if($user){
+   	if($user){
 
-         	DB::table('role_user')->where('user_id', $id)->delete();
-         	return response()->json([
-            	"message" => 1
-         	]);
-      	}else{
-         	return response()->json([
-            	"message" => 0
-         	]);
-      	}
-   	}
-
-   	public function getNameUser($id){
-
-      	$user = User::select('name','lastname')->where('id', $id)->get();
-
-      	foreach($user as $row){
-         	$name = $row['name'].' '.$row['lastname'];
-      	}
-
+      	DB::table('role_user')->where('user_id', $id)->delete();
       	return response()->json([
-         	"name" => $name
+         	"message" => 1
+      	]);
+   	}else{
+      	return response()->json([
+         	"message" => 0
       	]);
    	}
+	}
 
-   	public function getRolesData(Request $request){
+	public function getNameUser($id){
 
-      	$user = JWTAuth::toUser($request['token']);
-      	$role_user = $user->roles->first()->name;
+   	$user = User::select('name','lastname')->where('id', $id)->get();
 
-      	if($role_user == "superadmin"){
-         	$roles = DB::table("roles")
-            ->select('id', 'display_name AS text', 'description')->get();
-      	}else{
-         	$roles = DB::table("roles")
-            ->where('name', '!=', "superadmin")
-            ->select('id', 'display_name AS text', 'description')->get();
-      	}
-
-      	return response()->json($roles);
+   	foreach($user as $row){
+      	$name = $row['name'].' '.$row['lastname'];
    	}
 
-   	public function verifyToken(Request $request){
+   	return response()->json([
+      	"name" => $name
+   	]);
+	}
 
-      	try {
-   			if(! $user = JWTAuth::parseToken()->authenticate()) {
-		      	return response()->json(['user_not_found'], 404);
-   			}
-   		}catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-   			return response()->json(['token_expired'], $e->getStatusCode());
-   		}catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-   			return response()->json(['token_invalid'], $e->getStatusCode());
-   		}catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-   			return response()->json(['token_absent'], $e->getStatusCode());
-   		}
+	public function getRolesData(Request $request){
 
-			if(!empty($user['deleted_at'])){
-				return response()->json(['user_deleted']);
-			}else{
-				// the token is valid and we have found the user via the sub claim
-				$company_id = $user['company_id'];
+   	$user = JWTAuth::toUser($request['token']);
+   	$role_user = $user->roles->first()->name;
 
-				$plan = Plans::join('company_plan', 'plans.id', '=', 'company_plan.plan_id')
-		            ->where('company_plan.company_id', '=', $company_id)
-		            ->get();
+   	if($role_user == "superadmin"){
+      	$roles = DB::table("roles")
+         ->select('id', 'display_name AS text', 'description')->get();
+   	}else{
+      	$roles = DB::table("roles")
+         ->where('name', '!=', "superadmin")
+         ->select('id', 'display_name AS text', 'description')->get();
+   	}
 
-		      foreach($plan as $val){
-		         $services = ServicesPlans::join('detail_plan', 'services_plans.id', '=', 'detail_plan.id_service')
-		            ->where('detail_plan.plan_id', '=', $val['id'])
-		            ->select('services_plans.id as id_service', 'services_plans.name_service', 'detail_plan.plan_id')
-		            ->get();
-		      }
+   	return response()->json($roles);
+	}
 
-				return response()->json(compact('user', 'services'));
+	public function verifyToken(Request $request){
+
+   	try {
+			if(! $user = JWTAuth::parseToken()->authenticate()) {
+	      	return response()->json(['user_not_found'], 404);
+			}
+		}catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+			return response()->json(['token_expired'], $e->getStatusCode());
+		}catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+			return response()->json(['token_invalid'], $e->getStatusCode());
+		}catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
+			return response()->json(['token_absent'], $e->getStatusCode());
+		}
+
+		if(!empty($user['deleted_at'])){
+			return response()->json(['user_deleted']);
+		}else{
+			// the token is valid and we have found the user via the sub claim
+			$company_id = $user['company_id'];
+
+			$plan = Plans::join('company_plan', 'plans.id', '=', 'company_plan.plan_id')
+	            ->where('company_plan.company_id', '=', $company_id)
+	            ->get();
+
+	      foreach($plan as $val){
+	         $services = ServicesPlans::join('detail_plan', 'services_plans.id', '=', 'detail_plan.id_service')
+	            ->where('detail_plan.plan_id', '=', $val['id'])
+	            ->select('services_plans.id as id_service', 'services_plans.name_service', 'detail_plan.plan_id')
+	            ->get();
+	      }
+
+			$expiration = CompanyPlan::where('company_id', '=', $company_id)->select('expiration_date')->get();
+
+			if(count($expiration) == 0){
+				$expiration = "no date";
 			}
 
-   	}
+			return response()->json(compact('user', 'services', 'expiration'));
+		}
+
+	}
 }

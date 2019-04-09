@@ -209,6 +209,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_services', 'PlanController@getServices');
 
          Route::post('/assign_plan', 'PlanController@assignPlanCompany');
+
+         Route::post('/assign_manual_plan', 'PlanController@assignManualPlanCompany');
       });
 
       Route::get('errors/sendEmailAlarm', 'CheckpointController@sendEmailAlarm');

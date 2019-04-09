@@ -105,7 +105,7 @@ class PaymentController extends Controller{
       print "${tcard} <br>";      // TYPE CARD
    }
 
-   public function saveDataPayment(Request $request){
+   public function saveDataPayment($request){
       Log::info($request);
 
       $credit_name = $request['credit_name'];
@@ -162,7 +162,7 @@ class PaymentController extends Controller{
       }
    }
 
-   public function makePayment(){
+   public function makePayment($company_id, $plan_id){
 
       $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
       $code_invoice = substr(str_shuffle($permitted_chars), 0, 10);
@@ -212,7 +212,6 @@ class PaymentController extends Controller{
 
             if($result['code'] == 400){
                return $result['message'];
-
             }elseif($result['code'] == 200){
                $status_transaction = $result['data']['status'];
 
@@ -270,7 +269,6 @@ class PaymentController extends Controller{
                      ]
                   ]);
                }
-
             }
          }
       }
@@ -286,15 +284,17 @@ class PaymentController extends Controller{
 
          $invoice = Invoice::join('company_plan', 'invoice.company_id', '=', 'company_plan.company_id')
             ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->join('payment_methods', 'invoice.payment_method_id', '=', 'payment_methods.id')
             ->where('invoice.company_id', '=', $company_id)
-            ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name')
+            ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name', 'payment_methods.payment_name as payment_name')
             ->get();
      	}else{
          $company_id = $userLog['company_id'];
         	$invoice = Invoice::join('company_plan', 'invoice.company_id', '=', 'company_plan.company_id')
             ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->join('payment_methods', 'invoice.payment_method_id', '=', 'payment_methods.id')
             ->where('invoice.company_id', '=', $company_id)
-            ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name')
+            ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name', 'payment_methods.payment_name as payment_name')
             ->get();
      	}
 
@@ -304,10 +304,9 @@ class PaymentController extends Controller{
          ]);
       }else{
          return response()->json([
-            'data' => "No data"
+            'data' => []
          ]);
       }
-
    }
 
 
