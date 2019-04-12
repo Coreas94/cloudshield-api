@@ -159,75 +159,96 @@ class AuthController extends Controller
 
                   $plan_status = CompanyPlan::where('company_id', '=', $company_id)->pluck('status_plan_id');
                   $payment_data = CustomerPayment::where('company_id', '=', $company_id)->count();
+                  $payment_error = DB::table('customer_payment_issues')->where('company_id', '=', $company_id)->count();
 
-                  if($payment_data == 0){
+                  $plan = CompanyPlan::where('company_id', '=', $company_id)->pluck('plan_id');
 
-                     if($company_id == 1){
-                        return response()->json([
-                           'success' => [
-                              'api_token' => $token,
-                              'role_user' => $role_user,
-                              'message' => 'Login successful',
-                              'payment_data' => '1',
-                              'status_code' => 200
-                           ]
-                        ]);
-                     }else{
-                        return response()->json([
-                           'success' => [
-                              'api_token' => $token,
-                              'role_user' => $role_user,
-                              'message' => 'Login successful',
-                              'payment_data' => '0',
-                              'status_code' => 200
-                           ]
-                        ]);
-                     }
+                  $plan_id = str_replace(str_split('[]'), '', $plan);
+
+
+
+                  if($payment_error > 0){
+                     return response()->json([
+                        'success' => [
+                           'api_token' => $token,
+                           'role_user' => $role_user,
+                           'message' => 'Login successful',
+                           'plan_id' => $plan_id,
+                           'payment_data' => '2',
+                           'status_code' => 200
+                        ]
+                     ]);
                   }else{
 
-                     switch ($plan_status) {
-                        case '[1]':
+                     if($payment_data == 0){
+
+                        if($company_id == 1){
                            return response()->json([
                               'success' => [
                                  'api_token' => $token,
                                  'role_user' => $role_user,
                                  'message' => 'Login successful',
-                                 'status_plan' => 'active',
                                  'payment_data' => '1',
                                  'status_code' => 200
                               ]
                            ]);
-                           break;
-                        case '[2]':
+                        }else{
                            return response()->json([
                               'success' => [
                                  'api_token' => $token,
                                  'role_user' => $role_user,
                                  'message' => 'Login successful',
-                                 'status_plan' => 'inactive',
-                                 'payment_data' => '1',
+                                 'payment_data' => '0',
                                  'status_code' => 200
                               ]
                            ]);
-                           break;
-                        case '[3]':
-                           return response()->json([
-                              'success' => [
-                                 'api_token' => $token,
-                                 'role_user' => $role_user,
-                                 'message' => 'Login successful',
-                                 'status_plan' => 'suspended',
-                                 'payment_data' => '1',
-                                 'status_code' => 200
-                              ]
-                           ]);
-                           break;
-                        default:
+                        }
+                     }else{
+
+                        switch ($plan_status) {
+                           case '[1]':
+                              return response()->json([
+                                 'success' => [
+                                    'api_token' => $token,
+                                    'role_user' => $role_user,
+                                    'message' => 'Login successful',
+                                    'status_plan' => 'active',
+                                    'payment_data' => '1',
+                                    'status_code' => 200
+                                 ]
+                              ]);
+                              break;
+                           case '[2]':
+                              return response()->json([
+                                 'success' => [
+                                    'api_token' => $token,
+                                    'role_user' => $role_user,
+                                    'message' => 'Login successful',
+                                    'status_plan' => 'inactive',
+                                    'payment_data' => '1',
+                                    'status_code' => 200
+                                 ]
+                              ]);
+                              break;
+                           case '[3]':
+                              return response()->json([
+                                 'success' => [
+                                    'api_token' => $token,
+                                    'role_user' => $role_user,
+                                    'message' => 'Login successful',
+                                    'status_plan' => 'suspended',
+                                    'payment_data' => '1',
+                                    'status_code' => 200
+                                 ]
+                              ]);
+                              break;
+                           default:
                            // code...
                            break;
                         }
-                  }
+                     }
 
+                  }
                }else{
                   return response()->json([
            				'error' => [

@@ -2059,7 +2059,7 @@ class CheckpointController extends Controller
                   $publish = $this->publishChanges($sid);
 
                   if(Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($second_new_ip)) && Range::parse($ip_initial.'-'.$ip_last)->contains(new IP($third_new_ip))){
-
+                     Log::info("ENTRA AL RANGE PARSE 2062");
                      if($publish == "success"){
 
                         //Elimino el rango de la bdd
@@ -2099,6 +2099,9 @@ class CheckpointController extends Controller
                            \Storage::put($name_company.'/'.$token_company.'.json', $json);
 
                            $publish2 = $this->publishChanges($sid);
+
+                           Log::info("EL PUBLISH 2 ES:");
+                           Log::info($publish2);
 
                            if($publish2 == "success"){
                               //Creo un array con los datos de los nuevos rangos

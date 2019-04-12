@@ -21,7 +21,7 @@ Route::get('test', 'Controller@test');
 Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('otra', 'Controller@getIp');
-Route::get('pruebapago', 'PaymentController@makePayment');
+Route::get('pruebapago', 'PaymentController@manualPayment');
 /*******************************/
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
@@ -195,6 +195,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_payment', 'PaymentController@getAutomaticPayment');
 
          Route::get('/get_invoices', 'PaymentController@getInvoices');
+
+         Route::post('/manual_payment', 'PaymentController@manualPayment');
       });
 
       Route::group(['prefix' => 'plans'], function(){

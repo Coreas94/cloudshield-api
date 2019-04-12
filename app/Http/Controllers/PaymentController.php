@@ -136,9 +136,9 @@ class PaymentController extends Controller{
       $payment->country = $country;
       $payment->company_id = $company_id;
       $payment->credit_card = $credit_card;
-      $payment->secure_code = $secure_code;
-      $payment->credit_expmonth = $exp_month;
-      $payment->credit_expyear = $exp_year;
+      $payment->secure_code = Crypt::encrypt($secure_code);
+      $payment->credit_expmonth = Crypt::encrypt($exp_month);
+      $payment->credit_expyear = Crypt::encrypt($exp_year);
       $payment->card_brand = $type_card;
       $payment->save();
 
@@ -149,13 +149,13 @@ class PaymentController extends Controller{
       }
    }
 
-   public function getAutomaticPayment(Request $request){
+   public function getAutomaticPayment(){
       $dt = \Carbon\Carbon::now();
       $now = $dt->toDateString();
 
       $data_payment = CompanyPlan::where('automatic_payment', '=', 1)->where('expiration_date', '=', $now)->get();
 
-      if(count($data_payment > 0)){
+      if(count($data_payment) > 0){
          foreach($data_payment as $row){
             $payment = $this->makePayment($row['company_id'], $row['plan_id']);
          }
@@ -183,7 +183,7 @@ class PaymentController extends Controller{
          $token = $result['access_token'];
          $data = CustomerPayment::join('company_plan', 'customer_payment.company_id', '=', 'company_plan.company_id')
             ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
-            ->where('customer_payment.company_id', '=', 21)
+            ->where('customer_payment.company_id', '=', $company_id)
             ->select('customer_payment.*', 'plans.price', 'plans.id as plan_id')
             ->get();
 
@@ -232,6 +232,8 @@ class PaymentController extends Controller{
                         'updated_at' => date('Y-m-d H:i:s'),
                      )
                   );
+
+                  $insert = DB::table('invoice')->insert($arr_invoice);
                }else{
                   $message = $result['data']['error'];
                   $arr_invoice = array(
@@ -250,24 +252,38 @@ class PaymentController extends Controller{
                         'updated_at' => date('Y-m-d H:i:s'),
                      )
                   );
+
+                  $insert = DB::table('invoice')->insert($arr_invoice);
+                  $id = DB::getPdo()->lastInsertId();
+
+                  $issue_payment = DB::table('customer_payment_issues')->insert(
+                      [
+                        'customer_payment_id' => $customer_id,
+                        'company_id' => $company_id,
+                        'invoice_id' => $id,
+                        'status_payment' => $status_transaction,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                      ]
+                  );
                }
 
-               $insert = DB::table('invoice')->insert($arr_invoice);
-
                if($insert){
-                  return response()->json([
+                  return "Success";
+                  /*return response()->json([
                      'success' => [
                         'data' => "Se creó la factura",
                         'status_code' => 200
                      ]
-                  ]);
+                  ]);*/
                }else{
-                  return response()->json([
+                  /*return response()->json([
                      'error' => [
                         'message' => 'No se creó la factura',
                         'status_code' => 20
                      ]
-                  ]);
+                  ]);*/
+                  return "Error";
                }
             }
          }
@@ -307,6 +323,62 @@ class PaymentController extends Controller{
             'data' => []
          ]);
       }
+   }
+
+   public function manualPayment(Request $request){
+
+      Log::info($request);
+
+      $user = JWTAuth::toUser($request['token']);
+      $company_id = $user['company_id'];
+      Log::info($company_id);
+      $credit_name = $request['credit_name'];
+      $data_card = $request['data'];
+      $plan_id = $request['plan_id'];
+      $status = 1;
+
+      $decode = $this->decoder($data_card);
+
+      $credit_card = $data_card;
+      $secure_code = $decode['secure_code'];
+      $type_card = $decode['card_brand'];
+      $exp = $decode['credit_exp'];
+
+      $expiration = explode("/",$exp);
+      $exp_month = $expiration[0];
+      $exp_year = $expiration[1];
+
+      $payment = DB::table('customer_payment')
+         ->where('company_id', '=', $company_id)
+         ->update(
+            [
+               'credit_name' => $credit_name,
+               'company_id' => $company_id,
+               'credit_card' => $credit_card,
+               'secure_code' => Crypt::encrypt($secure_code),
+               'credit_expmonth' => Crypt::encrypt($exp_month),
+               'credit_expyear' => Crypt::encrypt($exp_year),
+               'card_brand' => $type_card
+            ]
+         );
+
+      $new_payment = $this->makePayment($company_id, $plan_id);
+
+      if($new_payment == "Success"){
+         return response()->json([
+             'success' => [
+                'message' => 'Pago hecho correctamente',
+                'status_code' => 200
+             ]
+         ]);
+      }else{
+         return response()->json([
+	          'error' => [
+	             'message' => 'Error al efectuar el pago.',
+	             'status_code' => 20
+	          ]
+	       ]);
+       }
    }
 
 
