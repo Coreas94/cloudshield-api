@@ -197,6 +197,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_invoices', 'PaymentController@getInvoices');
 
          Route::post('/manual_payment', 'PaymentController@manualPayment');
+
+         Route::post('/payment_now', 'PaymentController@paymentNow');
       });
 
       Route::group(['prefix' => 'plans'], function(){

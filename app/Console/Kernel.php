@@ -33,7 +33,7 @@ class Kernel extends ConsoleKernel
 
       $schedule->command('fortisiem:getLogsFortisiem')->cron('*/5 * * * *');
 
-      $schedule->command('checkpoint:resendData')->everyFiveMinutes();
+      $schedule->command('checkpoint:resendData')->cron('*/7 * * * *');
 
       $schedule->command('fortisiem:automaticThreat')->cron('*/10 * * * *');
 

@@ -806,7 +806,7 @@ class ValidateCommandController extends Controller{
 
                sleep(2);
 
-               while ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) || ($flag > 3)) {
+               while ((stripos($evaluate, "") !== false) || (stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) || ($flag > 3)) {
                   if($flag >= 3) break;
                   $flag++;
                   Log::info("1 existe try again resend");
@@ -823,8 +823,8 @@ class ValidateCommandController extends Controller{
                Log::info($evaluate);
 
                $exist_range = $this->existIpRange($row['object_name'], $row['ip_initial'], $row['ip_last'], $row['server']);
-
-               if($exist_range['response'] == 1){
+               Log::info($exist_range);
+               if($exist_range['response'] > 0){
                   //Se debe dejar
                   $update = HistoricalData::where('_id', '=', $row['_id'])->update(['status' => 1]);
                }else{

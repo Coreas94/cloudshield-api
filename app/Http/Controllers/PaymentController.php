@@ -269,20 +269,8 @@ class PaymentController extends Controller{
                }
 
                if($insert){
-                  return "Success";
-                  /*return response()->json([
-                     'success' => [
-                        'data' => "Se creó la factura",
-                        'status_code' => 200
-                     ]
-                  ]);*/
+                  return "success";
                }else{
-                  /*return response()->json([
-                     'error' => [
-                        'message' => 'No se creó la factura',
-                        'status_code' => 20
-                     ]
-                  ]);*/
                   return "Error";
                }
             }
@@ -326,12 +314,14 @@ class PaymentController extends Controller{
    }
 
    public function manualPayment(Request $request){
-
+      #1 -> updated
+      #0 -> insert
       Log::info($request);
+
+      $status = $request['status'];
 
       $user = JWTAuth::toUser($request['token']);
       $company_id = $user['company_id'];
-      Log::info($company_id);
       $credit_name = $request['credit_name'];
       $data_card = $request['data'];
       $plan_id = $request['plan_id'];
@@ -348,23 +338,47 @@ class PaymentController extends Controller{
       $exp_month = $expiration[0];
       $exp_year = $expiration[1];
 
-      $payment = DB::table('customer_payment')
-         ->where('company_id', '=', $company_id)
-         ->update(
-            [
-               'credit_name' => $credit_name,
-               'company_id' => $company_id,
-               'credit_card' => $credit_card,
-               'secure_code' => Crypt::encrypt($secure_code),
-               'credit_expmonth' => Crypt::encrypt($exp_month),
-               'credit_expyear' => Crypt::encrypt($exp_year),
-               'card_brand' => $type_card
-            ]
-         );
+      if($status == 0){//significa que se va a insertar el registro
 
-      $new_payment = $this->makePayment($company_id, $plan_id);
+         $payment = new CustomerPayment;
+         $payment->customer_phone = $customer_phone;
+         $payment->credit_name = $credit_name;
+         $payment->address = $address;
+         $payment->country = $country;
+         $payment->company_id = $company_id;
+         $payment->credit_card = $credit_card;
+         $payment->secure_code = Crypt::encrypt($secure_code);
+         $payment->credit_expmonth = Crypt::encrypt($exp_month);
+         $payment->credit_expyear = Crypt::encrypt($exp_year);
+         $payment->card_brand = $type_card;
+         $payment->save();
 
-      if($new_payment == "Success"){
+         if($payment->id){
+            $new_payment = $this->makePayment($company_id, $plan_id);
+         }else{
+            $new_payment = "error";
+         }
+
+      }else{//significa que se va a actualizar
+
+         $payment = DB::table('customer_payment')
+            ->where('company_id', '=', $company_id)
+            ->update(
+               [
+                  'credit_name' => $credit_name,
+                  'company_id' => $company_id,
+                  'credit_card' => $credit_card,
+                  'secure_code' => Crypt::encrypt($secure_code),
+                  'credit_expmonth' => Crypt::encrypt($exp_month),
+                  'credit_expyear' => Crypt::encrypt($exp_year),
+                  'card_brand' => $type_card
+               ]
+            );
+
+         $new_payment = $this->makePayment($company_id, $plan_id);
+      }
+
+      if($new_payment == "success"){
          return response()->json([
              'success' => [
                 'message' => 'Pago hecho correctamente',
@@ -381,5 +395,31 @@ class PaymentController extends Controller{
        }
    }
 
+   public function paymentNow(Request $request){
+      $user = JWTAuth::toUser($request['token']);
+      $company_id = $user['company_id'];
+
+      $data = CompanyPlan::where('company_id', '=', $company_id)->get();
+
+      foreach($data as $row){
+         $new_payment = $this->makePayment($company_id, $row['plan_id']);
+      }
+
+      if($new_payment == "success"){
+         return response()->json([
+             'success' => [
+                'message' => 'Pago realizado correctamente',
+                'status_code' => 200
+             ]
+         ]);
+      }else{
+         return response()->json([
+	          'error' => [
+	             'message' => 'Error al efectuar el pago.',
+	             'status_code' => 20
+	          ]
+	       ]);
+       }
+   }
 
 }

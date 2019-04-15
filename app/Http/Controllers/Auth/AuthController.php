@@ -165,8 +165,6 @@ class AuthController extends Controller
 
                   $plan_id = str_replace(str_split('[]'), '', $plan);
 
-
-
                   if($payment_error > 0){
                      return response()->json([
                         'success' => [
@@ -199,6 +197,7 @@ class AuthController extends Controller
                                  'role_user' => $role_user,
                                  'message' => 'Login successful',
                                  'payment_data' => '0',
+                                 'plan_id' => $plan_id,
                                  'status_code' => 200
                               ]
                            ]);

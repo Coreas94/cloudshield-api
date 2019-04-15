@@ -2174,25 +2174,108 @@ class CheckpointController extends Controller
                         ]);
                      }
                   }else{
-
+                     Log::info("entra al else rango y nada mas 1994");
                      if($publish == "success"){
                         Log::info("ELIMINA EL RANGO Y NADA MAS");
                         //Elimino el rango de la bdd
                         $delete_add = DB::table('fw_address_objects')->where('id', '=', $address_id)->delete();
 
                         if($delete_add){
-                           $emailCtrl->sendEmailSSHRange($data_email);
 
-                           return response()->json([
-                              'success' => [
-                                 'data' => "Rango eliminado correctamente",
-                                 'status_code' => 200
-                              ]
-                           ]);
+                           $total_ips = count($request['ips']);
+                           $flag = 1;
+
+                           //Mando a guardar el primer rango de ips a los checkpoint
+                           $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $ip_initial_range, $second_new_ip, $total_ips, $flag);
+
+                           sleep(2);
+
+                           array_push($arreglo_data, $validateAddrip);
+
+                           //Mando a guardar el segundo rango de ips al checkpoint
+                           $validateAddrip = $validateCmd->validateAssignIpObject($object_name, $third_new_ip, $ip_last_range, $total_ips, $flag);
+
+                           sleep(2);
+
+                           array_push($arreglo_data, $validateAddrip);
+
+                           if(!empty($data_exist)){
+                              foreach ($data_exist as $value) {
+                                 Log::info("VALUE DE DATA EXIST");
+                                 Log::info($value);
+                                 // if($value['info'] != 0){
+                                 //    array_push($arreglo_data, $data_exist);
+                                 // }
+                              }
+                              array_push($arreglo_data, $data_exist);
+                           }
+
+                           $json = json_encode($arreglo_data);
+                           \Storage::put($name_company.'/'.$token_company.'.json', $json);
+
+                           $publish2 = $this->publishChanges($sid);
+
+                           Log::info("EL PUBLISH 2 ES:");
+                           Log::info($publish2);
+
+                           if($publish2 == "success"){
+                              //Creo un array con los datos de los nuevos rangos
+                              $arr_addr = array(
+                                 0 => array(
+                                    'ip_initial' => $ip_initial_range,
+                                    'ip_last' => $second_new_ip,
+                                    'object_id' => $object_id,
+                                    'type_address_id' => $type_address_id,
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                                 ),
+                                 1 => array(
+                                    'ip_initial' => $third_new_ip,
+                                    'ip_last' => $ip_last_range,
+                                    'object_id' => $object_id,
+                                    'type_address_id' => $type_address_id,
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                                 ),
+                              );
+
+                              Log::info("NUEVOS RANGOS A INGRESAR");
+                              Log::info($arr_addr);
+
+                              //inserto en la base los nuevos rangos
+                              $insert = DB::table('fw_address_objects')->insert($arr_addr);
+
+                              if($insert){
+
+                                 $emailCtrl->sendEmailSSHRange($data_email);
+
+                                 return response()->json([
+                                    'success' => [
+                                       'data' => "Rango eliminado correctamente",
+                                       'status_code' => 200
+                                    ]
+                                 ]);
+                              }else{
+                                 return response()->json([
+                                    'error' => [
+                                       'message' => 'Rangos publicado en checkpoint pero no se guardó en la bdd',
+                                       'status_code' => 20
+                                    ]
+                                 ]);
+                              }
+                           }else{
+                              return response()->json([
+                                 'error' => [
+                                    'message' => 'No se pudieron guardar los nuevos rangos',
+                                    'status_code' => 20
+                                 ]
+                              ]);
+                           }
+
                         }else{
                            return response()->json([
                               'error' => [
-                                 'message' => 'No se pudo eliminar el rango',
+                                 'message' => 'No se pudieron guardar los nuevos rangos',
                                  'status_code' => 20
                               ]
                            ]);
@@ -2384,9 +2467,12 @@ class CheckpointController extends Controller
                            Log::info("NUEVOS RANGOS A INGRESAR");
                            Log::info($arr_addr);
 
-                           //inserto en la base los nuevos rangos
-                           //$insert = DB::table('fw_address_objects')->insert($arr_addr);
-                           $insert = 1;
+                           if(count($arr_addr) > 0){
+                              //inserto en la base los nuevos rangos
+                              $insert = DB::table('fw_address_objects')->insert($arr_addr);
+                           }
+
+                           //$insert = 1;
                            if($insert){
                               $emailCtrl->sendEmailSSHRange($data_email);
                               return response()->json([
