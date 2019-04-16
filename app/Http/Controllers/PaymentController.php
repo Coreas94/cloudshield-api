@@ -422,4 +422,43 @@ class PaymentController extends Controller{
        }
    }
 
+   public function typePayment(Request $request){
+
+      $user = JWTAuth::toUser($request['token']);
+      $company_id = $user['company_id'];
+
+      $automatic = CompanyPlan::where('company_id', '=', $company_id)->pluck('automatic_payment');
+      $automatic_id = str_replace(str_split('[]'), '', $automatic);
+
+      return response()->json([
+         'data' => $automatic_id
+      ]);
+   }
+
+   public function changePaymentType(Request $request){
+
+      $company_id = $request['company_id'];
+      $automatic = $request['automatic'];
+
+      $payment = DB::table('company_plan')
+         ->where('company_id', '=', $company_id)
+         ->update(['automatic_payment' => $automatic]);
+
+      if($payment){
+         return response()->json([
+             'success' => [
+                'message' => 'Pago automático actualizado',
+                'status_code' => 200
+             ]
+         ]);
+      }else{
+         return response()->json([
+	          'error' => [
+	             'message' => 'No se pudo actualizar el pago automático.',
+	             'status_code' => 20
+	          ]
+	       ]);
+       }
+   }
+
 }

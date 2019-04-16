@@ -288,4 +288,31 @@ class PlanController extends Controller{
        }
    }
 
+   public function changePlanCompany(Request $request){
+
+      $old_plan_id = $request['old_plan_id'];
+      $new_plan_id = $request['new_plan_id'];
+      $company_id = $request['company_id'];
+
+      $plan = DB::table('company_plan')
+         ->where('company_id', '=', $company_id)
+         ->update(['plan_id' => $new_plan_id]);
+
+      if($plan){
+         return response()->json([
+             'success' => [
+                'message' => 'Plan actualizado correctamente.',
+                'status_code' => 200
+             ]
+         ]);
+      }else{
+         return response()->json([
+	          'error' => [
+	             'message' => 'El plan no pudo ser actualizado.',
+	             'status_code' => 20
+	          ]
+	       ]);
+      }
+   }
+
 }

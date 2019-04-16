@@ -199,6 +199,10 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/manual_payment', 'PaymentController@manualPayment');
 
          Route::post('/payment_now', 'PaymentController@paymentNow');
+
+         Route::get('/type_payment', 'PaymentController@typePayment');
+
+         Route::post('/change_automatic', 'PaymentController@changePaymentType');
       });
 
       Route::group(['prefix' => 'plans'], function(){
@@ -215,6 +219,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/assign_plan', 'PlanController@assignPlanCompany');
 
          Route::post('/assign_manual_plan', 'PlanController@assignManualPlanCompany');
+
+         Route::post('/change_company_plan', 'PlanController@changePlanCompany');
       });
 
       Route::get('errors/sendEmailAlarm', 'CheckpointController@sendEmailAlarm');
