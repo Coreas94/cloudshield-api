@@ -149,7 +149,7 @@ class PaymentController extends Controller{
       }
    }
 
-   public function getAutomaticPayment(){
+   public function boo(){
       $dt = \Carbon\Carbon::now();
       $now = $dt->toDateString();
 
@@ -164,6 +164,7 @@ class PaymentController extends Controller{
 
    public function makePayment($company_id, $plan_id){
 
+      $dt = \Carbon\Carbon::now();
       $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
       $code_invoice = substr(str_shuffle($permitted_chars), 0, 10);
 
@@ -184,15 +185,17 @@ class PaymentController extends Controller{
          $data = CustomerPayment::join('company_plan', 'customer_payment.company_id', '=', 'company_plan.company_id')
             ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
             ->where('customer_payment.company_id', '=', $company_id)
-            ->select('customer_payment.*', 'plans.price', 'plans.id as plan_id')
+            ->select('customer_payment.*', 'plans.price', 'plans.id as plan_id', 'company_plan.expiration_date', 'plans.duration as duration')
             ->get();
 
          foreach($data as $value){
-
+            //Log::info($value);
             $customer_id = $value['id'];
             $company_id = $value['company_id'];
             $total = $value['price'];
             $plan_id = $value['plan_id'];
+
+            $duration = $value['duration'];
 
             $client = new \GuzzleHttp\Client();
             $response = $client->request('POST', 'https://api-payments.red4g.net/api/cloudshield/card/debit', [
@@ -208,6 +211,7 @@ class PaymentController extends Controller{
 
             $response = $response->getBody()->getContents();
             $result = json_decode($response, true);
+            Log::info($result);
             $arr_invoice = [];
 
             if($result['code'] == 400){
@@ -216,6 +220,19 @@ class PaymentController extends Controller{
                $status_transaction = $result['data']['status'];
 
                if($status_transaction == "APPROVED"){
+
+                  if($duration == "yearly"){
+                     $date_exp = $dt->addYear();
+                     $expiration = $date_exp->toDateString();
+                  }else{
+                     $date_exp = $dt->addMonth();
+                     $expiration = $date_exp->toDateString();
+                  }
+
+                  $company_plan = DB::table('company_plan')
+                     ->where('company_id', '=', $company_id)
+                     ->update(['plan_id' => $plan_id, 'expiration_date' => $expiration]);
+
                   $arr_invoice = array(
                      0 => array(
                         'customer_id' => $customer_id,
@@ -269,9 +286,9 @@ class PaymentController extends Controller{
                }
 
                if($insert){
-                  return "success";
+                  return $status_transaction;
                }else{
-                  return "Error";
+                  return "error";
                }
             }
          }
@@ -287,18 +304,20 @@ class PaymentController extends Controller{
          $company_id = $request['company_id'];
 
          $invoice = Invoice::join('company_plan', 'invoice.company_id', '=', 'company_plan.company_id')
-            ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->join('plans', 'invoice.plan_id', '=', 'plans.id')
             ->join('payment_methods', 'invoice.payment_method_id', '=', 'payment_methods.id')
             ->where('invoice.company_id', '=', $company_id)
             ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name', 'payment_methods.payment_name as payment_name')
+            ->orderBy('invoice.created_at', 'desc')
             ->get();
      	}else{
          $company_id = $userLog['company_id'];
         	$invoice = Invoice::join('company_plan', 'invoice.company_id', '=', 'company_plan.company_id')
-            ->join('plans', 'company_plan.plan_id', '=', 'plans.id')
+            ->join('plans', 'invoice.plan_id', '=', 'plans.id')
             ->join('payment_methods', 'invoice.payment_method_id', '=', 'payment_methods.id')
             ->where('invoice.company_id', '=', $company_id)
             ->select('invoice.*', 'plans.price', 'plans.id as plan_id', 'plans.name', 'payment_methods.payment_name as payment_name')
+            ->orderBy('invoice.created_at', 'desc')
             ->get();
      	}
 
@@ -328,7 +347,7 @@ class PaymentController extends Controller{
       $status = 1;
 
       $decode = $this->decoder($data_card);
-
+      Log::info($decode);
       $credit_card = $data_card;
       $secure_code = $decode['secure_code'];
       $type_card = $decode['card_brand'];
@@ -355,6 +374,7 @@ class PaymentController extends Controller{
 
          if($payment->id){
             $new_payment = $this->makePayment($company_id, $plan_id);
+            Log::info($new_payment);
          }else{
             $new_payment = "error";
          }
@@ -378,7 +398,7 @@ class PaymentController extends Controller{
          $new_payment = $this->makePayment($company_id, $plan_id);
       }
 
-      if($new_payment == "success"){
+      if($new_payment == "APPROVED"){
          return response()->json([
              'success' => [
                 'message' => 'Pago hecho correctamente',
@@ -405,7 +425,8 @@ class PaymentController extends Controller{
          $new_payment = $this->makePayment($company_id, $row['plan_id']);
       }
 
-      if($new_payment == "success"){
+      if($new_payment == "APPROVED"){
+      //if(isset($new_payment)){
          return response()->json([
              'success' => [
                 'message' => 'Pago realizado correctamente',
@@ -436,13 +457,15 @@ class PaymentController extends Controller{
    }
 
    public function changePaymentType(Request $request){
-
+      Log::info($request);
       $company_id = $request['company_id'];
       $automatic = $request['automatic'];
 
       $payment = DB::table('company_plan')
          ->where('company_id', '=', $company_id)
          ->update(['automatic_payment' => $automatic]);
+
+
 
       if($payment){
          return response()->json([

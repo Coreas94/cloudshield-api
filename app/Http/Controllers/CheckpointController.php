@@ -225,27 +225,34 @@ class CheckpointController extends Controller
 
                $textResp = "";
 
-               foreach($result_task['tasks'] as $key => $value){
-                  if($value['status'] == "succeeded")
-                     $textResp = "success";
-                     //return "success";
-                  else
-                     $textResp = "error";
-               }
+               if(isset($result_task) && $result_task != "error"){
 
-               if($textResp == "success" && $installCh2 == "success"){
-                  Log::info("Políticas instaladas correctamente en ambos checkpoint");
-                  return "Políticas instaladas correctamente en ambos checkpoint";
-               }elseif ($textResp == "success" && $installCh2 != "success") {
-                  Log::info("Políticas instaladas correctamente solo en el checkpoint 114");
-                  return "Políticas instaladas correctamente solo en el checkpoint 114";
-               }elseif ($textResp != "success" && $installCh2 == "success") {
-                  Log::info("Políticas instaladas correctamente solo en el checkpoint 118");
-                  return "Políticas instaladas correctamente solo en el checkpoint 118";
+                  foreach($result_task['tasks'] as $key => $value){
+                     if($value['status'] == "succeeded")
+                        $textResp = "success";
+                        //return "success";
+                     else
+                        $textResp = "error";
+                  }
+
+                  if($textResp == "success" && $installCh2 == "success"){
+                     Log::info("Políticas instaladas correctamente en ambos checkpoint");
+                     return "Políticas instaladas correctamente en ambos checkpoint";
+                  }elseif ($textResp == "success" && $installCh2 != "success") {
+                     Log::info("Políticas instaladas correctamente solo en el checkpoint 114");
+                     return "Políticas instaladas correctamente solo en el checkpoint 114";
+                  }elseif ($textResp != "success" && $installCh2 == "success") {
+                     Log::info("Políticas instaladas correctamente solo en el checkpoint 118");
+                     return "Políticas instaladas correctamente solo en el checkpoint 118";
+                  }else{
+                     Log::info("Politicas no instaladas");
+                     return "Politicas no instaladas";
+                  }
+
                }else{
-                  Log::info("Politicas no instaladas");
                   return "Politicas no instaladas";
                }
+
             }else return "error";
          }
       }else return "error con el sid";
