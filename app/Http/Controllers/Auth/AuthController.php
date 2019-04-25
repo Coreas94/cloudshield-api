@@ -10,6 +10,7 @@ use App\WhitelistCompany;
 use App\Plans;
 use App\CompanyPlan;
 use App\CustomerPayment;
+use App\Invoice;
 
 use Hash;
 use App\Http\Requests;
@@ -160,19 +161,22 @@ class AuthController extends Controller
                   $plan_status = CompanyPlan::where('company_id', '=', $company_id)->pluck('status_plan_id');
                   $payment_data = CustomerPayment::where('company_id', '=', $company_id)->count();
                   $payment_error = DB::table('customer_payment_issues')->where('company_id', '=', $company_id)->count();
+                  $last_pay = Invoice::where('company_id', '=', $company_id)->orderBy('created_at', 'desc')->pluck('status_transaction')->first();
+
+                  Log::info($last_pay);
 
                   $plan = CompanyPlan::where('company_id', '=', $company_id)->pluck('plan_id');
 
                   $plan_id = str_replace(str_split('[]'), '', $plan);
 
-                  if($payment_error > 0){
+                  if($last_pay == "APPROVED"){
                      return response()->json([
                         'success' => [
                            'api_token' => $token,
                            'role_user' => $role_user,
                            'message' => 'Login successful',
                            'plan_id' => $plan_id,
-                           'payment_data' => '2',
+                           'payment_data' => '1',//pago regreso con error
                            'status_code' => 200
                         ]
                      ]);
@@ -186,7 +190,7 @@ class AuthController extends Controller
                                  'api_token' => $token,
                                  'role_user' => $role_user,
                                  'message' => 'Login successful',
-                                 'payment_data' => '1',
+                                 'payment_data' => '1',//pago existoso
                                  'status_code' => 200
                               ]
                            ]);
@@ -196,7 +200,7 @@ class AuthController extends Controller
                                  'api_token' => $token,
                                  'role_user' => $role_user,
                                  'message' => 'Login successful',
-                                 'payment_data' => '0',
+                                 'payment_data' => '0',//no tiene informacion de pago
                                  'plan_id' => $plan_id,
                                  'status_code' => 200
                               ]
@@ -246,7 +250,6 @@ class AuthController extends Controller
                            break;
                         }
                      }
-
                   }
                }else{
                   return response()->json([
@@ -359,6 +362,4 @@ class AuthController extends Controller
          ]);
       }
    }
-
-
 }

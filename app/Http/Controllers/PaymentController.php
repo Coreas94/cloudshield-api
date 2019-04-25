@@ -465,8 +465,6 @@ class PaymentController extends Controller{
          ->where('company_id', '=', $company_id)
          ->update(['automatic_payment' => $automatic]);
 
-
-
       if($payment){
          return response()->json([
              'success' => [
@@ -483,5 +481,4 @@ class PaymentController extends Controller{
 	       ]);
        }
    }
-
 }
