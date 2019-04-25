@@ -23,6 +23,7 @@ use App\CompanyPlan;
 use App\Plans;
 use App\DetailPlan;
 use App\ServicesPlans;
+use App\Invoice;
 
 use JWTAuth;
 
@@ -304,7 +305,15 @@ class UserController extends Controller
 				$expiration = "no date";
 			}
 
-			return response()->json(compact('user', 'services', 'expiration'));
+			$last_pay = Invoice::where('company_id', '=', $company_id)->orderBy('created_at', 'desc')->pluck('status_transaction')->first();
+
+			if(count($last_pay) > 0){
+				$last_pay = $last_pay;
+			}else{
+				$last_pay = "none";
+			}
+
+			return response()->json(compact('user', 'services', 'expiration', 'last_pay'));
 		}
 
 	}

@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
    /**
    * Define the application's command schedule.
    *
-   * @param  \Illuminate\Console\Scheduling\Schedule  $schedulesca
+   * @param  \Illuminate\Console\Scheduling\Schedule $schedulesca
    * @return void
    */
    protected function schedule(Schedule $schedule){
@@ -41,7 +41,7 @@ class Kernel extends ConsoleKernel
 
       $schedule->command('fortisiem:automaticPALogs')->cron('*/3 * * * *');
 
-      //$schedule->command('payment:automaticPayment')->cron('0 */12 * * *');
+      $schedule->command('payment:automaticPayment')->cron('0 */12 * * *');
 
    }
 }

@@ -105,6 +105,20 @@ class PaymentController extends Controller{
       print "${tcard} <br>";      // TYPE CARD
    }
 
+   public function getAutomaticPayment(){
+      Log::info("llega al pago automatico cron");
+      $dt = \Carbon\Carbon::now();
+      $now = $dt->toDateString();
+
+      $data_payment = CompanyPlan::where('automatic_payment', '=', 1)->where('expiration_date', '=', $now)->get();
+      Log::info($data_payment);
+      if(count($data_payment) > 0){
+         foreach($data_payment as $row){
+            $payment = $this->makePayment($row['company_id'], $row['plan_id']);
+         }
+      }
+   }
+
    public function saveDataPayment($request){
       Log::info($request);
 

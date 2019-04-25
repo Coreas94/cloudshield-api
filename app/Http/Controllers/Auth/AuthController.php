@@ -160,10 +160,14 @@ class AuthController extends Controller
 
                   $plan_status = CompanyPlan::where('company_id', '=', $company_id)->pluck('status_plan_id');
                   $payment_data = CustomerPayment::where('company_id', '=', $company_id)->count();
-                  $payment_error = DB::table('customer_payment_issues')->where('company_id', '=', $company_id)->count();
+                  //$payment_error = DB::table('customer_payment_issues')->where('company_id', '=', $company_id)->count();
                   $last_pay = Invoice::where('company_id', '=', $company_id)->orderBy('created_at', 'desc')->pluck('status_transaction')->first();
 
-                  Log::info($last_pay);
+                  if(count($last_pay) > 0){
+                     $last_pay = $last_pay;
+                  }else{
+                     $last_pay = "none";
+                  }
 
                   $plan = CompanyPlan::where('company_id', '=', $company_id)->pluck('plan_id');
 
