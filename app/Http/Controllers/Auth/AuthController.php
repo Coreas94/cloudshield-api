@@ -230,6 +230,7 @@ class AuthController extends Controller
                                     'role_user' => $role_user,
                                     'message' => 'Login successful',
                                     'status_plan' => 'active',
+                                    'plan_id' => $plan_id,
                                     'payment_data' => '1',
                                     'status_code' => 200
                                  ]
@@ -243,6 +244,7 @@ class AuthController extends Controller
                                     'message' => 'Login successful',
                                     'status_plan' => 'inactive',
                                     'payment_data' => '1',
+                                    'plan_id' => $plan_id,
                                     'status_code' => 200
                                  ]
                               ]);
@@ -255,6 +257,7 @@ class AuthController extends Controller
                                     'message' => 'Login successful',
                                     'status_plan' => 'suspended',
                                     'payment_data' => '1',
+                                    'plan_id' => $plan_id,
                                     'status_code' => 200
                                  ]
                               ]);
