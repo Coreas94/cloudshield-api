@@ -416,6 +416,7 @@ class PaymentController extends Controller{
          return response()->json([
              'success' => [
                 'message' => 'Pago hecho correctamente',
+                'status' => $new_payment,
                 'status_code' => 200
              ]
          ]);
@@ -423,6 +424,7 @@ class PaymentController extends Controller{
          return response()->json([
 	          'error' => [
 	             'message' => 'Error al efectuar el pago.',
+                'status' => $new_payment,
 	             'status_code' => 20
 	          ]
 	       ]);
@@ -444,6 +446,7 @@ class PaymentController extends Controller{
          return response()->json([
              'success' => [
                 'message' => 'Pago realizado correctamente',
+                'status' => $new_payment,
                 'status_code' => 200
              ]
          ]);
@@ -451,6 +454,7 @@ class PaymentController extends Controller{
          return response()->json([
 	          'error' => [
 	             'message' => 'Error al efectuar el pago.',
+                'status' => $new_payment,
 	             'status_code' => 20
 	          ]
 	       ]);
