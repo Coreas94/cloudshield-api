@@ -159,10 +159,12 @@ class AuthController extends Controller
               		$role_user = $user->roles->first()->name;
 
                   $plan_status = CompanyPlan::where('company_id', '=', $company_id)->pluck('status_plan_id');
+                  Log::info($plan_status);
                   $payment_data = CustomerPayment::where('company_id', '=', $company_id)->count();
+                  Log::info($payment_data);
                   //$payment_error = DB::table('customer_payment_issues')->where('company_id', '=', $company_id)->count();
                   $last_pay = Invoice::where('company_id', '=', $company_id)->orderBy('created_at', 'desc')->pluck('status_transaction')->first();
-
+                  Log::info($last_pay);
                   if(count($last_pay) > 0){
                      $last_pay = $last_pay;
                   }else{
@@ -174,6 +176,7 @@ class AuthController extends Controller
                   $plan_id = str_replace(str_split('[]'), '', $plan);
 
                   if($last_pay == "APPROVED"){
+                     Log::info("ES APPROVED");
                      return response()->json([
                         'success' => [
                            'api_token' => $token,
@@ -187,8 +190,9 @@ class AuthController extends Controller
                   }else{
 
                      if($payment_data == 0){
-
+                        Log::info("payment_data = 0");
                         if($company_id == 1){
+                           Log::info("company 1");
                            return response()->json([
                               'success' => [
                                  'api_token' => $token,
@@ -199,6 +203,7 @@ class AuthController extends Controller
                               ]
                            ]);
                         }else{
+                           Log::info("else de company 1");
                            return response()->json([
                               'success' => [
                                  'api_token' => $token,
@@ -211,7 +216,7 @@ class AuthController extends Controller
                            ]);
                         }
                      }else{
-
+                        Log::info("else payment_data 0");
                         switch ($plan_status) {
                            case '[1]':
                               return response()->json([
