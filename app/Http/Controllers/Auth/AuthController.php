@@ -174,8 +174,10 @@ class AuthController extends Controller
                   $plan = CompanyPlan::where('company_id', '=', $company_id)->pluck('plan_id');
 
                   $plan_id = str_replace(str_split('[]'), '', $plan);
-                  $plan_status1 = str_replace(str_split('[]'), '', $plan);
-                  $plan_status2 = str_replace(str_split('""'), '', $plan);
+                  $plan_status1 = str_replace(str_split('[]'), '', $plan_status);
+                  $plan_status2 = str_replace(str_split('""'), '', $plan_status1);
+
+                  Log::info("plan 2 ". $plan_status2);
 
                   if($last_pay == "APPROVED"){
                      Log::info("ES APPROVED");
@@ -220,7 +222,7 @@ class AuthController extends Controller
                      }else{
                         Log::info("else payment_data 0");
                         switch ($plan_status2) {
-                           case '1':
+                           case 1:
                               return response()->json([
                                  'success' => [
                                     'api_token' => $token,
@@ -232,7 +234,7 @@ class AuthController extends Controller
                                  ]
                               ]);
                               break;
-                           case '2':
+                           case 2:
                               return response()->json([
                                  'success' => [
                                     'api_token' => $token,
@@ -244,7 +246,7 @@ class AuthController extends Controller
                                  ]
                               ]);
                               break;
-                           case '3':
+                           case 3:
                               return response()->json([
                                  'success' => [
                                     'api_token' => $token,
