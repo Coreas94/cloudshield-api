@@ -173,7 +173,8 @@ class AuthController extends Controller
 
                   $plan = CompanyPlan::where('company_id', '=', $company_id)->pluck('plan_id');
 
-                  $plan_id = str_replace(str_split('[]'), '', $plan);
+                  $plan2 = str_replace(str_split('[]'), '', $plan);
+                  $plan_id = str_replace(str_split('""'), '', $plan2);
                   $plan_status1 = str_replace(str_split('[]'), '', $plan_status);
                   $plan_status2 = str_replace(str_split('""'), '', $plan_status1);
 
