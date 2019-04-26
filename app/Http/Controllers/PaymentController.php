@@ -464,7 +464,7 @@ class PaymentController extends Controller{
 
       $automatic = CompanyPlan::where('company_id', '=', $company_id)->pluck('automatic_payment');
       $automatic_id2 = str_replace(str_split('[]'), '', $automatic);
-      $automatic_id = str_replace(str_split('""'), '', $automatic);
+      $automatic_id = str_replace(str_split('""'), '', $automatic_id2);
 
       return response()->json([
          'data' => $automatic_id
