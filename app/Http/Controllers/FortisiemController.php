@@ -98,8 +98,6 @@ class FortisiemController extends Controller
 
       foreach ($result as $key => $value) {
          $array = json_decode($value, true);
-         Log::info($array);
-         die();
 
          $format_date = date('Y-m-d H:i:s', strtotime($array['phRecvTime']));
          $test = explode("[rule_name]=", $array['rawEventMsg']);
@@ -177,7 +175,7 @@ class FortisiemController extends Controller
             $log->src_ip = isset($array['srcIpAddr']) ? $array['srcIpAddr'] : 'undefined';
             $log->severity_category = isset($array['eventSeverityCat']) ? $array['eventSeverityCat'] : 'undefined';
             $log->protection_name = isset($array['ipsProtectionName']) ? $array['ipsProtectionName'] : 'undefined';
-            $log->attack_name = isset($array(['attackName']) ? $array['attackName'] : 'undefined');
+            $log->attack_name = isset($array(['attackName']) ? $array['attackName'] : 'undefined';
             $log->src_country = $srcCountry;
             $log->src_latitude = $srcLat;
             $log->src_longitude = $srcLong;
