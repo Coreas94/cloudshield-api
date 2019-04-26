@@ -6,7 +6,7 @@
        <Exclude/>
   </CustomerScope>
   <SelectClause>
-       <AttrList>phRecvTime,eventType,eventSeverityCat,eventName,ruleName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,rawEventMsg,attackName,attackInfo,count,relayDevIpAddr</AttrList>
+       <AttrList>phRecvTime,eventType,eventSeverityCat,eventName,ruleName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,rawEventMsg,attackName,attackInfo,count,relayDevIpAddr, ipsProtectionName</AttrList>
   </SelectClause>
   <PatternClause window="0">
        <SubPattern id="7997651" name="">
