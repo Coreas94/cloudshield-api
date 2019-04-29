@@ -6,11 +6,11 @@
        <Exclude/>
   </CustomerScope>
   <SelectClause>
-       <AttrList>phRecvTime,eventType,eventSeverityCat,eventName,ruleName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,rawEventMsg,attackName,attackInfo,count,relayDevIpAddr, ipsProtectionName</AttrList>
+       <AttrList>phRecvTime,eventType,eventSeverityCat,eventName,ipsProtectionName,attackName,ruleName,srcIpAddr,srcGeoCountry,srcGeoLatitude,srcGeoLongitude,destIpAddr,destGeoCountry,destGeoLatitude,destGeoLongitude,rawEventMsg,attackInfo,count,relayDevIpAddr</AttrList>
   </SelectClause>
   <PatternClause window="0">
        <SubPattern id="7997651" name="">
-            <SingleEvtConstr>relayDevIpAddr = 172.16.3.114</SingleEvtConstr>
+            <SingleEvtConstr>relayDevIpAddr = 172.16.3.114 AND (ipsConfidence = "High" OR ipsConfidence = "Medium-High") AND (ipsSeverity = "Medium" OR ipsSeverity = "Critical")</SingleEvtConstr>
        </SubPattern>
   </PatternClause>
   <userRoles>

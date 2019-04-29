@@ -810,6 +810,105 @@ class LayersController extends Controller
          ]);
       }
    }
+
+	public function removeIpCheckpointBlock(Request $request){
+		Log::info($request);
+		$object_name = $request['object_name'];
+		$ip_initial = $request['ip_initial'];
+		$ip_last = $request['ip_last'];
+		$evaluate = "";
+
+		$total_ips = 1;
+		$flag = 0;
+
+      $ssh_command = "tscpgw_api -g '172.16.3.112' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command3 = "tscpgw_api -g '172.16.3.116' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command4 = "tscpgw_api -g '172.16.3.117' -a delrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+
+      \SSH::into('checkpoint')->run($ssh_command, function($line){
+			Log::info($line.PHP_EOL);
+			$evaluate = $line.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 112");
+			\SSH::into('checkpoint')->run($ssh_command, function($line){
+				Log::info($line.PHP_EOL);
+				$evaluate = $line.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		$flag = 0;
+		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+			Log::info($line2.PHP_EOL);
+			$evaluate = $line2.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 113");
+			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+				Log::info($line2.PHP_EOL);
+				$evaluate = $line2.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		$flag = 0;
+		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+			Log::info($line3.PHP_EOL);
+			$evaluate = $line3.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 116");
+			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+				Log::info($line3.PHP_EOL);
+				$evaluate = $line3.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		$flag = 0;
+		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+			Log::info($line4.PHP_EOL);
+			$evaluate = $line4.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 117");
+			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+				Log::info($line4.PHP_EOL);
+				$evaluate = $line4.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		return response()->json([
+			'success' => [
+				'message' => 'IP se quitó de la lista de checkpoint-block',
+				'status_code' => 200
+			]
+		]);
+   }
+
 }
 
 /*usuario: control4

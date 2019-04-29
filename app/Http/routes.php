@@ -181,6 +181,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::get('/get_ip_list_soc_allow', 'LayersController@getIpsListSocAllow');
          Route::post('/remove_ip_list', 'LayersController@removeIpList');
          Route::post('/edit_ip_list', 'LayersController@editIps');
+
+         Route::post('/remove_checkpoint_block', 'LayersController@removeIpCheckpointBlock');
       });
 
       Route::group(['prefix' => 'paloalto'], function(){
