@@ -415,6 +415,8 @@ class AutomaticData extends Controller{
             $list_sec->ip_last = $ip;
             $list_sec->comment = "automatic ip";
             $list_sec->server_id = 1;
+            $list_sec->status = "Esta en checkpoint";
+            $list_sec->status_num = 1;
             $list_sec->save();
          }else{
             Log::info("ya existe en la base");
@@ -423,5 +425,5 @@ class AutomaticData extends Controller{
          return $arreglo;
       }
    }
-
+//2206-4541
 }

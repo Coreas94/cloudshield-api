@@ -183,10 +183,11 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/edit_ip_list', 'LayersController@editIps');
 
          Route::post('/remove_checkpoint_block', 'LayersController@removeIpCheckpointBlock');
+         Route::post('/assign_checkpoint_block', 'LayersController@assignIpCheckpointBlock');
       });
 
       Route::group(['prefix' => 'paloalto'], function(){
-        Route::post('/save_address_object', 'PaloAltoController@addAddressObject');
+         Route::post('/save_address_object', 'PaloAltoController@addAddressObject');
       });
 
       Route::group(['prefix' => 'payment'], function(){

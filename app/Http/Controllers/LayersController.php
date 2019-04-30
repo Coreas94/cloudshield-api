@@ -544,7 +544,11 @@ class LayersController extends Controller
             $id_obj_list = $row['id'];
          }
 
-         $delete_add_ch = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE id=".$id_obj_list);
+			if(isset($id_obj_list)){
+				$delete_add_ch = DB::connection('checkpoint')->delete("DELETE FROM ip_object_list WHERE id=".$id_obj_list);
+			}else{
+				$delete_add_ch = 1;
+			}
 
          if($delete_add_ch){
             return response()->json([
@@ -816,6 +820,7 @@ class LayersController extends Controller
 		$object_name = $request['object_name'];
 		$ip_initial = $request['ip_initial'];
 		$ip_last = $request['ip_last'];
+		$id = $request['id'];
 		$evaluate = "";
 
 		$total_ips = 1;
@@ -901,6 +906,9 @@ class LayersController extends Controller
 
 		sleep(2);
 
+		$update_obj = LayerSecurity::where('id', $id)
+			->update(['status' => "No está en checkpoint", 'status_num' => 0]);
+
 		return response()->json([
 			'success' => [
 				'message' => 'IP se quitó de la lista de checkpoint-block',
@@ -909,6 +917,107 @@ class LayersController extends Controller
 		]);
    }
 
+	public function assignIpCheckpointBlock(Request $request){
+
+		$object_name = $request['object_name'];
+		$ip_initial = $request['ip_initial'];
+		$ip_last = $request['ip_last'];
+		$id = $request['id'];
+		$evaluate = "";
+
+		$total_ips = 1;
+		$flag = 0;
+
+      $ssh_command = "tscpgw_api -g '172.16.3.112' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command2 = "tscpgw_api -g '172.16.3.113' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command3 = "tscpgw_api -g '172.16.3.116' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+      $ssh_command4 = "tscpgw_api -g '172.16.3.117' -a addrip -o ".$object_name." -r '".$ip_initial." ".$ip_last."'";
+
+      \SSH::into('checkpoint')->run($ssh_command, function($line){
+			Log::info($line.PHP_EOL);
+			$evaluate = $line.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 112");
+			\SSH::into('checkpoint')->run($ssh_command, function($line){
+				Log::info($line.PHP_EOL);
+				$evaluate = $line.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		$flag = 0;
+		\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+			Log::info($line2.PHP_EOL);
+			$evaluate = $line2.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 113");
+			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
+				Log::info($line2.PHP_EOL);
+				$evaluate = $line2.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		$flag = 0;
+		\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+			Log::info($line3.PHP_EOL);
+			$evaluate = $line3.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 116");
+			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
+				Log::info($line3.PHP_EOL);
+				$evaluate = $line3.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		$flag = 0;
+		\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+			Log::info($line4.PHP_EOL);
+			$evaluate = $line4.PHP_EOL;
+		});
+
+		$evaluate = $this->output;
+
+		while (stripos($evaluate, "try again") !== false || stripos($evaluate, "failed") !== false || ($flag >= 3)) {
+			if($flag >= 3) break;
+			Log::info("1 existe try again 117");
+			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
+				Log::info($line4.PHP_EOL);
+				$evaluate = $line4.PHP_EOL;
+			});
+		}
+
+		sleep(2);
+
+		$update_obj = LayerSecurity::where('id', $id)
+			->update(['status' => "Esta en checkpoint", 'status_num' => 1]);
+
+		return response()->json([
+			'success' => [
+				'message' => 'IP se agregó nuevamente a la lista de checkpoint-block',
+				'status_code' => 200
+			]
+		]);
+	}
 }
 
 /*usuario: control4
