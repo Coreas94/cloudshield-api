@@ -804,4 +804,12 @@ class AccessController extends Controller{
        }
 	}
 
+	public function enableCompanyTemp(Request $request){
+		die();
+
+		$temp = new TemporaryController;
+
+
+	}
+
 }
