@@ -51,7 +51,7 @@ class AutomaticData extends Controller{
          $datos[] = array("ip" => $row['ip'], "object" => $row['object_name'], "id" => $row['_id']);
 
          $save = $this->sendDataCheckpoint($datos);
-         Log::info($save);
+         //Log::info($save);
       }
    }
 
@@ -63,7 +63,7 @@ class AutomaticData extends Controller{
       $current_ips = 1;
 
       foreach($datos as $val){
-         Log::info($val);
+         //Log::info($val);
          $ip = $val['ip'];
          $object_name = $val['object'];
          $id_obj = $val['id'];
@@ -83,11 +83,11 @@ class AutomaticData extends Controller{
          $verification = 1;
 
          $exist_object112 = $validateCmd->verifyExistObject('172.16.3.112', $object_name);
-         Log::info("AUTO exist object 112 ".$exist_object112);
+         //Log::info("AUTO exist object 112 ".$exist_object112);
          if($exist_object112 == 1){
 
             \SSH::into('checkpoint')->run($ssh_command, function($line){
-      			Log::info($line.PHP_EOL);
+      			//Log::info($line.PHP_EOL);
       			$evaluate = $line.PHP_EOL;
       		});
 
@@ -98,7 +98,7 @@ class AutomaticData extends Controller{
                $flag++;
       			Log::info("AUTO 1 existe try again 112");
       			\SSH::into('checkpoint')->run($ssh_command, function($line){
-      				Log::info($line.PHP_EOL);
+      				//Log::info($line.PHP_EOL);
       				$evaluate = $line.PHP_EOL;
       			});
       		}
@@ -164,11 +164,11 @@ class AutomaticData extends Controller{
          $flag2 = 0;
 
          $exist_object113 = $validateCmd->verifyExistObject('172.16.3.113', $object_name);
-         Log::info("AUTO exist object 113 ".$exist_object113);
+         //Log::info("AUTO exist object 113 ".$exist_object113);
          if($exist_object113 == 1){
 
             \SSH::into('checkpoint')->run($ssh_command2, function($line2){
-      			Log::info($line2.PHP_EOL);
+      			//Log::info($line2.PHP_EOL);
       			$evaluate = $line2.PHP_EOL;
       		});
 
@@ -179,7 +179,7 @@ class AutomaticData extends Controller{
                $flag++;
       			Log::info("AUTO 1 existe try again 113");
       			\SSH::into('checkpoint')->run($ssh_command2, function($line2){
-      				Log::info($line2.PHP_EOL);
+      				//Log::info($line2.PHP_EOL);
       				$evaluate = $line2.PHP_EOL;
       			});
       		}
@@ -246,11 +246,11 @@ class AutomaticData extends Controller{
          $flag2 = 0;
 
          $exist_object116 = $validateCmd->verifyExistObject('172.16.3.116', $object_name);
-         Log::info("AUTO exist object 116 ".$exist_object116);
+         //Log::info("AUTO exist object 116 ".$exist_object116);
          if($exist_object116 == 1){
 
             \SSH::into('checkpoint')->run($ssh_command3, function($line3){
-      			Log::info($line3.PHP_EOL);
+      			//Log::info($line3.PHP_EOL);
       			$evaluate = $line3.PHP_EOL;
       		});
 
@@ -259,9 +259,9 @@ class AutomaticData extends Controller{
       		while ( ((stripos($evaluate, "try again") !== false) || (stripos($evaluate, "not found") !== false) || (stripos($evaluate, "Illegal IP") !== false) ) || ($flag >= 2)) {
                if($flag >= 2) break;
                $flag++;
-      			Log::info("AUTO 1 existe try again 116");
+      			//Log::info("AUTO 1 existe try again 116");
       			\SSH::into('checkpoint')->run($ssh_command3, function($line3){
-      				Log::info($line3.PHP_EOL);
+      				//Log::info($line3.PHP_EOL);
       				$evaluate = $line3.PHP_EOL;
       			});
       		}
@@ -316,8 +316,6 @@ class AutomaticData extends Controller{
             /*Log::info("116");
             Log::info($array_data_err);
             Log::info($array_data_succ);*/
-
-
          }else{
             Log::info("AUTO No existe el objeto en el 116");
          }
@@ -332,7 +330,7 @@ class AutomaticData extends Controller{
          if($exist_object117 == 1){
 
             \SSH::into('checkpoint')->run($ssh_command4, function($line4){
-      			Log::info($line4.PHP_EOL);
+      			//Log::info($line4.PHP_EOL);
       			$evaluate = $line4.PHP_EOL;
       		});
 
@@ -343,7 +341,7 @@ class AutomaticData extends Controller{
                $flag++;
       			//Log::info("AUTO 1 existe try again 117");
       			\SSH::into('checkpoint')->run($ssh_command4, function($line4){
-      				Log::info($line4.PHP_EOL);
+      				//Log::info($line4.PHP_EOL);
       				$evaluate = $line4.PHP_EOL;
       			});
       		}

@@ -22,6 +22,7 @@ Route::get('prueba2', 'Controller@prueba2');
 Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('otra', 'Controller@getIp');
 Route::get('pruebapago', 'PaymentController@manualPayment');
+Route::get('pruebaset', 'AccessController@disableCompanyTemp');
 /*******************************/
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
@@ -159,6 +160,9 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/newCompany', 'AccessController@addCompany'); //ADD NEW COMPANY
          Route::post('/update_company', 'AccessController@updateCompany'); //UPDATE COMPANY
          Route::post('/delete_company', ['as' => 'access_control/delete _company', 'uses' => 'AccessController@destroy']); //DELETE COMPANY
+
+         Route::post('/disable_company','AccessController@disableCompanyTemp');//+5219981393539b
+         Route::post('/enable_company','AccessController@enableCompanyTemp');
 
          Route::post('/get_whitelist_ip', 'WhitelistCompanyController@getIpsCompany');
          Route::post('/add_ip_whitelist', 'WhitelistCompanyController@addIpsWhitelist');

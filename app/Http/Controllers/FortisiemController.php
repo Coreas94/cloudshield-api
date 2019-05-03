@@ -345,7 +345,8 @@ class FortisiemController extends Controller
       $date_init = $fecha.' 00:00:00';
       $date_last = $fecha.' 23:59:59';
 
-      $logs = LogsData::whereBetween('receive_time', array($date_init, $date_last))->orderBy('receive_time', 'desc')->count();
+      $logs = LogsData::whereBetween('receive_time', array($date_init, $date_last))->count();
+      // $logs = LogsData::whereBetween('receive_time', array($date_init, $date_last))->orderBy('receive_time', 'desc')->count();
       Log::info("el count es:");
       Log::info($logs);
 

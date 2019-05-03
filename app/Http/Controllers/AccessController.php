@@ -26,6 +26,7 @@ use App\Http\Controllers\EmailController;
 use App\Http\Controllers\CheckPointFunctionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\TemporaryController;
 
 use App\CustomerPayment;
 
@@ -41,7 +42,7 @@ class AccessController extends Controller{
 	  	$role_user = $userLog->roles->first()->name;
 
      	if($role_user == "superadmin" || $role_user == "ventas"){
-        	$companies = DB::table('fw_companies')->where('deleted_at', NULL)->get();
+        	$companies = DB::table('fw_companies')->where('deleted_at', NULL)->orWhere('disabled', 1)->get();
      	}else{
         	$companies = DB::table('fw_companies')->where('deleted_at', NULL)->where('id', $userLog['company_id'])->get();
      	}
@@ -74,6 +75,7 @@ class AccessController extends Controller{
 			$array_company[$i]['description'] = $value['description'];
 			$array_company[$i]['address'] = $value['address'];
 			$array_company[$i]['country_id'] = $value['country_id'];
+			$array_company[$i]['disabled'] = $value['disabled'];
 
 			$i++;
 		}
@@ -755,7 +757,51 @@ class AccessController extends Controller{
                'status_code' => 20
             ]
          ]);
-		 }
+	 	}
+	}
+
+	public function disableCompanyTemp(Request $request, TemporaryController $temp){
+
+		$id = $request['id_company'];
+		//$name = $request['company_name'];
+
+		$update_rule = Company::where('id', $id)
+			->update(['disabled' => 1]);
+
+		$rules = FwAccessRule::where('company_id', '=', $id)->get();
+		$objects = FwObject::join('fw_address_objects', 'fw_address_objects.object_id', '=', 'fw_objects.id')
+						->where('fw_objects.company_id', '=', $id)
+						->where('fw_objects.name', 'LIKE', "%IP-ADDRESS%")
+						->select('fw_objects.*', 'fw_address_objects.ip_initial', 'fw_address_objects.ip_last', 'fw_address_objects.id AS id_address')
+						->get();
+
+		foreach($objects as $key => $val){
+			if($val['ip_initial'] == '1.1.1.1' || $val['ip_last'] == '1.1.1.1'){
+				unset($objects[$key]);
+			}
+		}
+
+		$disable_rules = $temp->disableRule($rules);
+		$remove_ips = $temp->RemoveIpTemp($objects);
+
+		$company = Company::find($id);
+		$company->delete();
+
+		if($company){
+         return response()->json([
+             'success' => [
+                'message' => 'Compañía deshabilitada correctamente.',
+                'status_code' => 200
+             ]
+         ]);
+      }else{
+         return response()->json([
+	          'error' => [
+	             'message' => 'No se pudo deshabilitar la compañía.',
+	             'status_code' => 20
+	          ]
+	       ]);
+       }
 	}
 
 }

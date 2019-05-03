@@ -28,14 +28,16 @@ use Artisan;
 use App\HistoricalData;
 use GeoIP as GeoIP;
 
+use App\Http\Controllers\CheckpointController;
+
 use App\Company;
 use App\CompanyPlan;
 use App\Plans;
 use App\DetailPlan;
 use App\ServicesPlans;
 
-class Controller extends BaseController
-{
+class Controller extends BaseController{
+
    use AuthorizesRequests, AuthorizesResources, DispatchesJobs, ValidatesRequests;
 
    public function pruebaEmail(){
@@ -169,4 +171,59 @@ class Controller extends BaseController
       $cust_pay->customer_name = "name";
 
    }
+
+   public function setObject(){
+
+      $checkpoint = new CheckpointController;
+
+      if(Session::has('sid_session'))
+ 			$sid = Session::get('sid_session');
+ 		else $sid = $checkpoint->getLastSession();
+
+      if($sid){
+
+         $curl = curl_init();
+
+			curl_setopt_array($curl, array(
+			  	CURLOPT_URL => "https://172.16.3.114/web_api/set-dynamic-object",
+			  	CURLOPT_RETURNTRANSFER => true,
+			  	CURLOPT_ENCODING => "",
+			  	CURLOPT_MAXREDIRS => 10,
+			  	CURLOPT_TIMEOUT => 30,
+			  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			  	CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+				CURLOPT_POSTFIELDS => "{\r\n \"name\" : \"CUST-Cs150-IP-ADDRESS\",\r\n  \"read-only\" : \"true\"\r\n}",
+			  	CURLOPT_HTTPHEADER => array(
+			    	"cache-control: no-cache",
+			    	"content-type: application/json",
+			    	//"postman-token: 67baa239-ddc9-c7a4-fece-5a05f2396e38",
+			    	"x-chkp-sid: ".$sid
+			  	),
+			));
+
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+
+			if($err){
+				return response()->json([
+					'error' => [
+						'message' => $err,
+						'status_code' => 20
+					]
+				]);
+			}else{
+
+ 				$result = json_decode($response, true);
+            Log::info($result);
+            return $result;
+         }
+      }else{
+         return "no hay sesion";
+      }
+   }
+
 }
