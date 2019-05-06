@@ -29,6 +29,7 @@ use App\Http\Requests;
 use App\Http\Controllers\CheckpointController;
 use File;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use GeoIP as GeoIP;
 
 class LayersController extends Controller
 {
@@ -63,8 +64,28 @@ class LayersController extends Controller
 
 		$list = json_decode(json_encode($list), true);
 
+		$array = [];
+
+		foreach($list as $value){
+			$value['id'] = $value['id'];
+			$value['name_object'] = $value['name_object'];
+			$value['name_server'] = $value['name_server'];
+			$value['comment'] = $value['comment'];
+			$value['ip_initial'] = $value['ip_initial'];
+			$value['ip_last'] = $value['ip_last'];
+			$value['server_id'] = $value['server_id'];
+			$value['status'] = $value['status'];
+			$value['status_num'] = $value['status_num'];
+			$value['created_at'] = $value['created_at'];
+			$value['updated_at'] = $value['updated_at'];
+			$value['deleted_at'] = $value['deleted_at'];
+			$value['country'] = @geoip_country_name_by_name($value['ip_initial']);
+
+			array_push($array, $value);
+		}
+
 		return response()->json([
-			'data' => $list
+			'data' => $array
 		]);
 	}
 
@@ -78,8 +99,28 @@ class LayersController extends Controller
 
 		$list = json_decode(json_encode($list), true);
 
+		$array = [];
+
+		foreach($list as $value){
+			$value['id'] = $value['id'];
+			$value['name_object'] = $value['name_object'];
+			$value['name_server'] = $value['name_server'];
+			$value['comment'] = $value['comment'];
+			$value['ip_initial'] = $value['ip_initial'];
+			$value['ip_last'] = $value['ip_last'];
+			$value['server_id'] = $value['server_id'];
+			$value['status'] = $value['status'];
+			$value['status_num'] = $value['status_num'];
+			$value['created_at'] = $value['created_at'];
+			$value['updated_at'] = $value['updated_at'];
+			$value['deleted_at'] = $value['deleted_at'];
+			$value['country'] = @geoip_country_name_by_name($value['ip_initial']);
+
+			array_push($array, $value);
+		}
+
 		return response()->json([
-			'data' => $list
+			'data' => $array
 		]);
 	}
 
@@ -93,8 +134,28 @@ class LayersController extends Controller
 
 		$list = json_decode(json_encode($list), true);
 
+		$array = [];
+
+		foreach($list as $value){
+			$value['id'] = $value['id'];
+			$value['name_object'] = $value['name_object'];
+			$value['name_server'] = $value['name_server'];
+			$value['comment'] = $value['comment'];
+			$value['ip_initial'] = $value['ip_initial'];
+			$value['ip_last'] = $value['ip_last'];
+			$value['server_id'] = $value['server_id'];
+			$value['status'] = $value['status'];
+			$value['status_num'] = $value['status_num'];
+			$value['created_at'] = $value['created_at'];
+			$value['updated_at'] = $value['updated_at'];
+			$value['deleted_at'] = $value['deleted_at'];
+			$value['country'] = @geoip_country_name_by_name($value['ip_initial']);
+
+			array_push($array, $value);
+		}
+
 		return response()->json([
-			'data' => $list
+			'data' => $array
 		]);
 	}
 

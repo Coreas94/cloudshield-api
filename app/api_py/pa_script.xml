@@ -1,0 +1,26 @@
+<DataRequest custId="0" dbId="14896750" end="0" entityVersion="1" id="14896750" issueCustId="3" type="Query">
+   <Name>paloalto</Name>
+   <Description/>
+   <CustomerScope groupByEachCustomer="false">
+      <Include all="true"/>
+      <Exclude/>
+   </CustomerScope>
+   <SelectClause>
+      <!-- <AttrList>phRecvTime,srcIpAddr,srcGeoLatitude,srcGeoLongitude,srcGeoCountry,destIpAddr,destGeoLatitude,destGeoLongitude,destGeoCountry,ruleName,attackInfo,attackName,ipsProtectionName,eventSeverity,ipsSeverity,rawEventMsg,srcGeoOrg</AttrList> -->
+      <AttrList>phRecvTime,srcIpAddr,destIpAddr,rawEventMsg</AttrList>
+   </SelectClause>
+   <PatternClause window="0">
+      <SubPattern id="14896800" name="">
+         <!-- <SingleEvtConstr>parserName = "PaloAltoParser"</SingleEvtConstr> -->
+         <SingleEvtConstr>relayDevIpAddr = 172.16.3.51 OR relayDevIpAddr = 172.16.3.52</SingleEvtConstr>
+      </SubPattern>
+   </PatternClause>
+   <userRoles>
+      <roles custId="0">1686450</roles>
+   </userRoles>
+   <SyncOrgs/>
+   <ReportInterval>
+      <Low>::starttime</Low>
+      <High>::endtime</High>
+   </ReportInterval>
+</DataRequest>

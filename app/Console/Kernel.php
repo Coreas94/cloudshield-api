@@ -21,9 +21,10 @@ class Kernel extends ConsoleKernel
      Commands\AutomaticThreatSave::class,
      Commands\automaticPALogs::class,
      Commands\AutomaticPayment::class,
+     Commands\dataFortisiemPA::class,
    ];
 
-   /**
+   /**fortisiem:getLogsFortisiemPA
    * Define the application's command schedule.
    *
    * @param  \Illuminate\Console\Scheduling\Schedule $schedulesca
@@ -32,6 +33,8 @@ class Kernel extends ConsoleKernel
    protected function schedule(Schedule $schedule){
 
       $schedule->command('fortisiem:getLogsFortisiem')->cron('*/5 * * * *');
+
+      //$schedule->command('fortisiem:getLogsFortisiemPA')->cron('*/6 * * * *');
 
       $schedule->command('checkpoint:resendData')->cron('*/7 * * * *');
 

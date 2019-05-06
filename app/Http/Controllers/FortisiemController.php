@@ -410,7 +410,7 @@ class FortisiemController extends Controller
       }
    }
 
-   public function runPaloAltoLogs(){
+   public function runAutoPaloAltoLogs(){
 
       $dt = \Carbon\Carbon::now();
       $fecha_fin = $dt->timestamp;
@@ -452,6 +452,26 @@ class FortisiemController extends Controller
             return "No records found";
          }
       }
+   }
+
+   public function runScriptPA(){
+
+      $dt = \Carbon\Carbon::now();
+      $fecha_fin = $dt->timestamp;
+      $fecha_inicio = $dt->subHour(2);
+      $fecha_inicio = $fecha_inicio->timestamp;
+
+      $process = new Process("python ".app_path()."/api_py/GetQueryPaloAlto.py ".app_path()."/api_py/pa_script.xml ".$fecha_inicio.' '. $fecha_fin);
+      $process->run();
+
+      if(!$process->isSuccessful()){
+         Log::info("is error");
+         throw new ProcessFailedException($process);
+      }
+
+      $result = json_decode($process->getOutput(), true);
+      Log::info("trae PAlto: ". count($result));
+      Log::info($result);
    }
 
 }

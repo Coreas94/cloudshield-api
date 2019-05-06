@@ -40,6 +40,6 @@ class automaticPALogs extends Command
     public function handle(FortisiemController $fortisiem)
     {
         Log::info("Llega a palo alto automatic");
-        $fortisiem->runPaloAltoLogs();
+        $fortisiem->runAutoPaloAltoLogs();
     }
 }

@@ -10,7 +10,8 @@
   </SelectClause>
   <PatternClause window="0">
        <SubPattern id="7997651" name="">
-            <SingleEvtConstr>relayDevIpAddr = 172.16.3.114 AND (ipsConfidence = "High" OR ipsConfidence = "Medium-High") AND (ipsSeverity = "Medium" OR ipsSeverity = "Critical")</SingleEvtConstr>
+            <SingleEvtConstr>relayDevIpAddr = 172.16.3.114 </SingleEvtConstr>
+            <!-- AND (ipsConfidence = "High" OR ipsConfidence = "Medium-High") AND (ipsSeverity = "Medium" OR ipsSeverity = "Critical") -->
        </SubPattern>
   </PatternClause>
   <userRoles>
