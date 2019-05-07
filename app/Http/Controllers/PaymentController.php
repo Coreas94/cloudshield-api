@@ -442,7 +442,6 @@ class PaymentController extends Controller{
       }
 
       if($new_payment == "APPROVED"){
-      //if(isset($new_payment)){
          return response()->json([
              'success' => [
                 'message' => 'Pago realizado correctamente',

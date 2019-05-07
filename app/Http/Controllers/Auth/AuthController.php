@@ -124,7 +124,7 @@ class AuthController extends Controller
       $ip = \request()->ip();
       Log::info($ip);
 
-      if(in_array($ip, $ips_allow)){
+      //if(in_array($ip, $ips_allow)){
 
          $validator = Validator::make($request->all(), ['email' => 'required', 'password' => 'required']);
      		$input = $request->all();
@@ -278,14 +278,14 @@ class AuthController extends Controller
                }
             }
          }
-      }else{
+      /*}else{
          return response()->json([
             'error' => [
                'message' => 'Unauthorized IP',
                'status_code' => 20
             ]
          ]);
-      }
+      }*/
 	}
 
    public function api_signup(Request $request){
