@@ -230,6 +230,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/change_company_plan', 'PlanController@changePlanCompany');
       });
 
+      Route::post('historical/get_data', 'HistoryController@getHistoricalData');
+
       Route::get('errors/sendEmailAlarm', 'CheckpointController@sendEmailAlarm');
       Route::get('settings/get_countries', 'SettingController@getCountriesData');
 

@@ -288,18 +288,22 @@ class PaymentController extends Controller{
                   $id = DB::getPdo()->lastInsertId();
 
                   $issue_payment = DB::table('customer_payment_issues')->insert(
-                      [
+                     [
                         'customer_payment_id' => $customer_id,
                         'company_id' => $company_id,
                         'invoice_id' => $id,
                         'status_payment' => $status_transaction,
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s'),
-                      ]
+                     ]
                   );
                }
 
                if($insert){
+
+                  //Aquí se va a mandar el correo de la factura
+
+
                   return $status_transaction;
                }else{
                   return "error";

@@ -210,6 +210,7 @@ class ValidateCommandController extends Controller{
             $log->status = 0;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
 
          }else{
@@ -227,6 +228,7 @@ class ValidateCommandController extends Controller{
             $log->status = 1;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
          }
 
@@ -289,6 +291,7 @@ class ValidateCommandController extends Controller{
             $log->status = 0;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
 
          }else{
@@ -306,6 +309,7 @@ class ValidateCommandController extends Controller{
             $log->status = 1;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
          }
 
@@ -367,6 +371,7 @@ class ValidateCommandController extends Controller{
             $log->status = 0;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
 
          }else{
@@ -384,6 +389,7 @@ class ValidateCommandController extends Controller{
             $log->status = 1;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
          }
 
@@ -447,6 +453,7 @@ class ValidateCommandController extends Controller{
             $log->status = 0;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
          }else{
             $temp_data_succ = array("server"=>"172.16.3.117", "object_name"=>$object_name, "ip_initial"=> $ip_initial, "ip_last" => $ip_last, "type" => "addrip", "class" => "ip", "total_ips" => $total_ips, "current_ips" => $current_ips);
@@ -463,6 +470,7 @@ class ValidateCommandController extends Controller{
             $log->status = 1;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
          }
 
@@ -1037,7 +1045,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command2, function($line2){
       	Log::info("verification exist object");
-      	Log::info($line2.PHP_EOL);
+      	//Log::info($line2.PHP_EOL);
       	$this->verif_obj = $line2.PHP_EOL;
       });
 
@@ -1048,7 +1056,7 @@ class ValidateCommandController extends Controller{
          $ssh_command_obj = "tscpgw_api -g '".$server."' -a adddyo -o ".$object_name;
 
          \SSH::into('checkpoint')->run($ssh_command_obj, function($line3){
-            Log::info($line3.PHP_EOL);
+            //Log::info($line3.PHP_EOL);
             $this->output = $line3.PHP_EOL;
          });
 
@@ -1058,7 +1066,7 @@ class ValidateCommandController extends Controller{
             $flag++;
             Log::info("1 existe try again 112");
             \SSH::into('checkpoint')->run($ssh_command_obj, function($line4){
-              Log::info($line4.PHP_EOL);
+              //Log::info($line4.PHP_EOL);
               $evaluate = $line4.PHP_EOL;
             });
          }
@@ -1067,7 +1075,7 @@ class ValidateCommandController extends Controller{
 
          \SSH::into('checkpoint')->run($ssh_command2, function($line2){
             Log::info("verification exist object");
-            Log::info($line2.PHP_EOL);
+            //Log::info($line2.PHP_EOL);
             $this->verif_obj = $line2.PHP_EOL;
          });
 
@@ -1097,11 +1105,12 @@ class ValidateCommandController extends Controller{
 
       $name_company = $company_data2[0]['name'];
       $token_company = $company_data2[0]['token_company'];
+      $company_id = $company_data2[0]['id'];
 
       $command = "tscpgw_api -g '".$server."' -a ranges -o ".$object_name;
 
       \SSH::into('checkpoint')->run($command, function($line2){
-         Log::info($line2.PHP_EOL);
+         //Log::info($line2.PHP_EOL);
          $this->range = $line2.PHP_EOL;
       });
 
@@ -1109,12 +1118,12 @@ class ValidateCommandController extends Controller{
          if($flag >= 2) break;
          $flag++;
          \SSH::into('checkpoint')->run($command, function($line){
-            Log::info($line.PHP_EOL);
+            //Log::info($line.PHP_EOL);
             $this->range = $line.PHP_EOL;
          });
       }
 
-      Log::info($this->range);
+      //Log::info($this->range);
 
       if(!empty($this->range)){
          Log::info("esto es arraaaay");
@@ -1142,17 +1151,17 @@ class ValidateCommandController extends Controller{
          if(in_array($ip_initial, $array_ip) && in_array($ip_last, $array_ip)){
             Log::info("Existe la IP: ".$ip_initial);
 
-            $response = array("response" => 1, "info" => "success", "token" => $token_company);
+            $response = array("response" => 1, "info" => "success", "token" => $token_company, "company_id" => $company_id);
 
             return $response;
          }else{
             Log::info("No existe la ip: ".$ip_initial);
-            $response = array("response" => 0, "info" => $this->range, "token" => $token_company);
+            $response = array("response" => 0, "info" => $this->range, "token" => $token_company, "company_id" => $company_id);
             return $response;
          }
       }else{
          Log::info("VIENE VACIO EL ARRAY RANGE");
-         $response = array("response" => 0, "info" => "No devuelve valor", "token" => $token_company);
+         $response = array("response" => 0, "info" => "No devuelve valor", "token" => $token_company, "company_id" => $company_id);
          return $response;
       }
    }
@@ -1171,6 +1180,7 @@ class ValidateCommandController extends Controller{
 
       $name_company = $company_data2[0]['name'];
       $token_company = $company_data2[0]['token_company'];
+      $company_id = $company_data2[0]['id'];
 
       $array_object;
       $array_ip = [];
@@ -1264,6 +1274,7 @@ class ValidateCommandController extends Controller{
                      $log->status = 0;
                      $log->info = $removeRange['info'];
                      $log->token_company = $removeRange['token'];
+                     $log->company_id = $company_id;
                      $log->save();
 
                   }else{//Si se eliminó
@@ -1281,6 +1292,7 @@ class ValidateCommandController extends Controller{
                      $log->status = 1;
                      $log->info = $removeRange['info'];
                      $log->token_company = $removeRange['token'];
+                     $log->company_id = $company_id;
                      $log->save();
                   }
 
@@ -1350,6 +1362,7 @@ class ValidateCommandController extends Controller{
                      $log->status = 0;
                      $log->info = $removeRange['info'];
                      $log->token_company = $removeRange['token'];
+                     $log->company_id = $company_id;
                      $log->save();
 
                   }else{//Si se eliminó
@@ -1367,6 +1380,7 @@ class ValidateCommandController extends Controller{
                      $log->status = 1;
                      $log->info = $removeRange['info'];
                      $log->token_company = $removeRange['token'];
+                     $log->company_id = $company_id;
                      $log->save();
                   }
 
@@ -1483,6 +1497,7 @@ class ValidateCommandController extends Controller{
             $log->status = 0;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
 
          }else{
@@ -1500,6 +1515,7 @@ class ValidateCommandController extends Controller{
             $log->status = 1;
             $log->info = $exist_range['info'];
             $log->token_company = $exist_range['token'];
+            $log->company_id = $exist_range['company_id'];
             $log->save();
          }
 

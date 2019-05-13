@@ -280,12 +280,12 @@ class PlanController extends Controller{
          ]);
       }else{
          return response()->json([
-	          'error' => [
-	             'message' => 'El plan no pudo ser asignado.',
-	             'status_code' => 20
-	          ]
-	       ]);
-       }
+            'error' => [
+               'message' => 'El plan no pudo ser asignado.',
+               'status_code' => 20
+            ]
+         ]);
+      }
    }
 
    public function changePlanCompany(Request $request){
@@ -307,12 +307,12 @@ class PlanController extends Controller{
          ]);
       }else{
          return response()->json([
-	          'error' => [
-	             'message' => 'El plan no pudo ser actualizado.',
-	             'status_code' => 20
-	          ]
-	       ]);
-       }
+            'error' => [
+               'message' => 'El plan no pudo ser actualizado.',
+               'status_code' => 20
+            ]
+         ]);
+      }
    }
 
 }
