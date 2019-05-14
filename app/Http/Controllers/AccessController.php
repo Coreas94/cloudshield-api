@@ -513,8 +513,7 @@ class AccessController extends Controller{
 		            ]
 		         ]);
 				}
-			}
-			catch (GuzzleHttp\Exception\ClientException $e) {
+			}catch (GuzzleHttp\Exception\ClientException $e) {
 				$response = $e->getResponse();
 				$responseBodyAsString = $response->getBody()->getContents();
 
@@ -674,8 +673,7 @@ class AccessController extends Controller{
 					]
 				]);
 			}
-		}
-		catch (GuzzleHttp\Exception\ClientException $e) {
+		}catch (GuzzleHttp\Exception\ClientException $e) {
 			$response = $e->getResponse();
 			$responseBodyAsString = $response->getBody()->getContents();
 
@@ -706,11 +704,11 @@ class AccessController extends Controller{
 
 		if($company){
 			return response()->json([
-          'success' => [
-             'message' => 'Datos de compañía eliminados',
-             'status_code' => 200
-          ]
-       ]);
+          	'success' => [
+					'message' => 'Datos de compañía eliminados',
+					'status_code' => 200
+          	]
+       	]);
 		}else{
 			$type = "error";
 			$update_rule = Company::where('id', $id)

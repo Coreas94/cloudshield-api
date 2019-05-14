@@ -156,7 +156,6 @@ return [
         Collective\Bus\BusServiceProvider::class,
         'Sentry\SentryLaravel\SentryLaravelServiceProvider',
         \Torann\GeoIP\GeoIPServiceProvider::class,
-
         /*
          * Application Service Providers...
          */

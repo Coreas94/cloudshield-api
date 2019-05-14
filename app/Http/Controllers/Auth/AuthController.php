@@ -11,6 +11,7 @@ use App\Plans;
 use App\CompanyPlan;
 use App\CustomerPayment;
 use App\Invoice;
+use App\SessionLogs;
 
 use Hash;
 use App\Http\Requests;
@@ -20,6 +21,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Auth;
+use GeoIP as GeoIP;
 
 use JWTAuth;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
@@ -123,6 +125,18 @@ class AuthController extends Controller
       $ips_allow = WhitelistCompany::pluck('ip_allow')->toArray();
       $ip = \request()->ip();
       Log::info($ip);
+      $geo = GeoIP::getLocation($ip);
+      $geo = $geo->toArray();
+
+      /*$lat = $geo['lat'];
+      $lon = $geo['lon'];
+      $country = $geo['lat'];
+      $lat = $geo['lat'];
+      $lat = $geo['lat'];
+
+      dd($t);
+      die();*/
+
 
       //if(in_array($ip, $ips_allow)){
 
@@ -165,6 +179,7 @@ class AuthController extends Controller
                   //$payment_error = DB::table('customer_payment_issues')->where('company_id', '=', $company_id)->count();
                   $last_pay = Invoice::where('company_id', '=', $company_id)->orderBy('created_at', 'desc')->pluck('status_transaction')->first();
                   Log::info($last_pay);
+
                   if(count($last_pay) > 0){
                      $last_pay = $last_pay;
                   }else{
@@ -182,6 +197,13 @@ class AuthController extends Controller
 
                   if($last_pay == "APPROVED"){
                      Log::info("ES APPROVED");
+
+                     $session = new SessionLogs;
+                     $session->email = $user['email'];
+                     $session->user_id = $user['id'];
+                     $session->location = $geo;
+                     $session->save();
+
                      return response()->json([
                         'success' => [
                            'api_token' => $token,
@@ -198,6 +220,14 @@ class AuthController extends Controller
                         Log::info("payment_data = 0");
                         if($company_id == 1){
                            Log::info("company 1");
+
+                           $session = new SessionLogs;
+                           $session->email = $user['email'];
+                           $session->user_id = $user['id'];
+                           $session->company_id = $user['company_id'];
+                           $session->location = $geo;
+                           $session->save();
+
                            return response()->json([
                               'success' => [
                                  'api_token' => $token,
@@ -209,6 +239,14 @@ class AuthController extends Controller
                            ]);
                         }else{
                            Log::info("else de company 1");
+
+                           $session = new SessionLogs;
+                           $session->email = $input['email'];
+                           $session->user_id = $user['id'];
+                           $session->company_id = $user['company_id'];
+                           $session->location = $geo;
+                           $session->save();
+
                            return response()->json([
                               'success' => [
                                  'api_token' => $token,
@@ -224,6 +262,14 @@ class AuthController extends Controller
                         Log::info("else payment_data 0");
                         switch ($plan_status2) {
                            case 1:
+
+                              $session = new SessionLogs;
+                              $session->email = $input['email'];
+                              $session->user_id = $user['id'];
+                              $session->company_id = $user['company_id'];
+                              $session->location = $geo;
+                              $session->save();
+
                               return response()->json([
                                  'success' => [
                                     'api_token' => $token,
@@ -237,6 +283,14 @@ class AuthController extends Controller
                               ]);
                               break;
                            case 2:
+
+                              $session = new SessionLogs;
+                              $session->email = $input['email'];
+                              $session->user_id = $user['id'];
+                              $session->company_id = $user['company_id'];
+                              $session->location = $geo;
+                              $session->save();
+
                               return response()->json([
                                  'success' => [
                                     'api_token' => $token,
@@ -250,6 +304,14 @@ class AuthController extends Controller
                               ]);
                               break;
                            case 3:
+
+                              $session = new SessionLogs;
+                              $session->email = $input['email'];
+                              $session->user_id = $user['id'];
+                              $session->company_id = $user['company_id'];
+                              $session->location = $geo;
+                              $session->save();
+
                               return response()->json([
                                  'success' => [
                                     'api_token' => $token,
