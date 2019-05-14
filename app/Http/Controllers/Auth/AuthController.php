@@ -126,9 +126,17 @@ class AuthController extends Controller
       $ip = \request()->ip();
       Log::info($ip);
 
-      /*$geo = GeoIP::getLocation($ip);
-      $geo = $geo->toArray();*/
       $geo = @geoip_record_by_name($ip);
+
+      $array_geo = array(
+         "country_name" => utf8_encode($geo['country_name']),
+         "country_code" => utf8_encode($geo['country_code']),
+         "region" => utf8_encode($geo['region']),
+         "city" => utf8_encode($geo['city']),
+         "latitude" => $geo['latitude'],
+         "longitude" => $geo['longitude'],
+         'postal_code' => utf8_encode($geo['postal_code']),
+      );
 
       //if(in_array($ip, $ips_allow)){
 
@@ -193,7 +201,7 @@ class AuthController extends Controller
                      $session = new SessionLogs;
                      $session->email = $user['email'];
                      $session->user_id = $user['id'];
-                     $session->location = $geo;
+                     $session->location = $array_geo;
                      $session->save();
 
                      return response()->json([
@@ -217,7 +225,7 @@ class AuthController extends Controller
                            $session->email = $user['email'];
                            $session->user_id = $user['id'];
                            $session->company_id = $user['company_id'];
-                           $session->location = $geo;
+                           $session->location = $array_geo;
                            $session->save();
 
                            return response()->json([
@@ -236,7 +244,7 @@ class AuthController extends Controller
                            $session->email = $input['email'];
                            $session->user_id = $user['id'];
                            $session->company_id = $user['company_id'];
-                           $session->location = $geo;
+                           $session->location = $array_geo;
                            $session->save();
 
                            return response()->json([
@@ -259,7 +267,7 @@ class AuthController extends Controller
                               $session->email = $input['email'];
                               $session->user_id = $user['id'];
                               $session->company_id = $user['company_id'];
-                              $session->location = $geo;
+                              $session->location = $array_geo;
                               $session->save();
 
                               return response()->json([
@@ -280,7 +288,7 @@ class AuthController extends Controller
                               $session->email = $input['email'];
                               $session->user_id = $user['id'];
                               $session->company_id = $user['company_id'];
-                              $session->location = $geo;
+                              $session->location = $array_geo;
                               $session->save();
 
                               return response()->json([
@@ -301,7 +309,7 @@ class AuthController extends Controller
                               $session->email = $input['email'];
                               $session->user_id = $user['id'];
                               $session->company_id = $user['company_id'];
-                              $session->location = $geo;
+                              $session->location = $array_geo;
                               $session->save();
 
                               return response()->json([
