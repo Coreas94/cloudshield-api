@@ -30,8 +30,7 @@ use GeoIP as GeoIP;
 
 use JWTAuth;
 
-class FortisiemController extends Controller
-{
+class FortisiemController extends Controller{
 
    public function getOrganizations(){
 

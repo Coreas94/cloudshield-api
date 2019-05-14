@@ -125,18 +125,10 @@ class AuthController extends Controller
       $ips_allow = WhitelistCompany::pluck('ip_allow')->toArray();
       $ip = \request()->ip();
       Log::info($ip);
-      $geo = GeoIP::getLocation($ip);
-      $geo = $geo->toArray();
 
-      /*$lat = $geo['lat'];
-      $lon = $geo['lon'];
-      $country = $geo['lat'];
-      $lat = $geo['lat'];
-      $lat = $geo['lat'];
-
-      dd($t);
-      die();*/
-
+      /*$geo = GeoIP::getLocation($ip);
+      $geo = $geo->toArray();*/
+      $geo = @geoip_record_by_name($ip);
 
       //if(in_array($ip, $ips_allow)){
 
