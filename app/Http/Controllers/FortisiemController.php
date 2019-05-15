@@ -113,6 +113,8 @@ class FortisiemController extends Controller{
 
          if(strpos($rule_name, 'THREATSTOP') !== false){
             $rule_name_sust = "IP REPUTATION";
+         }else{
+            $rule_name_sust = $rule_name;
          }
 
          if( (isset($array['srcIpAddr']) && $array['srcIpAddr'] != "no-exist") && (isset($array['destIpAddr']) && $array['destIpAddr'] != "no-exist") ){
@@ -167,14 +169,40 @@ class FortisiemController extends Controller{
                $dstLong = $geo['lon'];
             }
 
+
+            if(!isset($array['ipsProtectionName'])){
+               $raw = explode("[attack]=", $array['rawEventMsg']);
+               foreach($raw as $k => $v){
+                  if($k == 1){
+                     $raw_msg = explode(",",$v);
+                     $attack_name = $raw_msg[0];
+                  }else{
+                     $attack_name = "undefined";
+                  }
+               }
+            }
+
+            if(!isset($array['ipsProtectionName'])){
+               $raw = explode("[Protection Name]=", $array['rawEventMsg']);
+
+               foreach($raw as $k => $v){
+                  if($k == 1){
+                     $raw_msg = explode(",",$v);
+                     $protection_name = $raw_msg[0];
+                  }else{
+                     $protection_name = "undefined";
+                  }
+               }
+            }
+
             $log = new LogsData;
             $log->receive_time = $format_date;
             $log->event_type = $array['eventType'];
             $log->event_name = $array['eventName'];
             $log->src_ip = isset($array['srcIpAddr']) ? $array['srcIpAddr'] : 'undefined';
             $log->severity_category = isset($array['eventSeverityCat']) ? $array['eventSeverityCat'] : 'undefined';
-            $log->protection_name = isset($array['ipsProtectionName']) ? $array['ipsProtectionName'] : 'undefined';
-            $log->attack_name = isset($array['attackName']) ? $array['attackName'] : 'undefined';
+            $log->protection_name = isset($array['ipsProtectionName']) ? $array['ipsProtectionName'] : $protection_name;
+            $log->attack_name = isset($array['attackName']) ? $array['attackName'] : $attack_name;
             $log->src_country = $srcCountry;
             $log->src_latitude = $srcLat;
             $log->src_longitude = $srcLong;

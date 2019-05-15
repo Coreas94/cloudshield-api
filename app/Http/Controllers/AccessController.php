@@ -409,7 +409,7 @@ class AccessController extends Controller{
 								      	}
 										}
 
-										$data_email = array("name_company" => $name, "type_ssh" => "new_company");
+										$data_email = array("name_company" => $name, "type_ssh" => "new_company");//Email nueva compañía***
 
 										if(isset($response_mk) && ($response_mk == 1)){
 
