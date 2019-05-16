@@ -1491,4 +1491,94 @@ class NetworkController extends Controller{
       }
    }
 
+   public function removeObjectNetwork(Request $request){
+
+      $checkpoint = new CheckpointController;
+      $checkpoint2 = new CheckPointFunctionController;
+
+      $type_object = $request['type_object'];
+      $object_id = $request['object_id'];
+
+      if($type_object == "host"){
+      	$type = "delete-host";
+      	$name_object = $request['name_object'];
+      	$data = "{\r\n  \"name\" : \"$name_object\"\r\n}";
+      }else{
+         $type = "delete-network";
+         $name_object = $request['name_object'];
+         $data = "{\r\n  \"name\" : \"$name_object\"\r\n}";
+      }
+
+      Log::info($request);
+
+      die();
+
+      $curl = curl_init();
+
+      curl_setopt_array($curl, array(
+         CURLOPT_URL => "https://172.16.3.114/web_api/".$type,
+         CURLOPT_RETURNTRANSFER => true,
+         CURLOPT_ENCODING => "",
+         CURLOPT_MAXREDIRS => 10,
+         CURLOPT_TIMEOUT => 30,
+         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+         CURLOPT_SSL_VERIFYPEER => false,
+         CURLOPT_SSL_VERIFYHOST => false,
+         CURLOPT_CUSTOMREQUEST => "POST",
+         CURLOPT_POSTFIELDS => $data,
+         CURLOPT_HTTPHEADER => array(
+            "cache-control: no-cache",
+            "content-type: application/json",
+            "X-chkp-sid: ".$sid
+         ),
+      ));
+
+   	$response = curl_exec($curl);
+   	Log::info(print_r($response, true));
+   	sleep(2);
+   	$err = curl_error($curl);
+
+   	curl_close($curl);
+
+   	if($err){
+         return response()->json([
+         	'error' => [
+         		'message' => $err,
+         		'status_code' => 20
+         	]
+         ]);
+   	}else{
+
+         $result = json_decode($response, true);
+         Log::info($result);
+
+         if(isset($result['code'])){
+         	return response()->json([
+         		'error' => [
+         			'message' => $result['message'],
+         			'status_code' => 20
+         		]
+         	]);
+         }else{
+
+            $publish = $checkpoint->publishChanges($sid);
+
+            if($publish == 'success'){
+            	$object2 = $checkpoint2->setObjectNetwork($array_post);
+            	sleep(1);
+
+            	$uid = $result['uid'];
+            	$object_id = $request['id'];
+
+            	$obj = FwObject::find($object_id);
+            	$obj->name = $name_object;
+            	$obj->save();
+
+         }
+
+   	}
+
+
+   }
+
 }

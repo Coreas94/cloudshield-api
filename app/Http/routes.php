@@ -133,6 +133,8 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
 
          Route::post('/set_object_network', 'NetworkController@setObjectNetwork');
 
+         Route::post('/remove_object_network', 'NetworkController@removeObjectNetwork');
+
          Route::get('/test_exc', 'NetworkController@exceptiontest');
       });
 
