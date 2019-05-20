@@ -23,6 +23,7 @@ Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('otra', 'Controller@getIp');
 Route::get('pruebapago', 'PaymentController@manualPayment');
 Route::get('pruebaset', 'AccessController@disableCompanyTemp');
+Route::get('testemail', 'EmailController@test');
 /*******************************/
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 

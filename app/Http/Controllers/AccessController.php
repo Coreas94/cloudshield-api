@@ -409,12 +409,27 @@ class AccessController extends Controller{
 								      	}
 										}
 
+										//LA CONTRASEÑA DE COMPAÑÍA SERÁ EL TAG + 2019!
+										$password_company = $tag.'2019!';
+
 										$data_email = array("name_company" => $name, "type_ssh" => "new_company");//Email nueva compañía***
+
+										//Aqui enviaré el segundo correo para el NOC con la información de la compañía
+										$data_company_noc = array(
+											"name_company" => $name,
+											"email" => $email,
+											"phone" => $phone,
+											"tag" => $tag,
+											"user_name" => $username,
+											"password_company" => $password_company
+										);
 
 										if(isset($response_mk) && ($response_mk == 1)){
 
 											//Mando la instrucción para enviar el email anunciando la creación de objeto
 				               		$emailCtrl->sendEmailSSHObj($data_email);
+
+											$emailCtrl->sendCompanyNOC($data_company_noc);
 
 											if($request['credit_status'] == 1){
 												$plan_id = $request['plan_id'];

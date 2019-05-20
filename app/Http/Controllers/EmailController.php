@@ -111,7 +111,7 @@
          //$msg
       }elseif($data['type_ssh'] == "remove_ip_object") {
          $title = 'CloudShield - Alert Remove Range IP Object';
-      
+
       }elseif($data['type_ssh'] == "new_company"){
          $title = 'CloudShield - Alert New Company Added';
          $msg = "Se informa que se agregó la empresa: ".$data['name_company'];
@@ -145,6 +145,33 @@
       }
 
       Mail::send('email.alertssh', ['title' => $title, 'data' => $msg, "data2" => $data2], function ($message){
+         $message->subject('CloudShield - Alarma Informativa');
+         $message->from('jcoreas@red4g.net', 'CloudShield');
+         #$message->to('servers-comment@request.red4g.net');
+         $message->to('jcoreas@red4g.net');
+      });
+
+      return response()->json(['message' => 'Request completed']);
+   }
+
+   public function test(){
+      $data = array("name_company" => "company test", "email" => "coreas@gmail.com", "phone" => "77885599", "tag" => "RR889", "user_name" => "RT206","password_company" => "Admin2019!");
+      Log::info($data['name_company']);
+      $t = $this->sendCompanyNOC($data);
+   }
+
+   public function sendCompanyNOC($array){
+      Log::info($array);
+
+      $title = "CloudShield - Alert New Company";
+      $data = "Se informa que se creó la empresa: ".$array['name_company']." y a continuación se detallan todos los datos: ";
+      $data2 = "Name Company: ".$array['name_company'];
+      $data3 = "Email: ".$array['email'];
+      $data4 = "Phone: ".$array['tag'];
+      $data5 = "Username: ".$array['user_name'];
+      $data6 = "Password Company: ".$array['password_company'];
+
+      Mail::send('email.data_company', ['title' => $title, 'data' => $data, "data2" => $data2, 'data3' => $data3, "data4" => $data4, 'data5' => $data5, "data6" => $data6], function ($message){
          $message->subject('CloudShield - Alarma Informativa');
          $message->from('jcoreas@red4g.net', 'CloudShield');
          #$message->to('servers-comment@request.red4g.net');

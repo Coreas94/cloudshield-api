@@ -169,7 +169,6 @@ class FortisiemController extends Controller{
                $dstLong = $geo['lon'];
             }
 
-
             if(!isset($array['ipsProtectionName'])){
                $raw = explode("[attack]=", $array['rawEventMsg']);
                foreach($raw as $k => $v){
@@ -180,6 +179,8 @@ class FortisiemController extends Controller{
                      $attack_name = "undefined";
                   }
                }
+            }else{
+               $attack_name = "undefined";
             }
 
             if(!isset($array['ipsProtectionName'])){
@@ -193,6 +194,8 @@ class FortisiemController extends Controller{
                      $protection_name = "undefined";
                   }
                }
+            }else{
+               $protection_name = "undefined";
             }
 
             $log = new LogsData;
