@@ -736,8 +736,8 @@ class AccessController extends Controller{
 	             'message' => 'Compañía no pudo ser eliminada',
 	             'status_code' => 20
 	          ]
-	       ]);
-		 }
+	      ]);
+		}
  	}
 
 	public function getIpsBlocked(Request $request){
@@ -818,11 +818,51 @@ class AccessController extends Controller{
 	}
 
 	public function enableCompanyTemp(Request $request){
-		die();
 
 		$temp = new TemporaryController;
 
+		$company_id = $request['company_id'];
+		$company = Company::withTrashed()->where('id', '=', $company_id)->restore();
 
+		if($company){
+
+			$rules = FwAccessRule::where('company_id', '=', $company_id)->get();
+
+			$objects = FwObject::join('fw_address_objects', 'fw_address_objects.object_id', '=', 'fw_objects.id')
+				->where('fw_objects.company_id', '=', $company_id)
+				->where('fw_objects.name', 'LIKE', "%IP-ADDRESS%")
+				->select('fw_objects.*', 'fw_address_objects.ip_initial', 'fw_address_objects.ip_last', 'fw_address_objects.id AS id_address')
+				->get();
+
+			foreach($objects as $key => $val){
+				if($val['ip_initial'] == '1.1.1.1' || $val['ip_last'] == '1.1.1.1'){
+					unset($objects[$key]);
+				}
+			}
+
+			$enable_rules = $temp->enableRules($rules);
+			$restore_ips = $temp->addIpTemp($objects);
+
+			if($enable_rules && $restore_ips){
+
+				$update_rule = Company::where('id', $company_id)
+					->update(['disabled' => 0]);
+
+	         return response()->json([
+	             'success' => [
+	                'message' => 'Compañía habilitada correctamente.',
+	                'status_code' => 200
+	             ]
+	         ]);
+	      }else{
+	         return response()->json([
+		          'error' => [
+		             'message' => 'Error al habilitar completamente la compañía.',
+		             'status_code' => 20
+		          ]
+	       	]);
+       	}
+ 		}
 	}
 
 }

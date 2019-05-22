@@ -55,7 +55,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command, function($line){
          Log::info($line.PHP_EOL);
-         $evaluate = $line.PHP_EOL;
+         $this->output = $line.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -78,7 +78,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command2, function($line2){
          Log::info($line2.PHP_EOL);
-         $evaluate = $line2.PHP_EOL;
+         $this->output = $line2.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -101,7 +101,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command3, function($line3){
          Log::info($line3.PHP_EOL);
-         $evaluate = $line3.PHP_EOL;
+         $this->output = $line3.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -124,7 +124,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command4, function($line4){
          Log::info($line4.PHP_EOL);
-         $evaluate = $line4.PHP_EOL;
+         $this->output = $line4.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -171,7 +171,7 @@ class ValidateCommandController extends Controller{
 
          \SSH::into('checkpoint')->run($ssh_command, function($line){
    			Log::info($line.PHP_EOL);
-   			$evaluate = $line.PHP_EOL;
+   			$this->output = $line.PHP_EOL;
    		});
 
          $evaluate = $this->output;
@@ -251,7 +251,7 @@ class ValidateCommandController extends Controller{
 
          \SSH::into('checkpoint')->run($ssh_command2, function($line2){
        			Log::info($line2.PHP_EOL);
-       			$evaluate = $line2.PHP_EOL;
+       			$this->output = $line2.PHP_EOL;
    		   });
 
          $evaluate = $this->output;
@@ -332,7 +332,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command3, function($line3){
    			Log::info($line3.PHP_EOL);
-   			$evaluate = $line3.PHP_EOL;
+   			$this->output = $line3.PHP_EOL;
    		});
 
          $evaluate = $this->output;
@@ -413,7 +413,7 @@ class ValidateCommandController extends Controller{
 
          \SSH::into('checkpoint')->run($ssh_command4, function($line4){
    			Log::info($line4.PHP_EOL);
-   			$evaluate = $line4.PHP_EOL;
+   			$this->output = $line4.PHP_EOL;
    		});
 
       $evaluate = $this->output;
@@ -533,7 +533,7 @@ class ValidateCommandController extends Controller{
 
                \SSH::into('checkpoint')->run($ssh_command, function($line){
                   Log::info($line.PHP_EOL);
-                  $evaluate = $line.PHP_EOL;
+                  $this->output = $line.PHP_EOL;
                });
 
                $evaluate = $this->output;
@@ -556,7 +556,7 @@ class ValidateCommandController extends Controller{
                $flag2 = 0;
                \SSH::into('checkpoint')->run($ssh_command, function($line4){
                   Log::info($line4.PHP_EOL);
-                  $evaluate = $line4.PHP_EOL;
+                  $this->output = $line4.PHP_EOL;
                });
 
                $evaluate = $this->output;
@@ -637,7 +637,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command, function($line){
          Log::info($line.PHP_EOL);
-         $evaluate = $line.PHP_EOL;
+         $this->output = $line.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -659,7 +659,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command2, function($line2){
          Log::info($line2.PHP_EOL);
-         $evaluate = $line2.PHP_EOL;
+         $this->output = $line2.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -681,7 +681,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command3, function($line3){
          Log::info($line3.PHP_EOL);
-         $evaluate = $line3.PHP_EOL;
+         $this->output = $line3.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -703,7 +703,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command4, function($line4){
          Log::info($line4.PHP_EOL);
-         $evaluate = $line4.PHP_EOL;
+         $this->output = $line4.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -1414,7 +1414,7 @@ class ValidateCommandController extends Controller{
 
       \SSH::into('checkpoint')->run($ssh_command, function($line){
          Log::info($line.PHP_EOL);
-         $evaluate = $line.PHP_EOL;
+         $this->output = $line.PHP_EOL;
       });
 
       $evaluate = $this->output;
@@ -1459,7 +1459,7 @@ class ValidateCommandController extends Controller{
 
          \SSH::into('checkpoint')->run($ssh_command, function($line){
    			Log::info($line.PHP_EOL);
-   			$evaluate = $line.PHP_EOL;
+   			$this->output = $line.PHP_EOL;
    		});
 
          $evaluate = $this->output;
