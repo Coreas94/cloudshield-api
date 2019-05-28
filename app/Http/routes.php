@@ -23,7 +23,7 @@ Route::get('delete_errors', 'Controller@getErrorData');
 Route::get('otra', 'Controller@getIp');
 Route::get('pruebapago', 'PaymentController@manualPayment');
 Route::get('pruebaset', 'AccessController@disableCompanyTemp');
-Route::get('testemail', 'EmailController@test');
+Route::post('testemail', 'EmailController@testFoto');
 /*******************************/
 Route::get('existip', 'ValidateCommandController@evaluateRemoveIp');
 
@@ -171,6 +171,13 @@ Route::group(['middleware' => ['web', 'api'], 'prefix' => 'api/v2'], function(){
          Route::post('/add_ip_whitelist', 'WhitelistCompanyController@addIpsWhitelist');
          Route::post('/edit_ip_whitelist', 'WhitelistCompanyController@editIpWhitelist');
          Route::post('/delete_ip_whitelist', 'WhitelistCompanyController@deleteWhitelistIp');
+
+         //Rutas para configuraciones de los técnicos
+         Route::get('/get_companies_config', 'TechnicalController@getNewCompanies');
+         Route::post('edit_config_company', 'TechnicalController@editConfigCompany');
+
+         Route::post('/validate_configuration', 'TechnicalController@validateConfigData');
+
       });
 
       Route::group(['prefix' => 'user'], function(){

@@ -108,13 +108,21 @@
 
       }elseif($data['type_ssh'] == "add_ip_object") {
          $title = 'CloudShield - Alert New Range IP Object';
-         //$msg
+
       }elseif($data['type_ssh'] == "remove_ip_object") {
          $title = 'CloudShield - Alert Remove Range IP Object';
 
       }elseif($data['type_ssh'] == "new_company"){
          $title = 'CloudShield - Alert New Company Added';
          $msg = "Se informa que se agregó la empresa: ".$data['name_company'];
+
+      }elseif($data['type_ssh'] == "enable_company"){
+         $title = 'CloudShield - Alert Company Enabled';
+         $msg = "Se informa que se habilitó nuevamente la empresa: ".$data['name_company'];
+
+      }elseif($data['type_ssh'] == "disable_company"){
+         $title = 'CloudShield - Alert Company Disabled';
+         $msg = "Se informa que se deshabilitó la empresa: ".$data['name_company'];
       }
 
       Mail::send('email.alertssh', ['title' => $title, 'data' => $msg], function ($message){
@@ -179,6 +187,12 @@
       });
 
       return response()->json(['message' => 'Request completed']);
+   }
+
+   public function sendConfigCompany($array){
+
+      $title = "CloudShield - Alert Company Configuration";
+
    }
 
 }

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection; // to generate collections.
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Crypt;
 
 use App\Company;
 use App\User;
@@ -139,7 +140,7 @@ class AccessController extends Controller{
 			$max = strlen($codeAlphabet); // edited
 
 			for ($i=0; $i < $length; $i++) {
-			  $token_company .= $codeAlphabet[random_int(0, $max-1)];
+		  		$token_company .= $codeAlphabet[random_int(0, $max-1)];
 			}
 
 	    	$name = $request['name_new_company'];
@@ -370,6 +371,12 @@ class AccessController extends Controller{
 							         		$result = json_decode($response, true);
 								         	Log::info($result['token']);
 
+												$length_pass = 15;
+
+												for ($i=0; $i < $length_pass; $i++) {
+											  		$password_company .= $codeAlphabet[random_int(0, $max-1)];
+												}
+
 												//AQUI MANDO A CREAR USER AL MIKROTIK
 												$curl = curl_init();
 
@@ -381,7 +388,7 @@ class AccessController extends Controller{
 												  	CURLOPT_TIMEOUT => 30,
 												  	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 												  	CURLOPT_CUSTOMREQUEST => "POST",
-												  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$companyid."&group_id=1",
+												  	CURLOPT_POSTFIELDS => "username=".$tag_mk."&name=".$name."&ip=".$ip_initial_mk."&company_id=".$companyid."&password=".$password_company."&group_id=1",
 												  	CURLOPT_HTTPHEADER => array(
 										    			"cache-control: no-cache",
 												    	"content-type: application/x-www-form-urlencoded"
@@ -409,8 +416,11 @@ class AccessController extends Controller{
 								      	}
 										}
 
-										//LA CONTRASEÑA DE COMPAÑÍA SERÁ EL TAG + 2019!
-										$password_company = $tag.'2019!';
+										//INSERTO LOS DATOS DE CONFIGURACION PARA CADA EMPRESA
+										$pass = Crypt::encrypt($password_company);
+										$data_config = DB::table('config_company')->insert(
+								    		['company_id' => $companyid, 'username' => $tag_mk, "password" => $pass]
+										);
 
 										$data_email = array("name_company" => $name, "type_ssh" => "new_company");//Email nueva compañía***
 
@@ -420,8 +430,8 @@ class AccessController extends Controller{
 											"email" => $email,
 											"phone" => $phone,
 											"tag" => $tag,
-											"user_name" => $username,
-											"password_company" => $password_company
+											"user_name" => $tag_mk
+											//"password_company" => $password_company
 										);
 
 										if(isset($response_mk) && ($response_mk == 1)){
@@ -465,7 +475,7 @@ class AccessController extends Controller{
 												return response()->json([
 													'success' => [
 														'tag_company' => $tag,
-														'message' => 'Se creó la compañía pero no se asingó el plan',
+														'message' => 'Se creó la compañía pero no se asignó el plan',
 														'status_code' => 200
 													]
 												]);
@@ -776,7 +786,7 @@ class AccessController extends Controller{
 	public function disableCompanyTemp(Request $request, TemporaryController $temp){
 
 		$id = $request['id_company'];
-		//$name = $request['company_name'];
+		$company_name = $request['company_name'];
 
 		$update_rule = Company::where('id', $id)
 			->update(['disabled' => 1]);
@@ -801,6 +811,10 @@ class AccessController extends Controller{
 		$company->delete();
 
 		if($company){
+
+			$data_email = array("name_company" => $company_name, "type_ssh" => "disable_company");
+			$emailCtrl->sendEmailSSHObj($data_email);
+
          return response()->json([
              'success' => [
                 'message' => 'Compañía deshabilitada correctamente.',
@@ -822,6 +836,7 @@ class AccessController extends Controller{
 		$temp = new TemporaryController;
 
 		$company_id = $request['company_id'];
+		$company_name = $request['company_name'];
 		$company = Company::withTrashed()->where('id', '=', $company_id)->restore();
 
 		if($company){
@@ -847,6 +862,9 @@ class AccessController extends Controller{
 
 				$update_rule = Company::where('id', $company_id)
 					->update(['disabled' => 0]);
+
+				$data_email = array("name_company" => $company_name, "type_ssh" => "enable_company");
+				$emailCtrl->sendEmailSSHObj($data_email);
 
 	         return response()->json([
 	             'success' => [
