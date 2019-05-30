@@ -242,7 +242,7 @@ class FortisiemController extends Controller{
          }
       }
 
-      // $logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->orderBy('receive_time', 'desc')->take(5000)->get();
+      //$logs = LogsData::whereIn('dst_ip', $new_array_ip)->orWhereIn('src_ip', $new_array_ip)->orderBy('receive_time', 'desc')->take(5000)->get();
       $logs = LogsData::orderBy('receive_time', 'desc')->take(5000)->get();
       //Log::info($logs);
 

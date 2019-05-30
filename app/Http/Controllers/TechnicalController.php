@@ -10,6 +10,7 @@ use App\Jobs\senderEmailIp;
 use App\Jobs\BackgroundTask;
 use Mail;
 use File;
+use Artisan;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
-use Artisan;
+use Illuminate\Support\Facades\Crypt;
 
 use JWTAuth;
 use App\Company;
@@ -91,6 +92,7 @@ class TechnicalController extends Controller{
    public function validateConfigData(Request $request){
       Log::info($request);
       //die();
+
       $credentials = $request->only('email', 'password');
 
       $token = NULL;
@@ -103,16 +105,26 @@ class TechnicalController extends Controller{
          ]);
       }else{
          $config = DB::table('config_company')->where('company_id', $request['company_id'])->get();
+         $array = [];
+
+         $config = json_decode(json_encode($config), true);
+
+         foreach($config as $value){
+            Log::info($value);
+            $value['id'] = $value['id'];
+   			$value['username'] = $value['username'];
+   			$value['password'] = Crypt::decrypt($value['password']);
+
+   			array_push($array, $value);
+         }
 
          return response()->json([
             'success' => [
-               'message' => $config,
+               'message' => $array,
                'status_code' => 200
             ]
          ]);
-
       }
-
    }
 
 }
