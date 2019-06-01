@@ -60,8 +60,8 @@ class TechnicalController extends Controller{
    }
 
    public function editConfigCompany(Request $request){
-
-      $company_id = $request['company_id'];
+      Log::info($request);
+      $company_id = $request['company_id'];//compañía que se está modificando
       $comment = $request['comment'];
       $user_id = $request['user_id'];
 
@@ -69,7 +69,7 @@ class TechnicalController extends Controller{
          ->update(['config' => 1]);
 
       $log_config = DB::table('config_company_logs')->insert(
-         ['company_id' => $company_id, 'user_id' => $user_id, "commemt" => $comment, 'created_at' => \Carbon\Carbon::now(), 'updated_at' =>\Carbon\Carbon::now()]
+         ['company_id' => $company_id, 'user_id' => $user_id, "comment" => $comment, 'created_at' => \Carbon\Carbon::now(), 'updated_at' =>\Carbon\Carbon::now()]
       );
 
       if($update_company){
@@ -91,7 +91,6 @@ class TechnicalController extends Controller{
 
    public function validateConfigData(Request $request){
       Log::info($request);
-      //die();
 
       $credentials = $request->only('email', 'password');
 
