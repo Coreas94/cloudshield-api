@@ -60,7 +60,9 @@ class TechnicalController extends Controller{
    }
 
    public function editConfigCompany(Request $request){
-      Log::info($request);
+
+      $emailCtrl = new EmailController;
+
       $company_id = $request['company_id'];//compañía que se está modificando
       $comment = $request['comment'];
       $user_id = $request['user_id'];
@@ -71,6 +73,15 @@ class TechnicalController extends Controller{
       $log_config = DB::table('config_company_logs')->insert(
          ['company_id' => $company_id, 'user_id' => $user_id, "comment" => $comment, 'created_at' => \Carbon\Carbon::now(), 'updated_at' =>\Carbon\Carbon::now()]
       );
+
+      $company_data = DB::table('fw_companies')->where('id', $company_id)->get();
+      $company_data2 = json_decode(json_encode($company_data), true);
+
+      $name_company = $company_data2[0]['name'];
+
+      $data_email = array("name_company" => $name_company, 'type_ssh' => 'confirm_enable_company');
+
+      $emailCtrl->sendEmailSSHObj($data_email);
 
       if($update_company){
          return response()->json([

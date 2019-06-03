@@ -123,6 +123,10 @@
       }elseif($data['type_ssh'] == "disable_company"){
          $title = 'CloudShield - Alert Company Disabled';
          $msg = "Se informa que se deshabilitó la empresa: ".$data['name_company'];
+
+      }elseif($data['type_ssh'] == "confirm_enable_company"){
+         $title = "CloudShield - Alert Company Configuration";
+         $data = "Se informa que se terminó la configuración de la empresa: ".$array['name_company'];
       }
 
       Mail::send('email.alertssh', ['title' => $title, 'data' => $msg], function ($message){
@@ -192,7 +196,15 @@
    public function sendConfigCompany($array){
 
       $title = "CloudShield - Alert Company Configuration";
+      $data = "Se informa que se terminó la configuración de la empresa: ".$array['name_company'];
 
+      Mail::send('email.data_company', ['title' => $title, 'data' => $data], function($message){
+         $message->subject('CloudShield - Alarma Informativa');
+         $message->from('jcoreas@red4g.net', 'CloudShield');
+         $message->to('jcoreas@red4g.net');
+      });
+
+      return response()->json(['message' => 'Request Completed']);
    }
 
 }
